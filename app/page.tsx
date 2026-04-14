@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform, AnimatePresence, Variants, useMotionValueEvent } from 'framer-motion';
-import { Bot, ArrowRight, Zap, Target, ShieldCheck, FileCheck, BrainCircuit, Mail, Send, ChevronDown, ChevronUp, UserCheck, Star, Clock, Filter, CheckCircle2 } from 'lucide-react';
+import { motion, useScroll, useTransform, AnimatePresence, Variants } from 'framer-motion';
+import { Bot, ArrowRight, Zap, ShieldCheck, BrainCircuit, Send, ChevronDown, ChevronUp, UserCheck, Star } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 import Header from '@/components/Header';
 
@@ -33,9 +33,6 @@ export default function LandingPage() {
 
       <main className="relative w-full">
         <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
-
-          <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(218,197,167,0.05)_0%,transparent_70%)]"></div>
-
           <motion.div
             style={{ y }}
             className="absolute inset-0 z-0 opacity-40 pointer-events-none bg-linear-to-t from-dark via-transparent to-transparent"
@@ -356,12 +353,10 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* LUXURY EDITORIAL FOOTER */}
       <footer id="contact" className="border-t border-cream/20 pt-20 pb-8 px-6 relative overflow-hidden">
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-20">
-            {/* Logo/Brand Column */}
             <div className="col-span-1 md:col-span-4">
               <div className="flex items-center gap-3 mb-6">
                 <Bot className="w-7 h-7 text-cream" />
