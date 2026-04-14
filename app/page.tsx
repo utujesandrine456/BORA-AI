@@ -8,8 +8,6 @@ import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 import Header from '@/components/Header';
 
 export default function LandingPage() {
-  const { scrollY } = useScroll();
-
   const scrollYProgress = useScroll().scrollYProgress;
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
 

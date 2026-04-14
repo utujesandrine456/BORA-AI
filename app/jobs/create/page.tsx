@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Plus, X, MapPin } from 'lucide-react';
+import { X, MapPin } from 'lucide-react';
 import TopNav from '@/components/TopNav';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';

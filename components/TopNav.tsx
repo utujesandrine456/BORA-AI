@@ -3,7 +3,6 @@
 import { Search, Bell, ChevronDown } from 'lucide-react';
 
 export default function TopNav() {
-  const patternSvg = `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='none' stroke='%23DAC5A7' stroke-opacity='0.15' stroke-width='1'/%3E%3Cpath d='M30 60L0 30' fill='none' stroke='%23DAC5A7' stroke-opacity='0.15' stroke-width='1'/%3E%3C/svg%3E`;
 
   return (
     <header className="fixed top-5 left-[300px] right-6 h-20 bg-dark/90 backdrop-blur-xl border border-cream/10 rounded-md flex items-center justify-between px-10 z-40 shadow-2xl">
