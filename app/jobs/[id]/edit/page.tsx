@@ -97,7 +97,7 @@ const JOBS_METADATA: Record<string, Job> = {
 
 export default function EditJobPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  
+
   // Select job data based on ID, fallback to Senior Frontend if not found
   const initialJob = JOBS_METADATA[id] || JOBS_METADATA['1'];
 
@@ -136,7 +136,7 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
   return (
     <div className="flex flex-col h-full bg-[#f8fafc]">
       <TopNav />
-      
+
       <div className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-[1200px] mx-auto pb-20">
           <Link href={`/jobs/${id}`} className="flex items-center gap-2 text-slate-500 hover:text-[#0c2d48] font-normal mb-6 transition-colors group w-fit">
@@ -159,40 +159,40 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                   <div className="w-2 h-8 bg-[#38bdf8] rounded-full"></div>
                   Basic Information
                 </h2>
-                
+
                 <div className="space-y-8">
-                  <Input 
-                    label="Job Title" 
+                  <Input
+                    label="Job Title"
                     value={title}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-                    placeholder="e.g. Senior Frontend Developer" 
+                    placeholder="e.g. Senior Frontend Developer"
                   />
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <Select 
-                      label="Job Type" 
+                    <Select
+                      label="Job Type"
                       defaultValue="full-time"
                       options={[
                         { value: 'full-time', label: 'Full-time' },
                         { value: 'contract', label: 'Contract' },
                         { value: 'freelance', label: 'Freelance' }
-                      ]} 
+                      ]}
                     />
-                    <Input 
-                      label="Location" 
+                    <Input
+                      label="Location"
                       value={location}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value)}
-                      placeholder="e.g. Remote or San Francisco" 
-                      icon={MapPin} 
+                      placeholder="e.g. Remote or San Francisco"
+                      icon={MapPin}
                     />
                   </div>
 
-                  <Textarea 
-                    label="Job Description" 
+                  <Textarea
+                    label="Job Description"
                     value={description}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
-                    placeholder="Describe the role, responsibilities, and team..." 
-                    rows={6} 
+                    placeholder="Describe the role, responsibilities, and team..."
+                    rows={6}
                   />
                 </div>
               </Card>
@@ -204,14 +204,14 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                 </h2>
                 <div className="space-y-8">
                   <div className="flex gap-2">
-                    <Input 
+                    <Input
                       value={newSkill}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSkill(e.target.value)}
                       onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && addSkill()}
-                      placeholder="Add a required skill..." 
+                      placeholder="Add a required skill..."
                       className="flex-1"
                     />
-                    <Button variant="sky" onClick={addSkill} className="px-8">
+                    <Button variant="primary" onClick={addSkill} className="px-8">
                       Add
                     </Button>
                   </div>
@@ -219,8 +219,8 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                     {skills.map(skill => (
                       <Badge key={skill} className="px-5 py-2 flex items-center gap-2 group">
                         {skill}
-                        <X 
-                          className="w-4 h-4 cursor-pointer hover:text-red-500 transition-colors" 
+                        <X
+                          className="w-4 h-4 cursor-pointer hover:text-red-500 transition-colors"
                           onClick={() => removeSkill(skill)}
                         />
                       </Badge>
@@ -235,25 +235,25 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
               <Card padding="lg" className="shadow-xl shadow-slate-200/40">
                 <h2 className="text-[22px] font-black text-slate-900 mb-8">Role Criteria</h2>
                 <div className="space-y-8">
-                  <Select 
-                    label="Experience Level" 
+                  <Select
+                    label="Experience Level"
                     options={[
                       { value: 'entry', label: 'Entry Level (0-2 years)' },
                       { value: 'junior', label: 'Junior (2-4 years)' },
                       { value: 'mid', label: 'Mid-Level (4-7 years)' },
                       { value: 'senior', label: 'Senior (7-10 years)' },
                       { value: 'lead', label: 'Lead/Manager (10+ years)' }
-                    ]} 
+                    ]}
                   />
-                  <Select 
-                    label="Education" 
+                  <Select
+                    label="Education"
                     options={[
                       { value: 'high_school', label: 'High School' },
                       { value: 'associate', label: 'Associate Degree' },
                       { value: 'bachelor', label: "Bachelor's Degree" },
                       { value: 'master', label: "Master's Degree" },
                       { value: 'phd', label: 'PhD' }
-                    ]} 
+                    ]}
                   />
                 </div>
               </Card>

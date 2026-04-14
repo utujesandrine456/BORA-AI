@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useState, useEffect } from 'react';
+import React, { use, useState } from 'react';
 import {
   MapPin,
   Calendar,
@@ -154,21 +154,17 @@ const JOBS_METADATA: Record<string, Job> = {
 export default function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
 
-  // Select job data based on ID, fallback to Senior Frontend if not found
   const baseJob = JOBS_METADATA[id] || JOBS_METADATA['1'];
-  const [job, setJob] = useState(baseJob);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(`job-${id}`);
-    if (saved) {
-      try {
-        const parsedSaved = JSON.parse(saved);
-        setJob(prev => ({ ...prev, ...parsedSaved }));
-      } catch (e) {
-        // ignore parse error
-      }
+  const [job] = useState(() => {
+    if (typeof window === 'undefined') return baseJob;
+    try {
+      const saved = localStorage.getItem(`job-${id}`);
+      if (saved) return { ...baseJob, ...JSON.parse(saved) };
+    } catch {
+      // ignore parse error
     }
-  }, [id]);
+    return baseJob;
+  });
 
   return (
     <div className="flex flex-col h-full bg-dark text-cream">
@@ -243,7 +239,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                   Technical Requirements
                 </h2>
                 <div className="flex flex-wrap gap-3">
-                  {job.skills.map(skill => (
+                  {job.skills.map((skill: string) => (
                     <Badge key={skill} variant="secondary" className="px-6 py-2.5 text-xs">
                       {skill}
                     </Badge>
@@ -263,7 +259,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                 </div>
 
                 <div className="space-y-4">
-                  {job.applicants.map(applicant => (
+                  {job.applicants.map((applicant: Applicant) => (
                     <div key={applicant.name} className="p-8 border border-cream/20 bg-dark rounded-md hover:border-cream hover:bg-cream/5 transition-all group cursor-pointer relative overflow-hidden">
                       <div className="absolute top-0 right-0 w-32 h-32 bg-cream/5 rounded-md -mr-16 -mt-16 group-hover:bg-cream/10 transition-colors"></div>
                       <div className="flex items-start justify-between relative z-10">
