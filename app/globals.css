@@ -1,11 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --bora-navy: #0c2d48;
-  --bora-sky: #38bdf8;
-  --sidebar-bg: #071e2d;
+  --background: #000000;
+  --foreground: #DAC5A7;
 }
 
 body {
@@ -15,12 +12,16 @@ body {
 
 @layer base {
   * {
-    @apply border-slate-200;
+    @apply border-slate-800;
   }
 }
 
 @theme {
   --animate-shimmer: shimmer 2s infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
+  --color-cream: #DAC5A7;
+  --color-dark: #000000;
 
   @keyframes shimmer {
     0% {
@@ -28,6 +29,15 @@ body {
     }
     100% {
       transform: translateX(100%);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
     }
   }
 }

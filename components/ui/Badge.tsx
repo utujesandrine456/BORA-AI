@@ -7,17 +7,18 @@ interface BadgeProps {
 }
 
 const Badge: React.FC<BadgeProps> = ({ children, variant = 'primary', className = '' }) => {
+  // Translate variants to strict dark / cream theme
   const variants = {
-    primary: 'bg-[#f0f9ff] text-[#38bdf8] border-transparent',
-    secondary: 'bg-slate-100 text-slate-600 border-transparent',
-    success: 'bg-[#dcfce7] text-[#166534] border-[#bbf7d0]',
-    warning: 'bg-amber-50 text-amber-600 border-amber-100',
-    danger: 'bg-red-50 text-red-600 border-red-100',
-    ghost: 'bg-slate-50/50 text-slate-500 border-slate-100',
+    primary: 'bg-cream text-dark border-cream',
+    secondary: 'bg-dark text-cream border-cream/30',
+    success: 'bg-dark text-cream border-cream shadow-[0_0_10px_rgba(218,197,167,0.2)]', // Highlighted
+    warning: 'bg-dark text-cream border-cream/50 border-dashed',
+    danger: 'bg-transparent text-red-500 border-red-500/30',
+    ghost: 'bg-transparent text-cream/60 border-transparent',
   };
 
   return (
-    <span className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${variants[variant]} ${className}`}>
+    <span className={`px-4 py-1.5 rounded-md text-[10px] uppercase font-bold tracking-widest border transition-all ${variants[variant]} ${className}`}>
       {children}
     </span>
   );

@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Urbanist } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { Toaster } from "react-hot-toast";
 
-const outfit = Outfit({ subsets: ["latin"] });
+// Use weights 500 (medium) for normal text to satisfy requirement "not light"
+// Include 700 and 900 for bold headers
+const urbanist = Urbanist({
+  subsets: ["latin"],
+  weight: ["500", "700", "900"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "BORA - AI Recruitment Platform",
@@ -17,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
-      <body className={`${outfit.className} h-full bg-[#f8fafc] text-slate-900 antialiased`}>
+    <html lang="en" className="h-full bg-dark">
+      <body className={`${urbanist.className} font-medium h-full antialiased bg-dark text-cream`}>
         <Toaster position="top-right" />
         <div className="flex min-h-screen">
           <Sidebar />

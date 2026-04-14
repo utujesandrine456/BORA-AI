@@ -1,13 +1,13 @@
 'use client';
 
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  Users, 
-  ClipboardCheck, 
-  History, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  Users,
+  ClipboardCheck,
+  History,
+  BarChart3,
   Settings,
   LucideIcon,
   Layers
@@ -34,15 +34,17 @@ const menuItems: MenuItem[] = [
 export default function Sidebar() {
   const pathname = usePathname();
 
+  if (pathname === '/') return null;
+
   return (
-    <div className="w-[280px] min-h-screen h-full bg-[#071e2d] flex flex-col p-6 border-r border-white/5 sticky top-0">
+    <div className="w-[280px] min-h-screen h-full bg-dark flex flex-col p-6 border-r border-cream/20 sticky top-0">
       <div className="mb-10 flex items-center gap-3 px-2">
-        <div className="w-10 h-10 bg-[#38bdf8] rounded-xl flex items-center justify-center shadow-lg shadow-[#38bdf8]/20">
-          <Layers className="w-6 h-6 text-white" />
+        <div className="w-10 h-10 border-2 border-cream bg-dark rounded-md flex items-center justify-center transition-transform hover:rotate-12 duration-500">
+          <Layers className="w-6 h-6 text-cream" />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight leading-none">BORA</h1>
-          <p className="text-[10px] text-[#38bdf8] font-black uppercase tracking-[0.2em] mt-1">Platform</p>
+          <h1 className="text-2xl font-black text-cream tracking-widest uppercase leading-none">BORA</h1>
+          <p className="text-[10px] text-cream/60 font-bold uppercase tracking-[0.2em] mt-1">Platform</p>
         </div>
       </div>
 
@@ -50,28 +52,27 @@ export default function Sidebar() {
         {menuItems.map((item) => {
           const isActive = pathname === item.href || (item.name === 'Jobs' && pathname === '/');
           const Icon = item.icon;
-          
+
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-5 py-3.5 rounded-xl transition-all duration-300 group cursor-pointer ${
-                isActive 
-                  ? 'bg-[#38bdf8] text-white shadow-lg shadow-[#38bdf8]/20' 
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
-              }`}
+              className={`flex items-center gap-3 px-5 py-3.5 rounded-md transition-all duration-300 group cursor-pointer ${isActive
+                ? 'bg-cream text-dark font-bold'
+                : 'text-cream/60 hover:bg-cream/10 hover:text-cream'
+                }`}
             >
-              <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-[#38bdf8]'}`} />
-              <span className="font-normal text-[15px]">{item.name}</span>
+              <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-dark' : 'text-cream/40 group-hover:text-cream'}`} />
+              <span className={`text-[15px] ${isActive ? 'font-bold uppercase tracking-wider text-sm' : 'font-medium uppercase tracking-wider text-sm'}`}>{item.name}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="mt-auto pt-6 border-t border-white/5">
-        <button className="flex items-center gap-3 px-5 py-3.5 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all w-full group cursor-pointer">
-          <History className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-          <span className="font-normal text-[15px]">Logout</span>
+      <div className="mt-auto pt-6 border-t border-cream/20">
+        <button className="flex items-center gap-3 px-5 py-3.5 rounded-md text-cream/60 hover:bg-cream/10 hover:text-cream transition-all w-full group cursor-pointer uppercase tracking-wider text-sm font-bold">
+          <History className="w-5 h-5 group-hover:rotate-12 transition-transform opacity-70" />
+          <span>Logout</span>
         </button>
       </div>
     </div>

@@ -9,21 +9,21 @@ import Button from '@/components/ui/Button';
 
 export default function JobsListingPage() {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-dark">
       <TopNav />
-      
+
       <div className="flex-1 p-8 overflow-y-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-        <div>
-          <h1 className="text-[40px] font-black text-slate-900 tracking-tight mb-2">Jobs Overview</h1>
-          <p className="text-slate-500 font-normal text-lg">Manage and track your active recruitment campaigns</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 border-b border-cream/20 pb-8">
+          <div>
+            <h1 className="text-5xl md:text-6xl font-black text-cream uppercase tracking-widest mb-4">Jobs Portal</h1>
+            <p className="text-cream/60 font-bold uppercase tracking-widest text-sm">Manage and track your active recruitment campaigns</p>
+          </div>
+          <Link href="/jobs/create">
+            <Button variant="primary" icon={Plus} size="lg" className="rounded-md font-bold uppercase tracking-widest px-8 py-4">
+              Post New Job
+            </Button>
+          </Link>
         </div>
-        <Link href="/jobs/create">
-          <Button variant="primary" icon={Plus} size="lg" className="shadow-xl shadow-[#0c2d48]/20 px-8">
-            Post New Job
-          </Button>
-        </Link>
-      </div>
 
         <JobTable />
       </div>
