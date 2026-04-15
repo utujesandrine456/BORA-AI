@@ -73,7 +73,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-6 border-t border-cream/20">
-        <button className="flex items-center gap-3 px-5 py-3.5 rounded-md bg-cream text-dark hover:bg-cream hover:text-dark/80 transition-all w-full group cursor-pointer text-lg font-semibold">
+        <button className="flex items-center gap-3 px-5 py-3.5 rounded-md bg-cream text-dark hover:bg-cream hover:text-dark/80 transition-all w-full group cursor-pointer text-md font-semibold">
           <History className="w-5 h-5 group-hover:rotate-12 transition-transform opacity-70" />
           <span>Logout</span>
         </button>

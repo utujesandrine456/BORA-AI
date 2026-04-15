@@ -33,8 +33,8 @@ export default function CreateJobPage() {
         <div className="max-w-[1200px] mx-auto pb-20">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 border-b border-cream/20 pb-8">
             <div>
-              <h1 className="text-5xl md:text-6xl font-black text-cream uppercase tracking-widest mb-4">Create Job</h1>
-              <p className="text-cream/60 font-bold uppercase tracking-widest text-sm">Define role requirements and candidate criteria</p>
+              <h1 className="text-5xl md:text-6xl font-black text-cream mb-4 uppercase">Create Job</h1>
+              <p className="text-cream/60 font-medium text-md">Define role requirements and candidate criteria</p>
             </div>
           </div>
 
@@ -42,33 +42,33 @@ export default function CreateJobPage() {
             {/* Main Form */}
             <div className="lg:col-span-2 space-y-10">
               <Card padding="lg">
-                <h2 className="text-[22px] font-black text-cream uppercase tracking-widest mb-8 flex items-center gap-3">
+                <h2 className="text-[24px] font-black text-cream uppercase mb-8 flex items-center gap-3">
                   <div className="w-2 h-8 bg-cream rounded-md"></div>
                   Basic Information
                 </h2>
 
                 <div className="space-y-8">
-                  <Input label="Job Title" placeholder="E.G. SENIOR FRONTEND DEVELOPER" />
+                  <Input label="Job Title" placeholder="E.g. Senior Frontend Developer" />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <Select
                       label="Job Type"
                       defaultValue="full-time"
                       options={[
-                        { value: 'full-time', label: 'FULL-TIME' },
-                        { value: 'contract', label: 'CONTRACT' },
-                        { value: 'freelance', label: 'FREELANCE' }
+                        { value: 'full-time', label: 'Full-time' },
+                        { value: 'contract', label: 'Contract' },
+                        { value: 'freelance', label: 'Freelance' }
                       ]}
                     />
-                    <Input label="Location" placeholder="E.G. REMOTE" icon={MapPin} />
+                    <Input label="Location" placeholder="E.g. Remote" icon={MapPin} />
                   </div>
 
-                  <Textarea label="Job Description" placeholder="DESCRIBE THE ROLE..." rows={6} />
+                  <Textarea label="Job Description" placeholder="Describe the role..." rows={6} className='text-md font-medium'/>
                 </div>
               </Card>
 
               <Card padding="lg">
-                <h2 className="text-[22px] font-black text-cream uppercase tracking-widest mb-8 flex items-center gap-3">
+                <h2 className="text-[24px] font-black text-cream uppercase mb-8 flex items-center gap-3">
                   <div className="w-2 h-8 bg-cream rounded-md"></div>
                   Skills & Expertise
                 </h2>
@@ -78,7 +78,7 @@ export default function CreateJobPage() {
                       value={newSkill}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSkill(e.target.value)}
                       onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && addSkill()}
-                      placeholder="ADD REQUIRED SKILL..."
+                      placeholder="Add Required Skills..."
                       className="flex-1"
                     />
                     <Button variant="secondary" size="md" onClick={addSkill} className="px-8">
@@ -103,7 +103,7 @@ export default function CreateJobPage() {
             {/* Sidebar (Settings/Publish) */}
             <div className="space-y-10">
               <Card padding="lg">
-                <h2 className="text-[22px] font-black text-cream uppercase tracking-widest mb-8 flex items-center gap-3">
+                <h2 className="text-[24px] font-black text-cream uppercase mb-8 flex items-center gap-3">
                   <div className="w-2 h-8 bg-cream"></div>
                   Role Criteria
                 </h2>
@@ -130,10 +130,10 @@ export default function CreateJobPage() {
               </Card>
 
               <div className="flex flex-col gap-4">
-                <Button variant="primary" size="lg" className="w-full h-14 text-lg border border-cream" onClick={() => toast.success('Job published successfully')}>
+                <Button variant="primary" size="lg" className="w-full h-14 text-md border border-cream" onClick={() => toast.success('Job published successfully')}>
                   Publish Job
                 </Button>
-                <Button variant="secondary" size="lg" className="w-full h-14 text-lg" onClick={() => toast.success('Draft saved successfully')}>
+                <Button variant="secondary" size="lg" className="w-full h-14 text-md" onClick={() => toast.success('Draft saved successfully')}>
                   Save Draft
                 </Button>
               </div>
