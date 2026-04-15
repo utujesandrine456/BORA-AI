@@ -13,7 +13,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', icon: Icon, iconPosition = 'left', className = '', children, ...props }, ref) => {
     const baseStyles = 'inline-flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-md cursor-pointer uppercase tracking-widest font-bold';
 
-    // Luxury minimal versions of the variants using Cream and Dark
     const variants = {
       primary: 'bg-cream hover:bg-white text-dark',
       secondary: 'bg-dark border border-cream/30 text-cream hover:bg-cream/10',

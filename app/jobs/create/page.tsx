@@ -17,6 +17,7 @@ export default function CreateJobPage() {
     if (newSkill && !skills.includes(newSkill)) {
       setSkills([...skills, newSkill]);
       setNewSkill('');
+      toast.success('Skill added');
     }
   };
 
@@ -72,7 +73,7 @@ export default function CreateJobPage() {
                   Skills & Expertise
                 </h2>
                 <div className="space-y-8">
-                  <div className="flex gap-2">
+                  <div className="flex items-end gap-2">
                     <Input
                       value={newSkill}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewSkill(e.target.value)}
@@ -80,7 +81,7 @@ export default function CreateJobPage() {
                       placeholder="ADD REQUIRED SKILL..."
                       className="flex-1"
                     />
-                    <Button variant="secondary" onClick={addSkill} className="px-8 mt-6">
+                    <Button variant="secondary" size="md" onClick={addSkill} className="px-8">
                       Add
                     </Button>
                   </div>

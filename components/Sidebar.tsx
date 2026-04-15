@@ -25,7 +25,7 @@ const menuItems: MenuItem[] = [
   { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { name: 'Jobs', icon: Briefcase, href: '/jobs' },
   { name: 'Applicants', icon: Users, href: '/applicants' },
-  { name: 'Screening Results', icon: ClipboardCheck, href: '/screening-results' },
+  { name: 'Screening Results', icon: ClipboardCheck, href: '/screening' },
   { name: 'Screening History', icon: History, href: '/screening-history' },
   { name: 'Candidate Insights', icon: BarChart3, href: '/insights' },
   { name: 'Settings', icon: Settings, href: '/settings' },
@@ -44,13 +44,16 @@ export default function Sidebar() {
         </div>
         <div>
           <h1 className="text-2xl font-black text-cream tracking-widest uppercase leading-none">BORA</h1>
-          <p className="text-[10px] text-cream/60 font-bold uppercase tracking-[0.2em] mt-1">Platform</p>
+          <p className="text-[16px] text-cream/60 font-medium mt-1">Platform</p>
         </div>
       </div>
 
       <nav className="flex-1 space-y-2">
         {menuItems.map((item) => {
-          const isActive = pathname === item.href || (item.name === 'Jobs' && pathname === '/');
+          const isActive =
+            pathname === item.href ||
+            (item.name === 'Jobs' && pathname === '/') ||
+            (item.name === 'Screening Results' && (pathname === '/screening' || pathname.startsWith('/screening/results')));
           const Icon = item.icon;
 
           return (
@@ -63,14 +66,14 @@ export default function Sidebar() {
                 }`}
             >
               <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-dark' : 'text-cream/40 group-hover:text-cream'}`} />
-              <span className={`text-[15px] ${isActive ? 'font-bold uppercase tracking-wider text-sm' : 'font-medium uppercase tracking-wider text-sm'}`}>{item.name}</span>
+              <span className={`text-[15px] ${isActive ? 'font-bold text-lg' : 'font-medium text-md'}`}>{item.name}</span>
             </Link>
           );
         })}
       </nav>
 
       <div className="mt-auto pt-6 border-t border-cream/20">
-        <button className="flex items-center gap-3 px-5 py-3.5 rounded-md text-cream/60 hover:bg-cream/10 hover:text-cream transition-all w-full group cursor-pointer uppercase tracking-wider text-sm font-bold">
+        <button className="flex items-center gap-3 px-5 py-3.5 rounded-md bg-cream text-dark hover:bg-cream hover:text-dark/80 transition-all w-full group cursor-pointer text-lg font-semibold">
           <History className="w-5 h-5 group-hover:rotate-12 transition-transform opacity-70" />
           <span>Logout</span>
         </button>

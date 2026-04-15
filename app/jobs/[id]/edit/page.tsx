@@ -134,28 +134,28 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#f8fafc]">
+    <div className="flex flex-col h-full bg-dark text-cream">
       <TopNav />
 
       <div className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-[1200px] mx-auto pb-20">
-          <Link href={`/jobs/${id}`} className="flex items-center gap-2 text-slate-500 hover:text-[#0c2d48] font-normal mb-6 transition-colors group w-fit">
+          <Link href={`/jobs/${id}`} className="flex items-center gap-2 text-cream/60 hover:text-cream font-normal mb-6 transition-colors group w-fit">
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span>Back to Job Details</span>
           </Link>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div>
-              <h1 className="text-[40px] font-black text-slate-900 tracking-tight mb-2">Edit Job</h1>
-              <p className="text-slate-500 font-normal text-lg">Update role requirements and candidate criteria</p>
+              <h1 className="text-5xl md:text-6xl font-black text-cream tracking-widest mb-2">Edit Job</h1>
+              <p className="text-cream/60 font-normal text-lg">Update role requirements and candidate criteria</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* Main Form */}
             <div className="lg:col-span-2 space-y-10">
-              <Card padding="lg" className="shadow-xl shadow-slate-200/40">
-                <h2 className="text-[22px] font-black text-slate-900 mb-8 flex items-center gap-3">
+              <Card padding="lg" className="shadow-xl shadow-cream/10">
+                <h2 className="text-[22px] font-black text-cream mb-8 flex items-center gap-3">
                   <div className="w-2 h-8 bg-[#38bdf8] rounded-full"></div>
                   Basic Information
                 </h2>
@@ -197,8 +197,8 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                 </div>
               </Card>
 
-              <Card padding="lg" className="shadow-xl shadow-slate-200/40">
-                <h2 className="text-[22px] font-black text-slate-900 mb-8 flex items-center gap-3">
+              <Card padding="lg" className="shadow-xl shadow-cream/10">
+                <h2 className="text-[22px] font-black text-cream mb-8 flex items-center gap-3">
                   <div className="w-2 h-8 bg-[#38bdf8] rounded-full"></div>
                   Skills & Expertise
                 </h2>
@@ -232,8 +232,8 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
 
             {/* Sidebar (Settings/Publish) */}
             <div className="space-y-10">
-              <Card padding="lg" className="shadow-xl shadow-slate-200/40">
-                <h2 className="text-[22px] font-black text-slate-900 mb-8">Role Criteria</h2>
+              <Card padding="lg" className="shadow-xl shadow-cream/10">
+                <h2 className="text-[22px] font-black text-cream mb-8">Role Criteria</h2>
                 <div className="space-y-8">
                   <Select
                     label="Experience Level"

@@ -25,7 +25,31 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full bg-dark">
       <body className={`${urbanist.className} font-medium h-full antialiased bg-dark text-cream`}>
-        <Toaster position="top-right" />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className: 'border border-cream/20 bg-dark text-cream shadow-2xl rounded-md px-4 py-3',
+            duration: 4000,
+            style: {
+              background: 'rgba(0, 0, 0, 0.95)',
+              color: '#DAC5A7',
+              border: '1px solid rgba(220, 197, 167, 0.2)',
+              backdropFilter: 'blur(16px)',
+            },
+            success: {
+              iconTheme: {
+                primary: '#DAC5A7',
+                secondary: '#000000',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#000000',
+              },
+            },
+          }}
+        />
         <div className="flex min-h-screen">
           <Sidebar />
           <main className="flex-1 flex flex-col min-w-0 overflow-hidden">

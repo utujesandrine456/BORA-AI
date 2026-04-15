@@ -15,11 +15,11 @@ export default function JobsListingPage() {
       <div className="flex-1 p-8 overflow-y-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 border-b border-cream/20 pb-8">
           <div>
-            <h1 className="text-5xl md:text-6xl font-black text-cream uppercase tracking-widest mb-4">Jobs Portal</h1>
-            <p className="text-cream/60 font-bold uppercase tracking-widest text-sm">Manage and track your active recruitment campaigns</p>
+            <h1 className="text-5xl md:text-6xl font-black text-cream uppercase mb-4">Jobs Portal</h1>
+            <p className="text-cream/60 font-medium text-md">Manage and track your active recruitment campaigns</p>
           </div>
           <Link href="/jobs/create">
-            <Button variant="primary" icon={Plus} size="lg" className="rounded-md font-bold uppercase tracking-widest px-8 py-4">
+            <Button variant="primary" icon={Plus} size="lg" className="rounded-md font-semibold text-lg px-6 py-3">
               Post New Job
             </Button>
           </Link>
