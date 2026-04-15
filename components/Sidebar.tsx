@@ -25,7 +25,7 @@ const menuItems: MenuItem[] = [
   { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { name: 'Jobs', icon: Briefcase, href: '/jobs' },
   { name: 'Applicants', icon: Users, href: '/applicants' },
-  { name: 'Screening Results', icon: ClipboardCheck, href: '/screening-results' },
+  { name: 'Screening Results', icon: ClipboardCheck, href: '/screening' },
   { name: 'Screening History', icon: History, href: '/screening-history' },
   { name: 'Candidate Insights', icon: BarChart3, href: '/insights' },
   { name: 'Settings', icon: Settings, href: '/settings' },
@@ -50,7 +50,10 @@ export default function Sidebar() {
 
       <nav className="flex-1 space-y-2">
         {menuItems.map((item) => {
-          const isActive = pathname === item.href || (item.name === 'Jobs' && pathname === '/');
+          const isActive =
+            pathname === item.href ||
+            (item.name === 'Jobs' && pathname === '/') ||
+            (item.name === 'Screening Results' && (pathname === '/screening' || pathname.startsWith('/screening/results')));
           const Icon = item.icon;
 
           return (
