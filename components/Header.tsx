@@ -46,9 +46,9 @@ export default function Header() {
                 </div>
 
                 {/* CTA - Right */}
-                <div className="flex justify-end items-center gap-4">
-                    <Link href="/dashboard" className="bg-cream text-dark px-6 py-2.5 rounded-md hover:bg-white transition-all flex items-center gap-2 text-md font-semibold">
-                        <span className="hidden lg:inline">Platform</span> <ArrowRight className="w-4 h-4" />
+                <div className="flex justify-end items-center gap-6">
+                    <Link href="/auth/signup" className="bg-cream text-dark px-6 py-2.5 rounded-md hover:bg-white transition-all flex items-center gap-2 text-md font-bold shadow-lg shadow-cream/5">
+                        <span>Apply Now</span> <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
             </div>

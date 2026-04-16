@@ -7,7 +7,6 @@ interface BadgeProps {
 }
 
 const Badge: React.FC<BadgeProps> = ({ children, variant = 'primary', className = '' }) => {
-  // Translate variants to strict dark / cream theme
   const variants = {
     primary: 'bg-cream text-dark border-cream',
     secondary: 'bg-dark text-cream border-cream/30',

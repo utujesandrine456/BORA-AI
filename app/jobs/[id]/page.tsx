@@ -206,7 +206,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
 
             <div className="flex items-center gap-4">
               <Link href={`/jobs/${id}/edit`}>
-                <Button variant="secondary" icon={Pencil} size="lg" className="px-8">
+                <Button variant="secondary" icon={Pencil} size="md" className="px-6 py-3">
                   Edit Job
                 </Button>
               </Link>
