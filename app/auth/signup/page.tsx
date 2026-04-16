@@ -36,7 +36,7 @@ export default function SignupPage() {
                             <span className="text-transparent bg-clip-text bg-linear-to-r from-cream to-cream/40 italic font-serif">True Potential</span>
                         </h1>
                         <p className="text-xl text-cream/70 max-w-xl leading-relaxed">
-                            Join the elite network of talent screened by the world's most advanced AI recruitment platform.
+                            Join the elite network of talent screened by the world&apos;s most advanced AI recruitment platform.
                             Get matched with roles that truly fit your expertise.
                         </p>
                     </motion.div>

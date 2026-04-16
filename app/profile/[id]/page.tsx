@@ -14,7 +14,6 @@ import {
     Award,
     Code2,
     Link as LinkIcon,
-    ChevronRight,
     Sparkles,
     Zap,
     Clock

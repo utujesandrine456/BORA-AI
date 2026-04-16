@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Bell, ChevronDown } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
 
 export default function TopNav() {
 
