@@ -28,13 +28,14 @@ const menuItems: MenuItem[] = [
   { name: 'Screening Results', icon: ClipboardCheck, href: '/screening' },
   { name: 'Screening History', icon: History, href: '/screening-history' },
   { name: 'Candidate Insights', icon: BarChart3, href: '/insights' },
+  { name: 'Profile', icon: Users, href: '/profile' },
   { name: 'Settings', icon: Settings, href: '/settings' },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
 
-  if (pathname === '/') return null;
+  if (pathname === '/' || pathname.startsWith('/auth')) return null;
 
   return (
     <div className="w-[280px] min-h-screen h-full bg-dark flex flex-col p-6 border-r border-cream/20 sticky top-0">
@@ -44,7 +45,7 @@ export default function Sidebar() {
         </div>
         <div>
           <h1 className="text-2xl font-black text-cream tracking-widest uppercase leading-none">BORA</h1>
-          <p className="text-[10px] text-cream/60 font-bold uppercase tracking-[0.2em] mt-1">Platform</p>
+          <p className="text-[16px] text-cream/60 font-medium mt-1">Platform</p>
         </div>
       </div>
 
@@ -66,14 +67,14 @@ export default function Sidebar() {
                 }`}
             >
               <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-dark' : 'text-cream/40 group-hover:text-cream'}`} />
-              <span className={`text-[15px] ${isActive ? 'font-bold uppercase tracking-wider text-sm' : 'font-medium uppercase tracking-wider text-sm'}`}>{item.name}</span>
+              <span className={`text-[15px] ${isActive ? 'font-bold text-lg' : 'font-medium text-md'}`}>{item.name}</span>
             </Link>
           );
         })}
       </nav>
 
       <div className="mt-auto pt-6 border-t border-cream/20">
-        <button className="flex items-center gap-3 px-5 py-3.5 rounded-md text-cream/60 hover:bg-cream/10 hover:text-cream transition-all w-full group cursor-pointer uppercase tracking-wider text-sm font-bold">
+        <button className="flex items-center gap-3 px-5 py-3.5 rounded-md bg-cream text-dark hover:bg-cream hover:text-dark/80 transition-all w-full group cursor-pointer text-md font-semibold">
           <History className="w-5 h-5 group-hover:rotate-12 transition-transform opacity-70" />
           <span>Logout</span>
         </button>

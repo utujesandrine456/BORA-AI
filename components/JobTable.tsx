@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, MoreVertical, Briefcase, MapPin, Clock, Check } from 'lucide-react';
+import { Search, Filter, MoreVertical, MapPin, Clock, Check } from 'lucide-react';
 import Link from 'next/link';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
@@ -19,7 +19,6 @@ export default function JobTable() {
   const [sortBy, setSortBy] = useState('latest');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filter states
   const [statusFilter, setStatusFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
 
@@ -59,10 +58,10 @@ export default function JobTable() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-cream/60" />
           <input
             type="text"
-            placeholder="SEARCH JOBS..."
+            placeholder="Search Jobs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-dark border border-cream/30 rounded-md focus:outline-none focus:ring-1 focus:ring-cream focus:border-cream transition-all font-bold text-cream uppercase tracking-wider text-xs placeholder:text-cream/40"
+            className="w-full pl-12 pr-4 py-3 bg-dark border border-cream/30 rounded-md focus:outline-none focus:ring-1 focus:ring-cream focus:border-cream transition-all font-medium text-cream text-sm placeholder:text-cream/40"
           />
         </div>
 
@@ -148,11 +147,11 @@ export default function JobTable() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-dark">
-              <th className="text-left px-8 py-5 text-[10px] font-black text-cream/40 uppercase tracking-widest border-b border-cream/20">Job Role</th>
-              <th className="text-left px-8 py-5 text-[10px] font-black text-cream/40 uppercase tracking-widest border-b border-cream/20">Location & Type</th>
-              <th className="text-left px-8 py-5 text-[10px] font-black text-cream/40 uppercase tracking-widest border-b border-cream/20">Applicants</th>
-              <th className="text-left px-8 py-5 text-[10px] font-black text-cream/40 uppercase tracking-widest border-b border-cream/20">Date Posted</th>
-              <th className="text-left px-8 py-5 text-[10px] font-black text-cream/40 uppercase tracking-widest border-b border-cream/20">Status</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Job Role</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Location & Type</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Applicants</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Date Posted</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Status</th>
               <th className="text-right px-8 py-5 border-b border-cream/20"></th>
             </tr>
           </thead>
@@ -161,12 +160,9 @@ export default function JobTable() {
               <tr key={job.id} className="hover:bg-cream/5 transition-colors group cursor-pointer">
                 <td className="px-8 py-6">
                   <Link href={`/jobs/${job.id}`} className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-md border border-cream ${job.color} flex items-center justify-center text-dark`}>
-                      <Briefcase className="h-6 w-6" />
-                    </div>
                     <div>
                       <div className="font-bold uppercase tracking-wider text-cream text-[15px] mb-1 group-hover:text-white transition-colors">{job.title}</div>
-                      <div className="text-[11px] font-bold tracking-widest uppercase text-cream/40">ID: JOB-00{job.id}</div>
+                      <div className="text-[14px] font-medium text-cream/40">ID: JOB-00{job.id}</div>
                     </div>
                   </Link>
                 </td>

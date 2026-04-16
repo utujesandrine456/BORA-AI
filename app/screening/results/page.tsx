@@ -31,26 +31,24 @@ export default function ScreeningResultsPage() {
         <div className="max-w-[1400px] mx-auto pb-20">
           
           <div className="mb-10 border-b border-cream/20 pb-8">
-            <h1 className="text-4xl md:text-5xl font-black text-cream tracking-widest uppercase mb-3">Screening Results</h1>
-            <p className="text-cream/60 font-bold uppercase tracking-wider text-sm">
+            <h1 className="text-4xl md:text-5xl font-black text-cream uppercase mb-3">Screening Results</h1>
+            <p className="text-cream/60 font-medium text-md">
               Senior Frontend Developer • Analyzed 5 candidates
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Left Sidebar - Candidate List */}
             <div className="lg:col-span-1 space-y-6">
               <Card padding="md" className="h-[800px] flex flex-col">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-black text-cream uppercase tracking-widest">Top Candidates</h2>
+                  <h2 className="text-xl font-black text-cream uppercase">Top Candidates</h2>
                   <button className="text-cream/60 hover:text-cream transition-colors">
                     <Filter className="w-5 h-5" />
                   </button>
                 </div>
                 
                 <div className="mb-6">
-                  <select className="w-full bg-dark border border-cream/20 rounded-md px-4 py-3 text-sm text-cream font-bold uppercase tracking-widest outline-none focus:border-cream cursor-pointer appearance-none">
+                  <select className="w-full bg-dark border border-cream/20 rounded-md px-4 py-3 text-sm text-cream font-bold uppercase outline-none focus:border-cream cursor-pointer appearance-none">
                     <option>All Scores</option>
                     <option>Top Matches</option>
                   </select>
@@ -80,13 +78,13 @@ export default function ScreeningResultsPage() {
                                 #{index + 1}
                               </div>
                             )}
-                            <div className="font-bold text-cream uppercase tracking-wider">{candidate.name}</div>
+                            <div className="font-semibold text-cream text-md">{candidate.name}</div>
                           </div>
                           <div className="font-black text-lg">{candidate.score}%</div>
                         </div>
 
                         {candidate.isBest && isActive && (
-                          <div className="inline-block px-2 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded mb-3">
+                          <div className="inline-block px-2 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase rounded mb-3">
                             Best Match
                           </div>
                         )}
@@ -104,7 +102,6 @@ export default function ScreeningResultsPage() {
               </Card>
             </div>
 
-            {/* Right Side - Candidate Details */}
             <div className="lg:col-span-2 space-y-6">
               <Card padding="lg" className="min-h-[800px]">
                 {/* Header */}
@@ -114,19 +111,18 @@ export default function ScreeningResultsPage() {
                       <Trophy className="w-8 h-8" />
                     </div>
                     <div>
-                      <h2 className="text-3xl font-black text-cream uppercase tracking-widest mb-2">Alex Johnson</h2>
+                      <h2 className="text-2xl font-black text-cream uppercase mb-2">Alex Johnson</h2>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black text-cream leading-none">95%</span>
-                        <span className="text-cream/60 font-bold uppercase tracking-widest text-sm">Match Score</span>
+                        <span className="text-3xl font-black text-cream leading-none">95%</span>
                       </div>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-4">
-                    <Button variant="primary" className="px-6 py-3 font-bold uppercase tracking-widest rounded-md">
+                    <Button variant="primary" className="px-6 py-3 font-bold uppercase rounded-md">
                       View Full Profile
                     </Button>
-                    <button className="p-3 border border-cream/20 rounded-md hover:bg-cream/10 transition-colors text-cream hidden sm:block">
+                    <button className="p-3 border border-cream/20 rounded-md cursor-pointer hover:bg-cream/10 transition-colors text-cream hidden sm:block">
                       <Download className="w-5 h-5" />
                     </button>
                   </div>
@@ -135,7 +131,7 @@ export default function ScreeningResultsPage() {
                 {/* Best Match Alert */}
                 <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-md p-5 mb-10 flex items-center gap-4">
                   <Trophy className="w-6 h-6 text-emerald-500" />
-                  <span className="text-emerald-500 font-bold uppercase tracking-widest text-sm">
+                  <span className="text-emerald-500 font-bold uppercase text-sm">
                     Best Match - Top candidate for this position
                   </span>
                 </div>
@@ -150,14 +146,14 @@ export default function ScreeningResultsPage() {
                   ].map((stat, i) => (
                     <div key={i} className="bg-cream/5 border border-cream/10 rounded-md p-6 text-center hover:bg-cream/10 transition-colors">
                       <div className="text-3xl font-black text-cream mb-2">{stat.value}</div>
-                      <div className="text-xs text-cream/60 font-bold uppercase tracking-widest">{stat.label}</div>
+                      <div className="text-xs text-cream/60 font-bold uppercase">{stat.label}</div>
                     </div>
                   ))}
                 </div>
 
                 {/* Strengths */}
                 <div className="mb-12">
-                  <h3 className="text-xl font-black text-cream uppercase tracking-widest mb-6 flex items-center gap-3">
+                  <h3 className="text-xl font-black text-cream uppercase mb-6 flex items-center gap-3">
                     <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                     Strengths
                   </h3>
@@ -178,7 +174,7 @@ export default function ScreeningResultsPage() {
 
                 {/* Gaps */}
                 <div className="mb-12">
-                  <h3 className="text-xl font-black text-cream uppercase tracking-widest mb-6 flex items-center gap-3">
+                  <h3 className="text-xl font-black text-cream uppercase mb-6 flex items-center gap-3">
                     <AlertCircle className="w-6 h-6 text-orange-500" />
                     Gaps / Areas for Consideration
                   </h3>
@@ -198,7 +194,7 @@ export default function ScreeningResultsPage() {
 
                 {/* AI Recommendation */}
                 <div>
-                  <h3 className="text-xl font-black text-cream uppercase tracking-widest mb-4">
+                  <h3 className="text-xl font-black text-cream uppercase mb-4">
                     AI Recommendation
                   </h3>
                   <p className="text-cream/80 font-medium leading-relaxed">
