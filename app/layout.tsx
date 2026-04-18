@@ -4,8 +4,6 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { Toaster } from "react-hot-toast";
 
-// Use weights 500 (medium) for normal text to satisfy requirement "not light"
-// Include 700 and 900 for bold headers
 const urbanist = Urbanist({
   subsets: ["latin"],
   weight: ["500", "700", "900"],
