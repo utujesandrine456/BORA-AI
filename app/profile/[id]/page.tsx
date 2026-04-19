@@ -5,8 +5,6 @@ import { motion } from 'framer-motion';
 import {
     MapPin,
     Mail,
-    Linkedin,
-    Github,
     Globe,
     Calendar,
     Briefcase,
@@ -18,6 +16,8 @@ import {
     Zap,
     Clock
 } from 'lucide-react';
+import { FaLinkedin as Linkedin, FaGithub as Github } from 'react-icons/fa6';
+
 import { mockProfile } from '@/lib/mockProfile';
 import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
@@ -151,7 +151,7 @@ export default function ProfilePage() {
                                             <p className="text-cream/70 mb-4 leading-relaxed">{exp.description}</p>
                                             <div className="flex flex-wrap gap-2">
                                                 {exp.technologies.map((tech: string) => (
-                                                    <span key={tech} className="text-xs font-bold uppercase tracking-wider py-1 px-2 rounded bg-cream/10 text-cream/60 border border-cream/10">
+                                                    <span key={tech} className="text-xs font-bold tracking-wider py-1 px-2 rounded bg-cream/10 text-cream/60 border border-cream/10">
                                                         {tech}
                                                     </span>
                                                 ))}
@@ -182,7 +182,7 @@ export default function ProfilePage() {
                                     <motion.div key={index} variants={fadeInUp}>
                                         <Card className="h-full p-6 bg-cream/5 border-cream/10 hover:border-cream/30 hover:translate-y-[-4px] transition-all flex flex-col">
                                             <div className="flex items-center justify-between mb-4">
-                                                <h3 className="text-lg font-black uppercase tracking-tight">{project.name}</h3>
+                                                <h3 className="text-lg font-black tracking-tight">{project.name}</h3>
                                                 {project.link && (
                                                     <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-cream/40 hover:text-cream transition-colors">
                                                         <LinkIcon className="w-4 h-4" />
@@ -200,7 +200,7 @@ export default function ProfilePage() {
                                                         </span>
                                                     ))}
                                                 </div>
-                                                <div className="flex items-center gap-2 text-[10px] text-cream/40 uppercase font-black tracking-widest pt-2 border-t border-cream/5">
+                                                <div className="flex items-center gap-2 text-[10px] text-cream/40 font-black tracking-widest pt-2 border-t border-cream/5">
                                                     <Calendar className="w-3 h-3" />
                                                     {project.startDate} - {project.endDate}
                                                 </div>
@@ -232,8 +232,8 @@ export default function ProfilePage() {
                                 {profile.skills.map((skill: Skill, index: number) => (
                                     <motion.div key={index} variants={fadeInUp} className="group">
                                         <div className="flex justify-between mb-1 items-end">
-                                            <span className="font-bold text-sm uppercase tracking-wide group-hover:text-cream transition-colors">{skill.name}</span>
-                                            <span className="text-[10px] text-cream/40 font-black uppercase tracking-widest">{skill.level} • {skill.yearsOfExperience}Y</span>
+                                            <span className="font-bold text-sm tracking-wide group-hover:text-cream transition-colors">{skill.name}</span>
+                                            <span className="text-[10px] text-cream/40 font-black tracking-widest">{skill.level} • {skill.yearsOfExperience}Y</span>
                                         </div>
                                         <div className="h-1.5 w-full bg-cream/5 rounded-full overflow-hidden border border-cream/10">
                                             <motion.div
@@ -293,7 +293,7 @@ export default function ProfilePage() {
                                     <motion.div key={index} variants={fadeInUp} className="space-y-1">
                                         <h3 className="font-bold text-cream underline decoration-cream/20 underline-offset-4">{edu.institution}</h3>
                                         <p className="text-sm font-medium text-cream/70">{edu.degree} in {edu.fieldOfStudy}</p>
-                                        <p className="text-[10px] text-cream/40 font-black uppercase tracking-widest">{edu.startYear} — {edu.endYear}</p>
+                                        <p className="text-[10px] text-cream/40 font-black tracking-widest">{edu.startYear} — {edu.endYear}</p>
                                     </motion.div>
                                 ))}
                             </div>
@@ -321,7 +321,7 @@ export default function ProfilePage() {
                                             </div>
                                             <div>
                                                 <h3 className="text-[13px] font-bold leading-tight">{cert.name}</h3>
-                                                <p className="text-[10px] text-cream/40 uppercase tracking-widest font-black mt-1">{cert.issuer} • {cert.issueDate}</p>
+                                                <p className="text-[10px] text-cream/40 tracking-widest font-black mt-1">{cert.issuer} • {cert.issueDate}</p>
                                             </div>
                                         </motion.div>
                                     ))}
