@@ -9,7 +9,7 @@ import {
   Users, 
   ClipboardCheck, 
   History, 
-  LineChart, 
+  BarChart3, 
   Settings,
   LogOut
 } from 'lucide-react';
@@ -19,9 +19,9 @@ const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
   { icon: Briefcase, label: 'Job Clips', href: '/jobs' },
   { icon: Users, label: 'Applicants', href: '/applicants' },
-  { icon: ClipboardCheck, label: 'Match Results', href: '/screening-results' },
+  { icon: ClipboardCheck, label: 'Match Results', href: '/screening/results' },
   { icon: History, label: 'Screening History', href: '/screening-history' },
-  { icon: LineChart, label: 'Analytics', href: '/candidate-insights' },
+  { icon: BarChart3, label: 'Analytics', href: '/insights' },
   { icon: Settings, label: 'Settings', href: '/settings' },
 ];
 

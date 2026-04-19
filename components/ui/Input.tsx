@@ -11,7 +11,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, icon: Icon, className = '', ...props }, ref) => {
     return (
       <div className="w-full">
-        {label && <label className="block text-[10px] font-black text-cream/70 uppercase tracking-widest mb-3">{label}</label>}
+        {label && <label className="block text-[10px] font-black text-cream/70 tracking-widest mb-3">{label}</label>}
         <div className="relative">
           {Icon && (
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
@@ -39,10 +39,10 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, className = '', ...props }, ref) => {
     return (
       <div className="w-full">
-        {label && <label className="block text-[10px] font-black text-cream/70 uppercase tracking-widest mb-3">{label}</label>}
+        {label && <label className="block text-[10px] font-black text-cream/70 tracking-widest mb-3">{label}</label>}
         <textarea
           ref={ref}
-          className={`w-full px-5 py-3.5 rounded-md border border-cream/30 focus:outline-none focus:ring-1 focus:ring-cream focus:border-cream transition-all placeholder:text-cream/30 font-bold uppercase tracking-wider text-xs bg-dark text-cream shadow-none resize-none ${className}`}
+          className={`w-full px-5 py-3.5 rounded-md border border-cream/30 focus:outline-none focus:ring-1 focus:ring-cream focus:border-cream transition-all placeholder:text-cream/30 font-bold tracking-wider text-xs bg-dark text-cream shadow-none resize-none ${className}`}
           {...props}
         />
       </div>
@@ -67,7 +67,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         <div className="relative">
           <select
             ref={ref}
-            className={`w-full appearance-none px-5 py-3.5 rounded-md border border-cream/30 focus:outline-none focus:ring-1 focus:ring-cream focus:border-cream transition-all font-bold uppercase tracking-wider text-xs bg-dark text-cream shadow-none cursor-pointer ${className}`}
+            className={`w-full appearance-none px-5 py-3.5 rounded-md border border-cream/30 focus:outline-none focus:ring-1 focus:ring-cream focus:border-cream transition-all font-bold tracking-wider text-xs bg-dark text-cream shadow-none cursor-pointer ${className}`}
             {...props}
           >
             {options.map((opt) => (

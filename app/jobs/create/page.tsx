@@ -33,7 +33,7 @@ export default function CreateJobPage() {
         <div className="max-w-[1200px] mx-auto pb-20">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 border-b border-cream/20 pb-8">
             <div>
-              <h1 className="text-5xl md:text-6xl font-black text-cream mb-4 uppercase">Create Job</h1>
+              <h1 className="text-4xl md:text-5xl font-black text-cream mb-4">Create Job</h1>
               <p className="text-cream/60 font-medium text-md">Define role requirements and candidate criteria</p>
             </div>
           </div>

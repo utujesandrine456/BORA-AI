@@ -14,6 +14,10 @@ const urbanist = Urbanist({
 export const metadata: Metadata = {
   title: "BORA - AI Recruitment Platform",
   description: "Advanced AI-powered recruitment and screening platform.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

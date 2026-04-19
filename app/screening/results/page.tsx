@@ -8,6 +8,7 @@ import {
   CheckCircle2, 
   AlertCircle 
 } from 'lucide-react';
+import Link from 'next/link';
 import TopNav from '@/components/TopNav';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -31,7 +32,7 @@ export default function ScreeningResultsPage() {
         <div className="max-w-[1400px] mx-auto pb-20">
           
           <div className="mb-10 border-b border-cream/20 pb-8">
-            <h1 className="text-4xl md:text-5xl font-black text-cream uppercase mb-3">Screening Results</h1>
+            <h1 className="text-4xl md:text-5xl font-black text-cream tracking-tight mb-3">Screening results</h1>
             <p className="text-cream/60 font-medium text-md">
               Senior Frontend Developer • Analyzed 5 candidates
             </p>
@@ -41,14 +42,14 @@ export default function ScreeningResultsPage() {
             <div className="lg:col-span-1 space-y-6">
               <Card padding="md" className="h-[800px] flex flex-col">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-black text-cream uppercase">Top Candidates</h2>
+                  <h2 className="text-xl font-bold text-cream">Top candidates</h2>
                   <button className="text-cream/60 hover:text-cream transition-colors">
                     <Filter className="w-5 h-5" />
                   </button>
                 </div>
                 
                 <div className="mb-6">
-                  <select className="w-full bg-dark border border-cream/20 rounded-md px-4 py-3 text-sm text-cream font-bold uppercase outline-none focus:border-cream cursor-pointer appearance-none">
+                  <select className="w-full bg-dark border border-cream/20 rounded-md px-4 py-3 text-sm text-cream font-bold outline-none focus:border-cream cursor-pointer appearance-none">
                     <option>All Scores</option>
                     <option>Top Matches</option>
                   </select>
@@ -84,7 +85,7 @@ export default function ScreeningResultsPage() {
                         </div>
 
                         {candidate.isBest && isActive && (
-                          <div className="inline-block px-2 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase rounded mb-3">
+                          <div className="inline-block px-2 py-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded mb-3">
                             Best Match
                           </div>
                         )}
@@ -107,11 +108,11 @@ export default function ScreeningResultsPage() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10 pb-8 border-b border-cream/10">
                   <div className="flex items-start gap-6">
-                    <div className="w-16 h-16 rounded-full border-2 border-amber-400/50 bg-amber-400/10 flex items-center justify-center text-amber-400">
+                    <div className="w-16 h-16 rounded-full border-2 border-emerald-500/30 bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                       <Trophy className="w-8 h-8" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-black text-cream uppercase mb-2">Alex Johnson</h2>
+                      <h2 className="text-2xl font-black text-cream tracking-tight mb-2">Alex Johnson</h2>
                       <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-black text-cream leading-none">95%</span>
                       </div>
@@ -119,9 +120,11 @@ export default function ScreeningResultsPage() {
                   </div>
                   
                   <div className="flex items-center gap-4">
-                    <Button variant="primary" className="px-6 py-3 font-bold uppercase rounded-md">
-                      View Full Profile
-                    </Button>
+                    <Link href={`/applicants/${activeCandidateId}`}>
+                      <Button variant="primary" className="px-6 py-3 font-bold rounded-md">
+                        View Details
+                      </Button>
+                    </Link>
                     <button className="p-3 border border-cream/20 rounded-md cursor-pointer hover:bg-cream/10 transition-colors text-cream hidden sm:block">
                       <Download className="w-5 h-5" />
                     </button>
@@ -130,8 +133,8 @@ export default function ScreeningResultsPage() {
 
                 {/* Best Match Alert */}
                 <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-md p-5 mb-10 flex items-center gap-4">
-                  <Trophy className="w-6 h-6 text-emerald-500" />
-                  <span className="text-emerald-500 font-bold uppercase text-sm">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                  <span className="text-emerald-500 font-bold text-sm">
                     Best Match - Top candidate for this position
                   </span>
                 </div>
@@ -145,15 +148,15 @@ export default function ScreeningResultsPage() {
                     { label: 'Relevance', value: '97%' }
                   ].map((stat, i) => (
                     <div key={i} className="bg-cream/5 border border-cream/10 rounded-md p-6 text-center hover:bg-cream/10 transition-colors">
-                      <div className="text-3xl font-black text-cream mb-2">{stat.value}</div>
-                      <div className="text-xs text-cream/60 font-bold uppercase">{stat.label}</div>
+                      <div className="text-3xl font-black text-cream mb-1">{stat.value}</div>
+                      <div className="text-xs text-cream/60 font-bold">{stat.label}</div>
                     </div>
                   ))}
                 </div>
 
                 {/* Strengths */}
                 <div className="mb-12">
-                  <h3 className="text-xl font-black text-cream uppercase mb-6 flex items-center gap-3">
+                  <h3 className="text-xl font-bold text-cream mb-6 flex items-center gap-3">
                     <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                     Strengths
                   </h3>
@@ -174,9 +177,9 @@ export default function ScreeningResultsPage() {
 
                 {/* Gaps */}
                 <div className="mb-12">
-                  <h3 className="text-xl font-black text-cream uppercase mb-6 flex items-center gap-3">
+                  <h3 className="text-xl font-bold text-cream mb-6 flex items-center gap-3">
                     <AlertCircle className="w-6 h-6 text-orange-500" />
-                    Gaps / Areas for Consideration
+                    Areas for consideration
                   </h3>
                   <ul className="space-y-4 ml-2">
                     {[
@@ -194,8 +197,8 @@ export default function ScreeningResultsPage() {
 
                 {/* AI Recommendation */}
                 <div>
-                  <h3 className="text-xl font-black text-cream uppercase mb-4">
-                    AI Recommendation
+                  <h3 className="text-xl font-bold text-cream mb-4">
+                    AI recommendation
                   </h3>
                   <p className="text-cream/80 font-medium leading-relaxed">
                     Highly recommended for interview. Excellent skill match and proven leadership experience. 

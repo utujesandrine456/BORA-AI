@@ -3,20 +3,26 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Layers, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false);
 
+    const patternSvg = `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3Cpath d='M30 60L0 30' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3C/svg%3E`;
+
     return (
-        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-dark">
+        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-dark relative">
+            <div
+                className="fixed inset-0 z-0 pointer-events-none opacity-[0.22]"
+                style={{ backgroundImage: `url("${patternSvg}")`, backgroundSize: '70px' }}
+            />
             <div className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden bg-linear-to-br from-cream/10 via-dark to-dark">
                 <div className="relative z-10">
                     <Link href="/" className="inline-flex items-center gap-3 group">
-                        <div className="w-10 h-10 border-2 border-cream bg-dark rounded-md flex items-center justify-center transition-transform hover:rotate-12 duration-500">
-                            <Layers className="w-6 h-6 text-cream" />
+                        <div className="w-10 h-10 border-2 border-cream bg-dark rounded-full flex items-center justify-center transition-transform hover:rotate-12 duration-500 overflow-hidden">
+                            <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
                         </div>
                         <span className="text-3xl font-black tracking-widest uppercase text-cream">
                             BORA
@@ -74,8 +80,8 @@ export default function SignupPage() {
                 >
                     <div className="lg:hidden text-center mb-10">
                         <Link href="/" className="inline-flex items-center gap-3 group">
-                            <div className="w-10 h-10 border border-cream bg-dark rounded-lg flex items-center justify-center">
-                                <Layers className="w-5 h-5 text-cream" />
+                            <div className="w-10 h-10 border border-cream bg-dark rounded-full flex items-center justify-center overflow-hidden">
+                                <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
                             </div>
                             <span className="text-2xl font-black uppercase text-cream">BORA</span>
                         </Link>
