@@ -90,13 +90,13 @@ export default function JobTable() {
                 <div className="absolute right-0 mt-3 w-64 bg-dark border border-cream/30 rounded-md shadow-2xl p-6 z-40 animate-in fade-in zoom-in duration-200">
                   <div className="space-y-6">
                     <div>
-                      <label className="text-[10px] font-black text-cream/40 uppercase tracking-widest mb-3 block">Job Status</label>
+                      <label className="text-[10px] font-black text-cream/40 tracking-widest mb-3 block">Job Status</label>
                       <div className="flex flex-col gap-1">
                         {['All', 'Open', 'Closed'].map(s => (
                           <button
                             key={s}
                             onClick={() => setStatusFilter(s)}
-                            className={`flex items-center justify-between px-3 py-2 rounded-md uppercase tracking-widest text-xs transition-colors ${statusFilter === s ? 'bg-cream/10 text-cream font-bold border border-cream/30' : 'text-cream/60 hover:bg-cream/5'}`}
+                            className={`flex items-center justify-between px-3 py-2 rounded-md tracking-widest text-xs transition-colors ${statusFilter === s ? 'bg-cream/10 text-cream font-bold border border-cream/30' : 'text-cream/60 hover:bg-cream/5'}`}
                           >
                             {s}
                             {statusFilter === s && <Check className="w-4 h-4 text-cream" />}
@@ -105,7 +105,7 @@ export default function JobTable() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-[10px] font-black text-cream/40 uppercase tracking-widest mb-3 block">Job Type</label>
+                      <label className="text-[10px] font-black text-cream/40 tracking-widest mb-3 block">Job Type</label>
                       <div className="flex flex-col gap-1">
                         {['All', 'Full-time', 'Contract'].map(t => (
                           <button
@@ -121,7 +121,7 @@ export default function JobTable() {
                     </div>
                     <button
                       onClick={() => { setStatusFilter('All'); setTypeFilter('All'); }}
-                      className="text-[10px] uppercase text-cream/40 hover:text-cream font-bold underline decoration-dotted underline-offset-4"
+                      className="text-[10px] text-cream/40 hover:text-cream font-bold underline decoration-dotted underline-offset-4"
                     >
                       Reset filters
                     </button>
@@ -134,11 +134,11 @@ export default function JobTable() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-6 py-3 bg-dark border border-cream/30 rounded-md focus:outline-none focus:ring-1 focus:ring-cream focus:border-cream transition-all font-bold uppercase tracking-wider text-xs text-cream cursor-pointer appearance-none pr-10 relative inline-block"
+            className="px-6 py-3 bg-dark border border-cream/30 rounded-md focus:outline-none focus:ring-1 focus:ring-cream focus:border-cream transition-all font-bold tracking-wider text-xs text-cream cursor-pointer appearance-none pr-10 relative inline-block"
             style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23DAC5A7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center' }}
           >
-            <option value="latest">LATEST FIRST</option>
-            <option value="applicants">MOST APPLICANTS</option>
+            <option value="latest">Latest first</option>
+            <option value="applicants">Most applicants</option>
           </select>
         </div>
       </div>
@@ -147,11 +147,11 @@ export default function JobTable() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-dark">
-              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Job Role</th>
-              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Location & Type</th>
-              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Applicants</th>
-              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Date Posted</th>
-              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b uppercase border-cream/20">Status</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b border-cream/20">Job Role</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b border-cream/20">Location & Type</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b border-cream/20">Applicants</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b border-cream/20">Date Posted</th>
+              <th className="text-left px-8 py-5 text-[13px] font-semibold text-cream/40 border-b border-cream/20">Status</th>
               <th className="text-right px-8 py-5 border-b border-cream/20"></th>
             </tr>
           </thead>
@@ -161,18 +161,18 @@ export default function JobTable() {
                 <td className="px-8 py-6">
                   <Link href={`/jobs/${job.id}`} className="flex items-center gap-4">
                     <div>
-                      <div className="font-bold uppercase tracking-wider text-cream text-[15px] mb-1 group-hover:text-white transition-colors">{job.title}</div>
+                      <div className="font-bold tracking-wider text-cream text-[15px] mb-1 group-hover:text-white transition-colors">{job.title}</div>
                       <div className="text-[14px] font-medium text-cream/40">ID: JOB-00{job.id}</div>
                     </div>
                   </Link>
                 </td>
                 <td className="px-8 py-6">
                   <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-1.5 text-cream/70 font-medium uppercase tracking-widest text-xs">
+                    <div className="flex items-center gap-1.5 text-cream/70 font-medium tracking-widest text-xs">
                       <MapPin className="h-4 w-4 text-cream/40" />
                       <span>{job.location}</span>
                     </div>
-                    <div className="text-[10px] font-black text-cream flex items-center gap-1.5 uppercase tracking-widest">
+                    <div className="text-[10px] font-black text-cream flex items-center gap-1.5 tracking-widest">
                       <div className="w-1 h-1 rounded-full bg-cream"></div>
                       {job.type}
                     </div>
@@ -193,13 +193,13 @@ export default function JobTable() {
                   </div>
                 </td>
                 <td className="px-8 py-6">
-                  <div className="flex items-center gap-2 text-cream/60 font-medium uppercase tracking-widest text-xs">
+                  <div className="flex items-center gap-2 text-cream/60 font-medium tracking-widest text-xs">
                     <Clock className="h-4 w-4 text-cream/40" />
                     <span>{job.posted}</span>
                   </div>
                 </td>
                 <td className="px-8 py-6">
-                  <Badge variant={job.status === 'Open' ? 'success' : 'secondary'} className="px-4 py-1.5 rounded-md text-[10px] uppercase tracking-wider font-bold">
+                  <Badge variant={job.status === 'Open' ? 'success' : 'secondary'} className="px-4 py-1.5 rounded-md text-[10px] tracking-wider font-bold">
                     {job.status}
                   </Badge>
                 </td>
@@ -216,10 +216,10 @@ export default function JobTable() {
                     <div className="w-16 h-16 border border-cream/20 flex items-center justify-center">
                       <Search className="w-8 h-8 text-cream/20" />
                     </div>
-                    <p className="text-cream/40 font-bold uppercase tracking-widest text-sm">NO JOBS FOUND MATCHING YOUR CRITERIA</p>
+                    <p className="text-cream/40 font-bold tracking-widest text-sm">No jobs found matching your criteria</p>
                     <button
                       onClick={() => { setSearchTerm(''); setStatusFilter('All'); setTypeFilter('All'); }}
-                      className="text-cream font-black text-xs uppercase tracking-widest hover:underline"
+                      className="text-cream font-black text-xs tracking-widest hover:underline"
                     >
                       Clear all filters
                     </button>
