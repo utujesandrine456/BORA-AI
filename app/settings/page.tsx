@@ -1,17 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  User, 
-  Lock, 
-  Bell, 
-  CreditCard, 
-  Link2, 
+import {
+  User,
+  Lock,
+  Bell,
   Shield,
   Save,
   Mail,
   Building2,
-  Globe
+  Globe,
+  Key
 } from 'lucide-react';
 import TopNav from '@/components/TopNav';
 import Button from '@/components/ui/Button';
@@ -23,8 +22,6 @@ const TABS = [
   { id: 'general', label: 'General Info', icon: User },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'billing', label: 'Billing', icon: CreditCard },
-  { id: 'integrations', label: 'Integrations', icon: Link2 },
 ];
 
 export default function SettingsPage() {
@@ -42,10 +39,10 @@ export default function SettingsPage() {
             <p className="text-cream/60 font-medium text-lg italic serif">Manage your account preferences and platform configuration.</p>
           </div>
           <div className="flex items-center gap-3">
-             <Button variant="secondary" className="font-semibold px-6">Discard</Button>
-             <Button variant="primary" className="gap-2 font-semibold px-6">
-                <Save className="w-4 h-4" /> Save changes
-             </Button>
+            <Button variant="secondary" className="font-semibold px-6">Discard</Button>
+            <Button variant="primary" className="gap-2 font-semibold px-6">
+              <Save className="w-4 h-4" /> Save changes
+            </Button>
           </div>
         </div>
 
@@ -60,11 +57,10 @@ export default function SettingsPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-md transition-all font-semibold ${
-                      isActive 
-                        ? 'bg-cream text-dark shadow-md' 
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-md transition-all font-semibold cursor-pointer ${isActive
+                        ? 'bg-cream text-dark shadow-md'
                         : 'text-cream/60 hover:text-cream hover:bg-cream/10'
-                    }`}
+                      }`}
                   >
                     <Icon className={`w-5 h-5 ${isActive ? 'text-dark' : 'opacity-70'}`} />
                     {tab.label}
@@ -76,7 +72,7 @@ export default function SettingsPage() {
 
           {/* Settings Content */}
           <div className="flex-1 space-y-8">
-            
+
             {activeTab === 'general' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <Card className="p-8 space-y-8">
@@ -84,7 +80,7 @@ export default function SettingsPage() {
                     <h2 className="text-2xl font-bold text-cream mb-1">Profile Information</h2>
                     <p className="text-cream/50 text-sm font-medium">Update your personal identifying details and public profile.</p>
                   </div>
-                  
+
                   <div className="flex items-center gap-6 pb-6 border-b border-cream/10">
                     <div className="relative group">
                       <div className="w-24 h-24 rounded-full bg-cream/10 border-2 border-cream/20 flex items-center justify-center text-3xl font-black text-cream overflow-hidden">
@@ -114,11 +110,11 @@ export default function SettingsPage() {
                     <h2 className="text-2xl font-bold text-cream mb-1">Company Details</h2>
                     <p className="text-cream/50 text-sm font-medium">Manage your organization's core information.</p>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 gap-6">
                     <Input label="Company Name" defaultValue="BORA Technologies" icon={Building2} />
                     <Input label="Website URL" defaultValue="https://bora.tech" icon={Globe} />
-                    <Select 
+                    <Select
                       label="Company Size"
                       options={[
                         { value: '1-50', label: '1 - 50 employees' },
@@ -128,7 +124,7 @@ export default function SettingsPage() {
                       ]}
                       defaultValue="51-200"
                     />
-                    <Select 
+                    <Select
                       label="Timezone"
                       options={[
                         { value: 'est', label: 'Eastern Time (ET)' },
@@ -150,7 +146,7 @@ export default function SettingsPage() {
                     <h2 className="text-2xl font-bold text-cream mb-1">Password & Authentication</h2>
                     <p className="text-cream/50 text-sm font-medium">Keep your account secure with strong credentials.</p>
                   </div>
-                  
+
                   <div className="space-y-6 max-w-md">
                     <Input label="Current Password" type="password" placeholder="••••••••" icon={Lock} />
                     <Input label="New Password" type="password" placeholder="••••••••" icon={Key} />
@@ -169,14 +165,14 @@ export default function SettingsPage() {
                     </div>
                     <Badge variant="success" className="bg-emerald-500/20 text-emerald-400 font-bold">Enabled</Badge>
                   </div>
-                  
+
                   <div className="p-4 bg-dark/40 border border-cream/10 rounded-md">
                     <p className="text-sm text-cream/70 leading-relaxed font-medium">
-                      Two-factor authentication is currently enabled via <strong className="text-cream">Authenticator App</strong>. 
+                      Two-factor authentication is currently enabled via <strong className="text-cream">Authenticator App</strong>.
                       You will be asked to enter a 6-digit code when logging in from a new device.
                     </p>
                   </div>
-                  
+
                   <div className="flex gap-4">
                     <Button variant="secondary" className="font-semibold text-red-500 border-red-500/30 hover:bg-red-500/10">Disable 2FA</Button>
                     <Button variant="secondary" className="font-semibold">Generate Recovery Codes</Button>
@@ -215,17 +211,6 @@ export default function SettingsPage() {
                 </Card>
               </div>
             )}
-
-            {(activeTab === 'billing' || activeTab === 'integrations') && (
-              <div className="py-20 flex flex-col items-center justify-center text-center space-y-4 animate-in zoom-in-95 duration-500">
-                <div className="w-16 h-16 bg-cream/5 rounded-full flex items-center justify-center text-cream/30 mb-2">
-                  <Lock className="w-8 h-8" />
-                </div>
-                <h2 className="text-2xl font-bold text-cream">Admin Access Required</h2>
-                <p className="text-cream/50 font-medium max-w-sm">This section is restricted to Organization Owners. Please contact your administrator to access billing and integrations.</p>
-              </div>
-            )}
-
           </div>
         </div>
       </div>
@@ -233,23 +218,3 @@ export default function SettingsPage() {
   );
 }
 
-function Key(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="7.5" cy="15.5" r="5.5" />
-      <path d="m21 2-9.6 9.6" />
-      <path d="m15.5 7.5 3 3L22 7l-3-3" />
-    </svg>
-  );
-}
