@@ -1,86 +1,85 @@
 'use client';
 
 import React from 'react';
-import {
-  LayoutDashboard,
-  Briefcase,
-  Users,
-  ClipboardCheck,
-  History,
-  BarChart3,
-  Settings,
-  LucideIcon
-} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { 
+  LayoutDashboard, 
+  Briefcase, 
+  Users, 
+  ClipboardCheck, 
+  History, 
+  BarChart3, 
+  Settings,
+  LogOut
+} from 'lucide-react';
+import { Logo } from './Logo';
 
-interface MenuItem {
-  name: string;
-  icon: LucideIcon;
-  href: string;
-}
-
-const menuItems: MenuItem[] = [
-  { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { name: 'Jobs', icon: Briefcase, href: '/jobs' },
-  { name: 'Applicants', icon: Users, href: '/applicants' },
-  { name: 'Screening Results', icon: ClipboardCheck, href: '/screening' },
-  { name: 'Screening History', icon: History, href: '/screening-history' },
-  { name: 'Candidate Insights', icon: BarChart3, href: '/insights' },
-  { name: 'Settings', icon: Settings, href: '/settings' },
+const navItems = [
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+  { icon: Briefcase, label: 'Job Clips', href: '/jobs' },
+  { icon: Users, label: 'Applicants', href: '/applicants' },
+  { icon: ClipboardCheck, label: 'Match Results', href: '/screening/results' },
+  { icon: History, label: 'Screening History', href: '/screening-history' },
+  { icon: BarChart3, label: 'Analytics', href: '/insights' },
+  { icon: Settings, label: 'Settings', href: '/settings' },
 ];
 
-export default function Sidebar() {
+export const Sidebar = () => {
   const pathname = usePathname();
 
-  const appRoutes = ['/dashboard', '/jobs', '/applicants', '/screening', '/insights', '/settings'];
-  const isAppRoute = appRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
-
-  if (!isAppRoute) return null;
-
+  // Hide sidebar on landing page and auth pages
+  if (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/register')) {
+    return null;
+  }
 
   return (
-    <div className="w-[280px] min-h-screen h-full bg-dark flex flex-col p-6 border-r border-cream/20 sticky top-0">
-      <div className="mb-10 flex items-center gap-3 px-2">
-        <div className="w-10 h-10 border-2 border-cream bg-dark rounded-full flex items-center justify-center transition-transform hover:rotate-12 duration-500 overflow-hidden">
-          <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-black text-cream tracking-widest uppercase leading-none">BORA</h1>
-          <p className="text-[16px] text-cream/60 font-medium mt-1">Platform</p>
-        </div>
+    <div className="relative w-80 flex-shrink-0 bg-black border-r border-[#E5D4B6]/10 flex flex-col h-screen font-sans overflow-hidden group/sidebar transition-all duration-700 z-20">
+      
+      <div className="relative z-10 p-10 pt-12">
+        <Logo />
+        <div className="h-1 w-10 bg-bora-accent mt-6 rounded-full opacity-30" />
       </div>
 
-      <nav className="flex-1 space-y-2">
-        {menuItems.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.name === 'Jobs' && pathname === '/') ||
-            (item.name === 'Screening Results' && (pathname === '/screening' || pathname.startsWith('/screening/results')));
-          const Icon = item.icon;
-
+      <nav className="relative z-10 flex-1 px-6 py-8 space-y-2.5 overflow-y-auto custom-scrollbar">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
           return (
             <Link
-              key={item.name}
+              key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-5 py-3.5 rounded-md transition-all duration-300 group cursor-pointer ${isActive
-                ? 'bg-cream text-dark font-bold'
-                : 'text-cream/60 hover:bg-cream/10 hover:text-cream'
-                }`}
+              className={`flex items-center gap-5 px-6 py-4 rounded-2xl transition-all duration-500 group relative overflow-hidden ${
+                isActive 
+                  ? 'bg-bora-accent text-black shadow-lg translate-x-1 ring-1 ring-bora-accent/20' 
+                  : 'text-[#E5D4B6]/50 hover:bg-bora-accent/5 hover:text-bora-accent hover:ring-1 hover:ring-[#E5D4B6]/10'
+              }`}
             >
-              <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-dark' : 'text-cream/40 group-hover:text-cream'}`} />
-              <span className={`text-[15px] ${isActive ? 'font-bold text-lg' : 'font-medium text-md'}`}>{item.name}</span>
+              <item.icon className={`transition-all duration-500 relative z-10 ${isActive ? 'scale-110 drop-shadow-md' : 'group-hover:scale-110 group-hover:rotate-6'}`} size={22} />
+              <span className={`text-[15px] tracking-tight uppercase font-black transition-all duration-500 relative z-10 ${isActive ? 'translate-x-1' : 'group-hover:translate-x-1'}`}>
+                {item.label}
+              </span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="mt-auto pt-6 border-t border-cream/20">
-        <button className="flex items-center gap-3 px-5 py-3.5 rounded-md bg-cream text-dark hover:bg-cream hover:text-dark/80 transition-all w-full group cursor-pointer text-md font-semibold">
-          <History className="w-5 h-5 group-hover:rotate-12 transition-transform opacity-70" />
+      <div className="relative z-10 p-8 border-t border-[#E5D4B6]/10">
+        <div className="bg-black/50 rounded-[2.5rem] p-8 border border-[#E5D4B6]/10 shadow-2xl relative overflow-hidden group/quota transition-all duration-500 hover:shadow-lg hover:-translate-y-1 mb-6">
+          <p className="text-[11px] font-black text-[#E5D4B6]/30 uppercase tracking-[0.2em] mb-4">CV Analysis Used</p>
+          <div className="flex items-end justify-between mb-3">
+            <span className="text-3xl font-black text-bora-accent tracking-tighter">65%</span>
+            <span className="text-[12px] font-bold text-[#E5D4B6]/40">650 / 1000</span>
+          </div>
+          <div className="h-2 w-full bg-[#E5D4B6]/10 rounded-full overflow-hidden">
+            <div className="h-full bg-bora-accent w-[65%] rounded-full shadow-sm" />
+          </div>
+        </div>
+
+        <button className="flex items-center gap-4 px-8 py-4 rounded-2xl bg-bora-accent/5 text-[#E5D4B6]/60 hover:bg-bora-accent hover:text-black transition-all w-full group cursor-pointer text-[13px] font-black uppercase tracking-widest border border-[#E5D4B6]/10">
+          <LogOut size={18} className="group-hover:rotate-12 transition-transform opacity-70" />
           <span>Logout</span>
         </button>
       </div>
     </div>
   );
-}
+};

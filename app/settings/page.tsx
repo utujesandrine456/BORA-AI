@@ -1,22 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  User,
+import { DashboardLayout } from '@/components/DashboardLayout';
+import { 
+  User, 
+  Mail, 
+  Briefcase, 
+  Phone, 
+  Building2, 
+  MapPin, 
+  Globe, 
+  Save, 
+  Settings as SettingsIcon,
   Lock,
   Bell,
   Shield,
-  Save,
-  Mail,
-  Building2,
-  Globe,
   Key
 } from 'lucide-react';
-import TopNav from '@/components/TopNav';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
-import { Input, Select } from '@/components/ui/Input';
 
 const TABS = [
   { id: 'general', label: 'General Info', icon: User },
@@ -28,193 +28,217 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
 
   return (
-    <div className="flex flex-col h-full bg-dark min-h-screen">
-      <TopNav />
+    <DashboardLayout 
+      title="Settings" 
+      subtitle="Manage your personal profile and platform configuration details."
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start bg-black">
+        {/* Profile Sidebar (Always Visible) */}
+        <div className="lg:col-span-4 space-y-6 animate-in fade-in slide-in-from-left-8 duration-1000">
+          <div className="bg-black backdrop-blur-2xl rounded-[2.5rem] p-8 border border-[#E5D4B6]/10 text-center relative overflow-hidden group shadow-2xl">
+            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-br from-bora-accent/10 to-transparent" />
+            
+            <div className="relative z-10">
+              <div className="w-24 h-24 bg-black border border-[#E5D4B6]/20 rounded-2xl mx-auto flex items-center justify-center text-bora-accent shadow-2xl mb-6 group-hover:scale-105 transition-transform duration-500 ring-4 ring-bora-accent/5 overflow-hidden">
+                <span className="text-3xl font-black">AC</span>
+              </div>
+              <h3 className="text-xl font-black text-bora-accent tracking-tighter mb-1">Alexander Chen</h3>
+              <p className="text-[10px] font-black text-[#E5D4B6]/50 uppercase tracking-[0.2em]">HR Manager at BORA AI</p>
+              
+              <div className="mt-8 grid grid-cols-2 gap-4">
+                 <div className="bg-black p-4 rounded-xl border border-[#E5D4B6]/10">
+                    <p className="text-lg font-black text-bora-accent">128</p>
+                    <p className="text-[8px] font-bold text-[#E5D4B6]/30 uppercase tracking-widest mt-1">Reviews</p>
+                 </div>
+                 <div className="bg-black p-4 rounded-xl border border-[#E5D4B6]/10">
+                    <p className="text-lg font-black text-bora-accent">24</p>
+                    <p className="text-[8px] font-bold text-[#E5D4B6]/30 uppercase tracking-widest mt-1">Open Jobs</p>
+                 </div>
+              </div>
+            </div>
+          </div>
 
-      <div className="flex-1 p-8 max-w-7xl mx-auto w-full">
-        {/* Header Section */}
-        <div className="mb-10 border-b border-cream/10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-4xl lg:text-5xl font-black text-cream tracking-tight mb-2">Settings</h1>
-            <p className="text-cream/60 font-medium text-lg italic serif">Manage your account preferences and platform configuration.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="secondary" className="font-semibold px-6">Discard</Button>
-            <Button variant="primary" className="gap-2 font-semibold px-6">
-              <Save className="w-4 h-4" /> Save changes
-            </Button>
-          </div>
+          <nav className="bg-black rounded-[2rem] p-4 border border-[#E5D4B6]/10 space-y-2 shadow-xl">
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl transition-all font-black uppercase tracking-widest text-[10px] cursor-pointer border ${isActive
+                    ? 'bg-bora-accent text-black border-bora-accent shadow-lg'
+                    : 'text-[#E5D4B6]/40 border-transparent hover:text-bora-accent hover:bg-[#E5D4B6]/5'
+                    }`}
+                >
+                  <Icon size={18} className={isActive ? 'text-black' : 'opacity-50'} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-10">
-          {/* Settings Sidebar */}
-          <div className="w-full lg:w-64 shrink-0">
-            <nav className="space-y-1">
-              {TABS.map((tab) => {
-                const isActive = activeTab === tab.id;
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-md transition-all font-semibold cursor-pointer ${isActive
-                      ? 'bg-cream text-dark shadow-md'
-                      : 'text-cream/60 hover:text-cream hover:bg-cream/10'
-                      }`}
-                  >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-dark' : 'opacity-70'}`} />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Settings Content */}
-          <div className="flex-1 space-y-8">
-
-            {activeTab === 'general' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <Card className="p-8 space-y-8">
-                  <div>
-                    <h2 className="text-2xl font-bold text-cream mb-1">Profile Information</h2>
-                    <p className="text-cream/50 text-sm font-medium">Update your personal identifying details and public profile.</p>
-                  </div>
-
-                  <div className="flex items-center gap-6 pb-6 border-b border-cream/10">
-                    <div className="relative group">
-                      <div className="w-24 h-24 rounded-full bg-cream/10 border-2 border-cream/20 flex items-center justify-center text-3xl font-black text-cream overflow-hidden">
-                        AC
+        {/* Settings Content */}
+        <div className="lg:col-span-8 animate-in fade-in slide-in-from-right-8 duration-1000">
+          {activeTab === 'general' && (
+            <div className="space-y-8">
+              <section className="bg-black backdrop-blur-xl rounded-[3rem] p-10 border border-[#E5D4B6]/10 shadow-2xl">
+                <div className="flex items-center justify-between mb-12">
+                   <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 bg-bora-accent rounded-2xl flex items-center justify-center text-black shadow-xl ring-4 ring-bora-accent/5">
+                        <User size={24} />
                       </div>
-                      <button className="absolute inset-0 rounded-full bg-dark/60 text-cream text-[10px] uppercase font-bold tracking-widest flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        Change
-                      </button>
+                      <div>
+                        <h2 className="text-2xl font-black text-bora-accent tracking-tighter uppercase">Personal Details</h2>
+                        <p className="text-[11px] font-bold text-[#E5D4B6]/40 uppercase tracking-widest">Update your identification info</p>
+                      </div>
+                   </div>
+                   <button className="flex items-center gap-3 px-8 py-3 bg-bora-accent text-black text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all">
+                      <Save size={14} /> Save
+                   </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  {[
+                    { label: 'First Name', value: 'Alexander', icon: User },
+                    { label: 'Last Name', value: 'Chen', icon: User },
+                    { label: 'Email Address', value: 'alexander@boratech.co', icon: Mail },
+                    { label: 'Role', value: 'Head of Recruitment', icon: Briefcase }
+                  ].map((field, i) => (
+                    <div key={i} className="space-y-4">
+                      <label className="text-[9px] font-black text-[#E5D4B6]/30 uppercase tracking-[0.2em] ml-1 flex items-center gap-2">
+                        <field.icon size={12} className="text-bora-accent/50" />
+                        {field.label}
+                      </label>
+                      <input 
+                        type="text" 
+                        defaultValue={field.value}
+                        className="w-full bg-black/60 border border-[#E5D4B6]/10 rounded-2xl px-6 py-4 text-xs font-black text-bora-accent focus:border-bora-accent/50 focus:outline-none transition-all placeholder:text-bora-accent/20" 
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="bg-black backdrop-blur-xl rounded-[3rem] p-10 border border-[#E5D4B6]/10 shadow-2xl">
+                 <div className="flex items-center gap-5 mb-12">
+                    <div className="w-12 h-12 bg-bora-accent rounded-2xl flex items-center justify-center text-black shadow-xl ring-4 ring-bora-accent/5">
+                      <Building2 size={24} />
                     </div>
                     <div>
-                      <div className="text-cream font-bold text-lg mb-1">Alexander Chen</div>
-                      <div className="text-cream/50 text-sm font-medium mb-3">alexander@boratech.co</div>
-                      <span className="text-[10px] font-bold text-cream/40 bg-cream/10 px-3 py-1 rounded">Admin Account</span>
+                      <h2 className="text-2xl font-black text-bora-accent tracking-tighter uppercase">Company Info</h2>
+                      <p className="text-[11px] font-bold text-[#E5D4B6]/40 uppercase tracking-widest">Global platform preferences</p>
                     </div>
-                  </div>
+                 </div>
 
-                  <div className="grid md:grid-cols-2 gap-6 pt-2">
-                    <Input label="First Name" defaultValue="Alexander" icon={User} />
-                    <Input label="Last Name" defaultValue="Chen" icon={User} />
-                    <Input label="Email Address" defaultValue="alexander@boratech.co" icon={Mail} />
-                    <Input label="Role" defaultValue="Head of Recruitment" icon={Building2} />
-                  </div>
-                </Card>
-
-                <Card className="p-8 space-y-8">
-                  <div>
-                    <h2 className="text-2xl font-bold text-cream mb-1">Company Details</h2>
-                    <p className="text-cream/50 text-sm font-medium">Manage your organization&apos;s core information.</p>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <Input label="Company Name" defaultValue="BORA Technologies" icon={Building2} />
-                    <Input label="Website URL" defaultValue="https://bora.tech" icon={Globe} />
-                    <Select
-                      label="Company Size"
-                      options={[
-                        { value: '1-50', label: '1 - 50 employees' },
-                        { value: '51-200', label: '51 - 200 employees' },
-                        { value: '201-500', label: '201 - 500 employees' },
-                        { value: '500+', label: '500+ employees' }
-                      ]}
-                      defaultValue="51-200"
-                    />
-                    <Select
-                      label="Timezone"
-                      options={[
-                        { value: 'est', label: 'Eastern Time (ET)' },
-                        { value: 'pst', label: 'Pacific Time (PT)' },
-                        { value: 'utc', label: 'Coordinated Universal Time (UTC)' },
-                        { value: 'cet', label: 'Central European Time (CET)' }
-                      ]}
-                      defaultValue="est"
-                    />
-                  </div>
-                </Card>
-              </div>
-            )}
-
-            {activeTab === 'security' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <Card className="p-8 space-y-8">
-                  <div>
-                    <h2 className="text-2xl font-bold text-cream mb-1">Password & Authentication</h2>
-                    <p className="text-cream/50 text-sm font-medium">Keep your account secure with strong credentials.</p>
-                  </div>
-
-                  <div className="space-y-6 max-w-md">
-                    <Input label="Current Password" type="password" placeholder="••••••••" icon={Lock} />
-                    <Input label="New Password" type="password" placeholder="••••••••" icon={Key} />
-                    <Input label="Confirm New Password" type="password" placeholder="••••••••" icon={Key} />
-                    <Button variant="secondary" className="font-semibold w-full mt-4">Change Password</Button>
-                  </div>
-                </Card>
-
-                <Card className="p-8 space-y-8 border-emerald-500/20 bg-emerald-500/5">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h2 className="text-2xl font-bold text-cream mb-1 flex items-center gap-2">
-                        <Shield className="w-6 h-6 text-emerald-500" /> Two-Factor Authentication
-                      </h2>
-                      <p className="text-cream/60 text-sm font-medium">Add an extra layer of security to your account.</p>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-4">
+                      <label className="text-[9px] font-black text-[#E5D4B6]/30 uppercase tracking-[0.2em] ml-1">Business Name</label>
+                      <input type="text" defaultValue="BORA Technologies" className="w-full bg-black/60 border border-[#E5D4B6]/10 rounded-2xl px-6 py-4 text-xs font-black text-bora-accent focus:border-bora-accent/50 focus:outline-none transition-all" />
                     </div>
-                    <Badge variant="success" className="bg-emerald-500/20 text-emerald-400 font-bold">Enabled</Badge>
-                  </div>
+                    <div className="space-y-4">
+                      <label className="text-[9px] font-black text-[#E5D4B6]/30 uppercase tracking-[0.2em] ml-1">Website URL</label>
+                      <input type="text" defaultValue="https://bora.tech" className="w-full bg-black/60 border border-[#E5D4B6]/10 rounded-2xl px-6 py-4 text-xs font-black text-bora-accent focus:border-bora-accent/50 focus:outline-none transition-all" />
+                    </div>
+                 </div>
+              </section>
+            </div>
+          )}
 
-                  <div className="p-4 bg-dark/40 border border-cream/10 rounded-md">
-                    <p className="text-sm text-cream/70 leading-relaxed font-medium">
-                      Two-factor authentication is currently enabled via <strong className="text-cream">Authenticator App</strong>.
-                      You will be asked to enter a 6-digit code when logging in from a new device.
+          {activeTab === 'security' && (
+            <div className="space-y-8">
+              <section className="bg-black backdrop-blur-xl rounded-[3rem] p-10 border border-[#E5D4B6]/10 shadow-2xl">
+                <div className="flex items-center gap-5 mb-12">
+                   <div className="w-12 h-12 bg-bora-accent rounded-2xl flex items-center justify-center text-black shadow-xl ring-4 ring-bora-accent/5">
+                     <Lock size={24} />
+                   </div>
+                   <div>
+                     <h2 className="text-2xl font-black text-bora-accent tracking-tighter uppercase">Security</h2>
+                     <p className="text-[11px] font-bold text-[#E5D4B6]/40 uppercase tracking-widest">Access control & credentials</p>
+                   </div>
+                </div>
+
+                <div className="max-w-md space-y-8 pl-2">
+                   <div className="space-y-4">
+                      <label className="text-[9px] font-black text-[#E5D4B6]/30 uppercase tracking-[0.2em] ml-1">Current Password</label>
+                      <input type="password" placeholder="••••••••" className="w-full bg-black/60 border border-[#E5D4B6]/10 rounded-2xl px-6 py-4 text-xs font-black text-bora-accent focus:border-bora-accent/50 focus:outline-none transition-all" />
+                   </div>
+                   <div className="space-y-4">
+                      <label className="text-[9px] font-black text-[#E5D4B6]/30 uppercase tracking-[0.2em] ml-1">New Secure Password</label>
+                      <input type="password" placeholder="••••••••" className="w-full bg-black/60 border border-[#E5D4B6]/10 rounded-2xl px-6 py-4 text-xs font-black text-bora-accent focus:border-bora-accent/50 focus:outline-none transition-all" />
+                   </div>
+                   <button className="w-full py-4 bg-bora-accent text-black text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
+                     Change Credentials
+                   </button>
+                </div>
+              </section>
+
+              <section className="bg-bora-accent/5 backdrop-blur-xl rounded-[3rem] p-10 border border-emerald-500/20 shadow-2xl">
+                 <div className="flex items-start justify-between mb-8">
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-black shadow-emerald-500/20 shadow-xl ring-4 ring-emerald-500/10">
+                        <Shield size={24} />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Two-Factor Auth</h2>
+                        <p className="text-[11px] font-bold text-emerald-500/60 uppercase tracking-widest">Status: active & protected</p>
+                      </div>
+                    </div>
+                    <div className="px-5 py-2 bg-emerald-500 text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">Enabled</div>
+                 </div>
+                 
+                 <div className="p-8 bg-black/40 border border-emerald-500/10 rounded-3xl mb-8">
+                    <p className="text-sm text-[#E5D4B6]/70 leading-relaxed font-bold italic">
+                      "Two-factor authentication is currently enabled via Authenticator App. You will be asked to enter a 6-digit code when logging in from a new device."
                     </p>
-                  </div>
+                 </div>
 
-                  <div className="flex gap-4">
-                    <Button variant="secondary" className="font-semibold text-red-500 border-red-500/30 hover:bg-red-500/10">Disable 2FA</Button>
-                    <Button variant="secondary" className="font-semibold">Generate Recovery Codes</Button>
-                  </div>
-                </Card>
-              </div>
-            )}
+                 <div className="flex gap-4">
+                   <button className="px-8 py-4 bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-red-500 hover:text-black transition-all">Disable 2FA</button>
+                   <button className="px-8 py-4 bg-black border border-[#E5D4B6]/10 text-[#E5D4B6]/60 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:text-bora-accent transition-all">Recovery Codes</button>
+                 </div>
+              </section>
+            </div>
+          )}
 
-            {activeTab === 'notifications' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <Card className="p-8 space-y-8">
-                  <div>
-                    <h2 className="text-2xl font-bold text-cream mb-1">Alert Preferences</h2>
-                    <p className="text-cream/50 text-sm font-medium">Choose what events you want to be notified about.</p>
-                  </div>
+          {activeTab === 'notifications' && (
+            <div className="space-y-8">
+              <section className="bg-black backdrop-blur-xl rounded-[3rem] p-10 border border-[#E5D4B6]/10 shadow-2xl">
+                <div className="flex items-center gap-5 mb-12">
+                   <div className="w-12 h-12 bg-bora-accent rounded-2xl flex items-center justify-center text-black shadow-xl ring-4 ring-bora-accent/5">
+                     <Bell size={24} />
+                   </div>
+                   <div>
+                     <h2 className="text-2xl font-black text-bora-accent tracking-tighter uppercase">Alerts</h2>
+                     <p className="text-[11px] font-bold text-[#E5D4B6]/40 uppercase tracking-widest">Communication Preferences</p>
+                   </div>
+                </div>
 
-                  <div className="space-y-1">
-                    {[
-                      { id: 'n1', title: 'New Application Received', desc: 'When a candidate applies directly to a job board.' },
-                      { id: 'n2', title: 'High-Match Candidate Alert', desc: 'Get notified when an AI-scored >90% applies.' },
-                      { id: 'n3', title: 'Daily Summary', desc: 'Receive a daily digest of hiring activity.' },
-                      { id: 'n4', title: 'Interview Updates', desc: 'Rescheduling requests or cancellations.' }
-                    ].map((notif, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 bg-cream/5 border border-cream/10 rounded-md hover:border-cream/30 transition-colors">
-                        <div>
-                          <p className="font-bold text-cream text-md">{notif.title}</p>
-                          <p className="text-xs text-cream/50 mt-1 font-medium">{notif.desc}</p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" defaultChecked={i < 2} className="sr-only peer" />
-                          <div className="w-11 h-6 bg-dark/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-cream/40 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cream/80 peer-checked:after:bg-dark"></div>
-                        </label>
+                <div className="space-y-4">
+                  {[
+                    { id: 'n1', title: 'New Application Received', desc: 'When a candidate applies directly to a job board.' },
+                    { id: 'n2', title: 'High-Match Candidate Alert', desc: 'Get notified when an AI-scored >90% applies.' },
+                    { id: 'n3', title: 'Daily Summary', desc: 'Receive a daily digest of hiring activity.' },
+                    { id: 'n4', title: 'Interview Updates', desc: 'Rescheduling requests or cancellations.' }
+                  ].map((notif, i) => (
+                    <div key={i} className="flex items-center justify-between p-6 bg-black/40 border border-[#E5D4B6]/10 rounded-2xl hover:border-bora-accent/30 transition-all group">
+                      <div className="space-y-1">
+                        <p className="font-black text-bora-accent text-sm uppercase tracking-wider">{notif.title}</p>
+                        <p className="text-[11px] text-[#E5D4B6]/40 font-bold">{notif.desc}</p>
                       </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-            )}
-          </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" defaultChecked={i < 2} className="sr-only peer" />
+                        <div className="w-14 h-7 bg-black border border-[#E5D4B6]/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-black after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-[#E5D4B6]/20 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-bora-accent peer-checked:after:bg-black"></div>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
-

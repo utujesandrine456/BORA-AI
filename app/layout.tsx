@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
-import "./globals.css";
-import Sidebar from "@/components/Sidebar";
 import { Toaster } from "react-hot-toast";
+import { Sidebar } from "@/components/Sidebar";
+import "./globals.css";
 
 const urbanist = Urbanist({
   subsets: ["latin"],
   weight: ["500", "700", "900"],
+  variable: "--font-urbanist",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "BORA - AI Recruitment Platform",
-  description: "Advanced Recruitment Platform",
+  description: "Advanced AI-powered recruitment and screening platform.",
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
@@ -25,12 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full bg-dark">
-      <body className={`${urbanist.className} font-medium h-full antialiased bg-dark text-cream`}>
+    <html lang="en" className={`${urbanist.variable} h-full bg-black`}>
+      <body className={`${urbanist.className} font-medium h-full antialiased bg-black text-[#E5D4B6]`}>
         <Toaster
           position="top-right"
           toastOptions={{
-            className: 'border border-cream/20 bg-dark text-cream shadow-2xl rounded-md px-4 py-3',
+            className: 'border border-[#E5D4B6]/20 bg-black text-[#E5D4B6] shadow-2xl rounded-md px-4 py-3',
             duration: 4000,
             style: {
               background: 'rgba(0, 0, 0, 0.95)',

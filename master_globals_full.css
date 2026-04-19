@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 :root {
   --background: #000000;
@@ -12,16 +12,12 @@
   --color-bora-light: #E5D4B6;
   --color-bora-accent: #E5D4B6;
   --color-bora-accent-hover: #d6c3a2;
-  --color-cream: #E5D4B6;
-  --color-dark: #000000;
   
   --font-sans: var(--font-urbanist), system-ui, sans-serif;
 
   --animate-mesh: mesh 20s ease-in-out infinite;
   --animate-scan: scan 4s linear infinite;
   --animate-chart: chart 2s ease-in-out infinite;
-  --animate-shimmer: shimmer 2s infinite;
-  --animate-float: float 6s ease-in-out infinite;
 
   @keyframes mesh {
     0%, 100% { transform: translate(0, 0) scale(1); }
@@ -38,16 +34,6 @@
     0%, 100% { stroke-dashoffset: 100; }
     50% { stroke-dashoffset: 0; }
   }
-
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-  }
 }
 
 @layer base {
@@ -58,10 +44,6 @@
   body {
     @apply bg-black text-bora-light antialiased overflow-x-hidden;
     min-height: 100vh;
-  }
-
-  * {
-    @apply border-[#E5D4B6]/10;
   }
 }
 
