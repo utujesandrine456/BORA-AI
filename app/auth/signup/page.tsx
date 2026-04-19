@@ -139,6 +139,21 @@ export default function SignupPage() {
                                 Apply Now <ArrowRight className="ml-2 w-5 h-5" />
                             </Button>
                         </form>
+
+                        <div className="relative py-2">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-cream/10"></div>
+                            </div>
+                            <div className="relative flex justify-center text-[10px] font-black uppercase tracking-[0.2em]">
+                                <span className="bg-dark/80 px-4 text-cream/20 backdrop-blur-sm">Already have an account?</span>
+                            </div>
+                        </div>
+
+                        <Link href="/auth/login" className="block">
+                            <Button variant="secondary" className="w-full h-14 border-cream/10 text-cream/40 hover:text-cream hover:bg-cream/5 font-bold text-sm uppercase rounded-xl transition-all">
+                                Sign In
+                            </Button>
+                        </Link>
                     </div>
                 </motion.div>
             </div>

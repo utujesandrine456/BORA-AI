@@ -33,7 +33,7 @@ const menuItems: MenuItem[] = [
 export default function Sidebar() {
   const pathname = usePathname();
 
-  const appRoutes = ['/dashboard', '/jobs', '/applicants', '/screening', '/insights', '/settings'];
+  const appRoutes = ['/dashboard', '/jobs', '/applicants', '/screening', '/insights', '/settings', '/screening-history'];
   const isAppRoute = appRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
 
   if (!isAppRoute) return null;
@@ -47,7 +47,7 @@ export default function Sidebar() {
         </div>
         <div>
           <h1 className="text-2xl font-black text-cream tracking-widest uppercase leading-none">BORA</h1>
-          <p className="text-[16px] text-cream/60 font-medium mt-1">Platform</p>
+          <p className="text-[16px] text-cream/60 font-medium mt-1">Dashboard</p>
         </div>
       </div>
 
