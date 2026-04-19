@@ -10,11 +10,9 @@ interface DashboardLayoutProps {
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title, subtitle }) => {
   return (
-    <div className="flex h-screen bg-black font-sans selection:bg-bora-accent/30 selection:text-black overflow-hidden">
+    <div className="h-screen bg-black font-sans selection:bg-bora-accent/30 selection:text-black overflow-hidden">
       
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col relative z-10 w-full h-full overflow-hidden">
+      <div className="flex flex-col relative z-10 w-full h-full overflow-hidden">
         {/* Top Header */}
         <header className="h-20 flex-shrink-0 bg-black border-b border-[#E5D4B6]/10 px-10 flex items-center justify-between z-30 w-full relative">
           <div className="flex-1 max-w-2xl relative group">

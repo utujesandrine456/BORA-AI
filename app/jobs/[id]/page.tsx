@@ -1,12 +1,12 @@
 'use client';
 
-import React, { use, useState, useEffect } from 'react';
-import { 
-  MapPin, 
-  Calendar, 
-  Users, 
-  Pencil, 
-  Play, 
+import React, { use, useState } from 'react';
+import {
+  MapPin,
+  Calendar,
+  Users,
+  Pencil,
+  Play,
   ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
@@ -154,54 +154,50 @@ const JOBS_METADATA: Record<string, Job> = {
 export default function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
 
-  // Select job data based on ID, fallback to Senior Frontend if not found
   const baseJob = JOBS_METADATA[id] || JOBS_METADATA['1'];
-  const [job, setJob] = useState(baseJob);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(`job-${id}`);
-    if (saved) {
-      try {
-        const parsedSaved = JSON.parse(saved);
-        setJob(prev => ({ ...prev, ...parsedSaved }));
-      } catch (e) {
-        // ignore parse error
-      }
+  const [job] = useState(() => {
+    if (typeof window === 'undefined') return baseJob;
+    try {
+      const saved = localStorage.getItem(`job-${id}`);
+      if (saved) return { ...baseJob, ...JSON.parse(saved) };
+    } catch {
+      // ignore parse error
     }
-  }, [id]);
+    return baseJob;
+  });
 
   return (
-    <div className="flex flex-col h-full bg-[#f8fafc]">
+    <div className="flex flex-col h-full bg-dark text-cream">
       <TopNav />
-      
+
       <div className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-[1280px] mx-auto pb-20">
           {/* Back button */}
-          <Link href="/jobs" className="flex items-center gap-2 text-slate-500 hover:text-[#0c2d48] font-normal mb-6 transition-colors group w-fit">
+          <Link href="/jobs" className="flex items-center gap-2 text-cream/60 hover:text-cream text-sm uppercase tracking-widest font-bold mb-10 transition-colors group w-fit">
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span>Back to Jobs</span>
           </Link>
 
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 pb-8 border-b border-cream/20">
             <div>
-              <h1 className="text-[42px] font-black text-slate-900 tracking-tight mb-3">{job.title}</h1>
-              <div className="flex flex-wrap items-center gap-6 text-slate-500 font-normal">
+              <h1 className="text-5xl md:text-6xl font-black text-cream tracking-widest uppercase mb-4">{job.title}</h1>
+              <div className="flex flex-wrap items-center gap-6 text-cream/60 font-bold uppercase tracking-wider text-xs">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-slate-100 rounded-lg">
-                    <MapPin className="w-5 h-5 text-slate-400" />
+                  <div className="p-1 border border-cream/20 rounded-md bg-cream/5">
+                    <MapPin className="w-4 h-4 text-cream" />
                   </div>
                   <span>{job.location}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-slate-100 rounded-lg">
-                    <Calendar className="w-5 h-5 text-slate-400" />
+                  <div className="p-1 border border-cream/20 rounded-md bg-cream/5">
+                    <Calendar className="w-4 h-4 text-cream" />
                   </div>
                   <span>Posted {job.postedDate}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-slate-100 rounded-lg">
-                    <Users className="w-5 h-5 text-slate-400" />
+                  <div className="p-1 border border-cream/20 rounded-md bg-cream/5">
+                    <Users className="w-4 h-4 text-cream" />
                   </div>
                   <span>{job.applicantsCount} applicants</span>
                 </div>
@@ -210,7 +206,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
 
             <div className="flex items-center gap-4">
               <Link href={`/jobs/${id}/edit`}>
-                <Button variant="secondary" icon={Pencil} size="lg" className="px-8">
+                <Button variant="secondary" icon={Pencil} size="md" className="px-6 py-3">
                   Edit Job
                 </Button>
               </Link>
@@ -222,29 +218,29 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
 
           {/* Main Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            
+
             {/* Left Column (Main Info) */}
             <div className="lg:col-span-2 space-y-10">
               {/* Job Overview */}
-              <Card padding="lg" className="shadow-xl shadow-slate-200/40">
-                <h2 className="text-[22px] font-black text-slate-900 mb-6 flex items-center gap-3">
-                  <div className="w-2 h-8 bg-[#38bdf8] rounded-full"></div>
+              <Card padding="lg">
+                <h2 className="text-[22px] font-black text-cream uppercase tracking-widest mb-6 flex items-center gap-3">
+                  <div className="w-2 h-8 bg-cream rounded-md"></div>
                   Job Overview
                 </h2>
-                <p className="text-slate-600 leading-relaxed font-normal text-lg">
+                <p className="text-cream/80 leading-relaxed font-medium text-lg">
                   {job.description}
                 </p>
               </Card>
 
               {/* Technical Requirements */}
-              <Card padding="lg" className="shadow-xl shadow-slate-200/40">
-                <h2 className="text-[22px] font-black text-slate-900 mb-8 flex items-center gap-3">
-                  <div className="w-2 h-8 bg-[#38bdf8] rounded-full"></div>
+              <Card padding="lg">
+                <h2 className="text-[22px] font-black text-cream uppercase tracking-widest mb-8 flex items-center gap-3">
+                  <div className="w-2 h-8 bg-cream rounded-md"></div>
                   Technical Requirements
                 </h2>
                 <div className="flex flex-wrap gap-3">
-                  {job.skills.map(skill => (
-                    <Badge key={skill} variant="primary" className="px-8 py-3 text-sm font-normal">
+                  {job.skills.map((skill: string) => (
+                    <Badge key={skill} variant="secondary" className="px-6 py-2.5 text-xs">
                       {skill}
                     </Badge>
                   ))}
@@ -252,35 +248,35 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
               </Card>
 
               {/* Applicants List */}
-              <Card padding="lg" className="shadow-xl shadow-slate-200/40">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
-                  <h2 className="text-[24px] font-black text-slate-900">Applicants ({job.applicantsCount})</h2>
+              <Card padding="lg">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 border-b border-cream/10 pb-6">
+                  <h2 className="text-[22px] font-black text-cream uppercase tracking-widest">Applicants ({job.applicantsCount})</h2>
                   <Link href="/screening/loading">
-                    <Button variant="sky" icon={Play} size="lg" className="px-10">
+                    <Button variant="primary" icon={Play} size="md" className="px-8">
                       Run AI Screening
                     </Button>
                   </Link>
                 </div>
 
                 <div className="space-y-4">
-                  {job.applicants.map(applicant => (
-                    <div key={applicant.name} className="p-8 border border-slate-100 rounded-[32px] hover:border-[#38bdf8]/30 hover:bg-[#38bdf8]/5 transition-all group cursor-pointer relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-[#38bdf8]/5 rounded-full -mr-16 -mt-16 group-hover:bg-[#38bdf8]/10 transition-colors"></div>
+                  {job.applicants.map((applicant: Applicant) => (
+                    <div key={applicant.name} className="p-8 border border-cream/20 bg-dark rounded-md hover:border-cream hover:bg-cream/5 transition-all group cursor-pointer relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-cream/5 rounded-md -mr-16 -mt-16 group-hover:bg-cream/10 transition-colors"></div>
                       <div className="flex items-start justify-between relative z-10">
                         <div className="flex gap-6 items-center">
-                          <div className="w-16 h-16 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 shadow-sm">
+                          <div className="w-16 h-16 bg-black border border-cream/30 rounded-md flex items-center justify-center text-cream group-hover:scale-110 transition-transform">
                             <Users className="w-8 h-8" />
                           </div>
                           <div>
-                            <h3 className="font-black text-slate-900 text-xl mb-1 group-hover:text-[#38bdf8] transition-colors">{applicant.name}</h3>
-                            <p className="text-slate-500 font-normal mb-1">{applicant.skills}</p>
-                            <p className="text-slate-400 font-normal text-sm tracking-wide uppercase">{applicant.experience}</p>
+                            <h3 className="font-black text-cream uppercase tracking-widest text-xl mb-1">{applicant.name}</h3>
+                            <p className="text-cream/60 font-bold text-sm uppercase tracking-wider mb-2">{applicant.skills}</p>
+                            <p className="text-cream/40 font-bold text-[10px] tracking-[0.2em] uppercase">{applicant.experience}</p>
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="flex flex-col items-end">
-                            <span className="text-[32px] font-black text-slate-900 leading-none">{applicant.match}%</span>
-                            <span className="text-[#38bdf8] font-black text-[10px] uppercase tracking-[0.2em] mt-2">Score Match</span>
+                            <span className="text-4xl font-black text-cream leading-none">{applicant.match}%</span>
+                            <span className="text-cream/60 font-black text-[10px] uppercase tracking-[0.2em] mt-2">Score Match</span>
                           </div>
                         </div>
                       </div>
@@ -293,48 +289,50 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
             {/* Right Column (Sidebar) */}
             <div className="space-y-10">
               {/* Quick Info Card */}
-              <Card padding="lg" className="shadow-xl shadow-slate-200/40">
-                <h2 className="text-[22px] font-black text-slate-900 mb-10 flex items-center gap-3">
-                  <div className="w-2 h-8 bg-[#38bdf8] rounded-full"></div>
+              <Card padding="lg">
+                <h2 className="text-[22px] font-black text-cream uppercase tracking-widest mb-10 flex items-center gap-3">
+                  <div className="w-2 h-8 bg-cream"></div>
                   Quick Info
                 </h2>
                 <div className="space-y-10">
                   <div className="flex flex-col gap-2">
-                    <label className="text-slate-400 font-black text-xs uppercase tracking-widest">Experience Level</label>
-                    <span className="text-slate-900 font-normal text-xl">{job.requirements.experience}</span>
+                    <label className="text-cream/40 font-black text-[10px] uppercase tracking-[0.2em]">Experience Level</label>
+                    <span className="text-cream font-bold uppercase tracking-widest text-sm">{job.requirements.experience}</span>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-slate-400 font-black text-xs uppercase tracking-widest">Education</label>
-                    <span className="text-slate-900 font-normal text-xl">{job.requirements.education}</span>
+                    <label className="text-cream/40 font-black text-[10px] uppercase tracking-[0.2em]">Education</label>
+                    <span className="text-cream font-bold uppercase tracking-widest text-sm">{job.requirements.education}</span>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-slate-400 font-black text-xs uppercase tracking-widest">Location Type</label>
-                    <span className="text-slate-900 font-normal text-xl">{job.requirements.location}</span>
+                    <label className="text-cream/40 font-black text-[10px] uppercase tracking-[0.2em]">Location Type</label>
+                    <span className="text-cream font-bold uppercase tracking-widest text-sm">{job.requirements.location}</span>
                   </div>
                 </div>
               </Card>
 
               {/* Application Summary Card */}
-              <Card padding="lg" className="bg-[#0c2d48] text-white shadow-xl shadow-[#0c2d48]/20 border-none relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-20 -mt-20"></div>
-                <h2 className="text-[22px] font-black mb-10 relative z-10 flex items-center gap-3">
-                  <div className="w-2 h-8 bg-[#38bdf8] rounded-full"></div>
+              <Card padding="lg" className="border-cream bg-cream">
+                <h2 className="text-[22px] font-black mb-10 text-dark uppercase tracking-widest flex items-center gap-3">
+                  <div className="w-2 h-8 bg-dark"></div>
                   Summary
                 </h2>
-                <div className="space-y-8 relative z-10">
+                <div className="space-y-8 text-dark">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400 font-normal text-lg">Total Applicants</span>
-                    <span className="text-white font-black text-3xl">{job.summary.total}</span>
+                    <span className="font-bold uppercase tracking-widest text-xs">Total Applicants</span>
+                    <span className="font-black text-3xl">{job.summary.total}</span>
                   </div>
-                  <div className="h-px bg-white/10" />
+                  <div className="h-px bg-dark/20" />
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400 font-normal text-lg">Screened</span>
-                    <span className="text-white font-black text-3xl">{job.summary.screened}</span>
+                    <span className="font-bold uppercase tracking-widest text-xs">Screened</span>
+                    <span className="font-black text-3xl">{job.summary.screened}</span>
                   </div>
-                  <div className="h-px bg-white/10" />
+                  <div className="h-px bg-dark/20" />
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400 font-normal text-lg">Shortlisted</span>
-                    <span className="text-[#38bdf8] font-black text-3xl">{job.summary.shortlisted}</span>
+                    <span className="font-bold uppercase tracking-widest text-xs">Shortlisted</span>
+                    <span className="font-black text-3xl relative">
+                      {job.summary.shortlisted}
+                      <span className="absolute -top-1 -right-4 w-2 h-2 bg-black rounded-full animate-pulse"></span>
+                    </span>
                   </div>
                 </div>
               </Card>

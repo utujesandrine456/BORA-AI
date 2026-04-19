@@ -7,58 +7,57 @@ import Card from '@/components/ui/Card';
 
 export default function ScreeningLoadingPage() {
   return (
-    <div className="flex flex-col h-full bg-[#f8fafc]">
+    <div className="flex flex-col h-full bg-dark text-cream">
       <TopNav />
-      
+
       <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-y-auto">
-        {/* Animated Loader Container */}
+    
         <div className="relative mb-12 flex items-center justify-center">
-          <div className="absolute w-40 h-40 bg-[#38bdf8]/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="relative w-24 h-24 rounded-full border-[6px] border-slate-100 flex items-center justify-center">
-            <div className="absolute inset-[-6px] border-[6px] border-transparent border-t-[#38bdf8] rounded-full animate-spin"></div>
-            <div className="w-16 h-16 bg-gradient-to-br from-[#38bdf8] to-[#0c2d48] rounded-full shadow-lg shadow-[#38bdf8]/40 flex items-center justify-center">
-              <Cpu className="w-8 h-8 text-white animate-pulse" />
+          <div className="absolute w-40 h-40 bg-cream/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="relative w-24 h-24 rounded-full border-2 border-cream/20 flex items-center justify-center">
+            <div className="absolute inset-[-2px] border-2 border-transparent border-t-cream rounded-full animate-spin"></div>
+            <div className="w-16 h-16 bg-black border border-cream/30 rounded-full shadow-lg shadow-cream/10 flex items-center justify-center">
+              <Cpu className="w-6 h-6 text-cream animate-pulse" />
             </div>
           </div>
         </div>
 
-        {/* Text Area */}
-        <div className="text-center mb-12">
-          <h1 className="text-[40px] font-black text-slate-900 tracking-tight mb-2">BORA AI Analysis</h1>
-          <p className="text-slate-500 font-normal text-lg">Scanning candidate data and predicting job match...</p>
+        <div className="text-center mb-12 uppercase">
+          <h1 className="text-4xl md:text-5xl font-black text-cream tracking-[0.2em] mb-4">BORA AI Analysis</h1>
+          <p className="text-cream/60 font-bold text-xs tracking-widest">Scanning candidate data and predicting job match...</p>
         </div>
 
         {/* Progress Card */}
-        <Card className="w-full max-w-[580px] shadow-2xl shadow-slate-200/60 p-12 space-y-12">
-          
+        <Card className="w-full max-w-[580px] p-12 space-y-12 bg-[#111111] border-cream/20 rounded-md">
+
           {/* Step 1: Completed */}
           <div className="flex items-start gap-8">
-            <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center shrink-0">
-              <FileText className="w-7 h-7 text-emerald-500" />
+            <div className="w-14 h-14 bg-cream/10 rounded-md border border-cream/30 flex items-center justify-center shrink-0">
+              <FileText className="w-6 h-6 text-cream" />
             </div>
             <div className="flex-1 pt-1">
               <div className="flex items-center justify-between mb-4">
-                <span className="font-black text-slate-900 text-lg uppercase tracking-wider">Parsing resumes</span>
-                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                <span className="font-black text-cream text-sm uppercase tracking-[0.2em]">Parsing resumes</span>
+                <CheckCircle2 className="w-5 h-5 text-cream" />
               </div>
-              <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-full w-full"></div>
+              <div className="h-2 w-full bg-cream/10 rounded-md overflow-hidden">
+                <div className="h-full bg-cream rounded-md w-full"></div>
               </div>
             </div>
           </div>
 
           {/* Step 2: In Progress */}
           <div className="flex items-start gap-8">
-            <div className="w-14 h-14 bg-[#f0f9ff] rounded-2xl flex items-center justify-center shrink-0">
-              <Workflow className="w-7 h-7 text-[#38bdf8]" />
+            <div className="w-14 h-14 bg-black rounded-md border border-cream flex items-center justify-center shrink-0">
+              <Workflow className="w-6 h-6 text-cream" />
             </div>
             <div className="flex-1 pt-1">
               <div className="flex items-center justify-between mb-4">
-                <span className="font-normal text-slate-900 text-lg uppercase tracking-wider">Matching candidates</span>
+                <span className="font-bold text-cream text-sm uppercase tracking-[0.2em]">Matching candidates</span>
               </div>
-              <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden relative">
-                <div className="h-full bg-[#38bdf8] rounded-full w-[65%] relative">
-                  <div className="absolute inset-0 bg-white/30 animate-shimmer"></div>
+              <div className="h-2 w-full bg-cream/10 rounded-md overflow-hidden relative">
+                <div className="h-full bg-cream rounded-md w-[65%] relative">
+                  <div className="absolute inset-0 bg-white/10 animate-shimmer"></div>
                 </div>
               </div>
             </div>
@@ -66,24 +65,24 @@ export default function ScreeningLoadingPage() {
 
           {/* Step 3: Pending */}
           <div className="flex items-start gap-8 opacity-30">
-            <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center shrink-0">
-              <BarChart3 className="w-7 h-7 text-slate-400" />
+            <div className="w-14 h-14 bg-black rounded-md border border-cream/30 flex items-center justify-center shrink-0">
+              <BarChart3 className="w-6 h-6 text-cream/50" />
             </div>
             <div className="flex-1 pt-1">
               <div className="flex items-center justify-between mb-4">
-                <span className="font-normal text-slate-400 text-lg uppercase tracking-wider">Ranking results</span>
+                <span className="font-bold text-cream/50 text-sm uppercase tracking-[0.2em]">Ranking results</span>
               </div>
-              <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-slate-200 rounded-full w-0"></div>
+              <div className="h-2 w-full bg-cream/10 rounded-md overflow-hidden">
+                <div className="h-full bg-cream/30 rounded-md w-0"></div>
               </div>
             </div>
           </div>
         </Card>
 
         {/* Bottom Status */}
-        <div className="mt-12 flex items-center gap-3">
-          <div className="w-2 h-2 bg-[#38bdf8] rounded-full animate-ping"></div>
-          <p className="text-slate-400 font-normal text-sm uppercase tracking-[0.2em]">
+        <div className="mt-12 flex items-center gap-4">
+          <div className="w-2 h-2 bg-cream rounded-md animate-pulse"></div>
+          <p className="text-cream/60 font-bold text-[10px] uppercase tracking-[0.3em]">
             Processing neural match predictions...
           </p>
         </div>
