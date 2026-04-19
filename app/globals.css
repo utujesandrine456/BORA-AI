@@ -41,3 +41,29 @@ body {
     }
   }
 }
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(218, 197, 167, 0.05); /* cream/5 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(218, 197, 167, 0.2); /* cream/20 */
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(218, 197, 167, 0.5); /* cream/50 */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(218, 197, 167, 0.2) transparent;
+}
