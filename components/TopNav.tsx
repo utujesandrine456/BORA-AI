@@ -1,6 +1,7 @@
 'use client';
 
 import { Search, Bell } from 'lucide-react';
+import Link from 'next/link';
 
 export default function TopNav() {
 
@@ -19,10 +20,10 @@ export default function TopNav() {
         </div>
 
         <div className="flex items-center gap-6 relative z-10">
-          <button className="relative p-3 text-cream/60 hover:text-cream hover:bg-cream/10 rounded-md transition-all border border-transparent cursor-pointer">
+          <Link href="/notifications" className="relative p-3 text-cream/60 hover:text-cream hover:bg-cream/10 rounded-md transition-all border border-transparent cursor-pointer block">
             <Bell className="h-5 w-5" />
             <span className="absolute top-2 right-2 w-2 h-2 bg-red-600 rounded-full"></span>
-          </button>
+          </Link>
 
           <div className="flex items-center gap-5 pl-6 border-l border-cream/20">
             <div className="flex flex-col items-end">

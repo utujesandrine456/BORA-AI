@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { 
-  Search, 
-  Filter, 
-  MapPin, 
+import {
+  Search,
+  Filter,
+  MapPin,
   User,
   ChevronRight,
   Download,
   Check,
-  Zap
+  Zap,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import TopNav from '@/components/TopNav';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -27,15 +29,25 @@ const INITIAL_APPLICANTS = [
   { id: 7, name: 'Marcus Berg', role: 'Systems Architect', location: 'Stockholm, SWE', score: 89, status: 'Technical test', date: '3d ago', avatar: 'MB' },
 ];
 
+
 export default function ApplicantsPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [selectedApplicants, setSelectedApplicants] = useState<number[]>([]);
+
+  const handleSelectApplicant = (id: number, checked: boolean) => {
+    setSelectedApplicants(prev =>
+      checked ? [...prev, id] : prev.filter(aId => aId !== id)
+    );
+  };
+
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredApplicants = useMemo(() => {
     return INITIAL_APPLICANTS.filter(applicant => {
-      const matchesSearch = applicant.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           applicant.role.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = applicant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        applicant.role.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || applicant.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -72,65 +84,77 @@ export default function ApplicantsPage() {
             />
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
-             <div className="relative">
-                <Button 
-                  variant="secondary" 
-                  className={`gap-2 ${showFilters ? 'bg-cream/10 border-cream/40' : ''}`}
-                  onClick={() => setShowFilters(!showFilters)}
-                >
-                  <Filter className="w-4 h-4" />
-                  Filters
-                  {statusFilter !== 'All' && <span className="w-2 h-2 bg-cream rounded-full" />}
-                </Button>
+            <div className="relative">
+              <Button
+                variant="secondary"
+                className={`gap-2 ${showFilters ? 'bg-cream/10 border-cream/40' : ''}`}
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="w-4 h-4" />
+                Filters
+                {statusFilter !== 'All' && <span className="w-2 h-2 bg-cream rounded-full" />}
+              </Button>
 
-                {showFilters && (
-                  <>
-                    <div className="fixed inset-0 z-30" onClick={() => setShowFilters(false)} />
-                    <Card className="absolute right-0 mt-3 w-64 p-6 z-40 shadow-2xl animate-in fade-in zoom-in duration-200">
-                      <div className="space-y-4">
-                        <div className="text-[10px] font-bold text-cream/40 tracking-wider mb-2">Status</div>
-                        <div className="space-y-1">
-                          {['All', 'Shortlisted', 'In review', 'Interviewing', 'New'].map(s => (
-                            <button
-                              key={s}
-                              onClick={() => { setStatusFilter(s); setShowFilters(false); }}
-                              className={`w-full flex items-center justify-between px-3 py-2 rounded text-sm transition-colors ${statusFilter === s ? 'bg-cream/10 text-cream font-bold' : 'text-cream/60 hover:bg-cream/5'}`}
-                            >
-                              {s}
-                              {statusFilter === s && <Check className="w-4 h-4" />}
-                            </button>
-                          ))}
-                        </div>
+              {showFilters && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setShowFilters(false)} />
+                  <Card className="absolute right-0 mt-3 w-64 p-6 z-40 shadow-2xl animate-in fade-in zoom-in duration-200">
+                    <div className="space-y-4">
+                      <div className="text-[10px] font-bold text-cream/40 tracking-wider mb-2">Status</div>
+                      <div className="space-y-1">
+                        {['All', 'Shortlisted', 'In review', 'Interviewing', 'New'].map(s => (
+                          <button
+                            key={s}
+                            onClick={() => { setStatusFilter(s); setShowFilters(false); }}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded text-sm transition-colors ${statusFilter === s ? 'bg-cream/10 text-cream font-bold' : 'text-cream/60 hover:bg-cream/5'}`}
+                          >
+                            {s}
+                            {statusFilter === s && <Check className="w-4 h-4" />}
+                          </button>
+                        ))}
                       </div>
-                    </Card>
-                  </>
-                )}
-             </div>
-             <select 
+                    </div>
+                  </Card>
+                </>
+              )}
+            </div>
+            <select
               className="bg-dark border border-cream/20 text-cream text-sm rounded-md px-4 py-3 focus:outline-none focus:ring-1 focus:ring-cream/40 cursor-pointer appearance-none pr-10"
               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center' }}
-             >
-                <option>Sort by Match</option>
-                <option>Sort by Date</option>
-                <option>Sort by Name</option>
-             </select>
+            >
+              <option>Sort by Match</option>
+              <option>Sort by Date</option>
+              <option>Sort by Name</option>
+            </select>
           </div>
         </div>
 
         {/* Applicants Grid/List */}
         <div className="grid grid-cols-1 gap-4">
           {filteredApplicants.length > 0 ? filteredApplicants.map((applicant) => (
-            <Link 
-              key={applicant.id} 
-              href={`/applicants/${applicant.id}`}
-              className="group"
+            <div
+              key={applicant.id}
+              className="group relative block"
             >
               <Card className="p-6 transition-all duration-300 group-hover:border-cream/40 group-hover:bg-cream/2">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                  <div className="w-14 h-14 bg-cream/10 border border-cream/20 rounded-md flex items-center justify-center text-cream font-black text-xl group-hover:bg-cream group-hover:text-dark transition-colors duration-500">
+                  {/* Checkbox Wrapper */}
+                  <div className="relative z-10 flex items-center justify-center pt-2 md:pt-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedApplicants.includes(applicant.id)}
+                      onChange={(e) => handleSelectApplicant(applicant.id, e.target.checked)}
+                      className="w-5 h-5 accent-cream/80 cursor-pointer rounded border-cream/20 bg-dark/50"
+                    />
+                  </div>
+
+                  {/* Absolute Link */}
+                  <Link href={`/applicants/${applicant.id}`} className="absolute inset-0 z-0" />
+
+                  <div className="relative z-0 w-14 h-14 bg-cream/10 border border-cream/20 rounded-md flex items-center justify-center text-cream font-black text-xl group-hover:bg-cream group-hover:text-dark transition-colors duration-500">
                     {applicant.avatar}
                   </div>
-                  
+
                   <div className="flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-3">
                       <h3 className="text-xl font-bold text-cream group-hover:text-white transition-colors">{applicant.name}</h3>
@@ -164,12 +188,12 @@ export default function ApplicantsPage() {
                   </div>
                 </div>
               </Card>
-            </Link>
+            </div>
           )) : (
             <div className="py-20 text-center space-y-4 border border-dashed border-cream/10 rounded-md">
               <User className="w-12 h-12 text-cream/10 mx-auto" />
               <p className="text-cream/40 font-bold tracking-wider">No applicants found matching your search</p>
-              <button 
+              <button
                 onClick={() => { setSearchTerm(''); setStatusFilter('All'); }}
                 className="text-xs font-bold text-cream underline underline-offset-4 decoration-cream/20 hover:decoration-cream transition-all"
               >
@@ -179,6 +203,51 @@ export default function ApplicantsPage() {
           )}
         </div>
       </div>
+
+      {/* Floating Action Bar */}
+      {selectedApplicants.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom flex items-center gap-4 bg-cream text-dark px-6 py-4 rounded-xl shadow-2xl font-bold border border-dark/10">
+          <div className="flex items-center gap-2 border-r border-dark/20 pr-4">
+            <span className="bg-dark text-cream w-6 h-6 rounded-full flex items-center justify-center text-xs">
+              {selectedApplicants.length}
+            </span>
+            <span>Selected</span>
+          </div>
+
+          {selectedApplicants.length === 1 ? (
+            <div className="flex items-center gap-3">
+              <Button
+                variant="primary"
+                className="border border-dark/20 text-cream hover:bg-dark/80 hover:text-dark whitespace-nowrap"
+              >
+                Screen
+              </Button>
+              <Button
+                variant="secondary"
+                className="border border-dark/20 text-cream hover:bg-dark hover:text-white whitespace-nowrap"
+                onClick={() => router.push(`/applicants/${selectedApplicants[0]}`)}
+              >
+                View details
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="primary"
+              className="bg-dark text-white hover:bg-dark/80 hover:text-dark whitespace-nowrap"
+            >
+              Screen All
+            </Button>
+          )}
+
+          <button
+            onClick={() => setSelectedApplicants([])}
+            className="p-2 ml-2 opacity-60 hover:opacity-100 transition-opacity"
+            aria-label="Clear selection"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

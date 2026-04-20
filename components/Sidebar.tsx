@@ -33,7 +33,7 @@ const menuItems: MenuItem[] = [
 export default function Sidebar() {
   const pathname = usePathname();
 
-  const appRoutes = ['/dashboard', '/jobs', '/applicants', '/screening', '/insights', '/settings', '/screening-history'];
+  const appRoutes = ['/dashboard', '/jobs', '/applicants', '/screening', '/insights', '/settings', '/screening-history', '/notifications'];
   const isAppRoute = appRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
 
   if (!isAppRoute) return null;
