@@ -2,13 +2,50 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { authApi } from '@/lib/api/auth';
+import toast from 'react-hot-toast';
 
 export default function SignupPage() {
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        agreeToTerms: false
+    });
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.name || !formData.email || !formData.password) {
+            return toast.error('Please fill in all required fields');
+        }
+        if (!formData.agreeToTerms) {
+            return toast.error('You must agree to the Terms of Use');
+        }
+
+        setLoading(true);
+        try {
+            await authApi.register({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password
+            });
+            toast.success('Account created successfully!');
+            router.push('/auth/login');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Failed to create account');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const patternSvg = `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3Cpath d='M30 60L0 30' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3C/svg%3E`;
 
@@ -93,11 +130,13 @@ export default function SignupPage() {
                     </div>
 
                     <div className="bg-cream/5 border border-cream/10 p-10 rounded-2xl space-y-8">
-                        <form className="space-y-6">
+                        <form className="space-y-6" onSubmit={handleSubmit}>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase text-cream/40 ml-1">Full Name</label>
                                 <Input
                                     placeholder="Enter your full name"
+                                    value={formData.name}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
                                     className="bg-cream/5 border-cream/20 h-14 rounded-xl text-cream focus:border-cream/50 transition-all font-medium"
                                 />
                             </div>
@@ -107,6 +146,8 @@ export default function SignupPage() {
                                 <Input
                                     type="email"
                                     placeholder="name@company.com"
+                                    value={formData.email}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, email: e.target.value })}
                                     className="bg-cream/5 border-cream/20 h-14 rounded-xl text-cream focus:border-cream/50 transition-all font-medium"
                                 />
                             </div>
@@ -116,6 +157,8 @@ export default function SignupPage() {
                                 <Input
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
+                                    value={formData.password}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, password: e.target.value })}
                                     className="text-md bg-cream/5 border-cream/20 h-14 rounded-xl text-cream focus:border-cream/50 transition-all font-medium pr-12"
                                 />
                                 <button
@@ -129,14 +172,23 @@ export default function SignupPage() {
                             </div>
 
                             <div className="flex items-start gap-3 ml-1">
-                                <input type="checkbox" className="w-4 h-4 rounded border-cream/20 bg-dark text-cream mt-1 accent-cream" id="agree" />
+                                <input 
+                                    type="checkbox" 
+                                    className="w-4 h-4 rounded border-cream/20 bg-dark text-cream mt-1 accent-cream" 
+                                    id="agree" 
+                                    checked={formData.agreeToTerms}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
+                                />
                                 <label htmlFor="agree" className="text-xs text-cream/50 leading-relaxed cursor-pointer select-none">
                                     By signing up, I agree to the <Link href="#" className="underline hover:text-cream">Terms of Use</Link> and <Link href="#" className="underline hover:text-cream">Privacy Policy</Link>.
                                 </label>
                             </div>
 
-                            <Button className="w-full h-14 bg-cream text-dark hover:bg-white font-black text-md uppercase rounded-xl transition-all shadow-xl shadow-cream/10">
-                                Apply Now <ArrowRight className="ml-2 w-5 h-5" />
+                            <Button 
+                                type="submit" 
+                                disabled={loading}
+                                className="w-full h-14 bg-cream text-dark hover:bg-white font-black text-md uppercase rounded-xl transition-all shadow-xl shadow-cream/10 disabled:opacity-50 disabled:cursor-not-allowed">
+                                {loading ? 'Applying...' : <>Apply Now <ArrowRight className="ml-2 w-5 h-5" /></>}
                             </Button>
                         </form>
 

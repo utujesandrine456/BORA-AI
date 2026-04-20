@@ -2,15 +2,46 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
+import { authApi } from '@/lib/api/auth';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formData.email || !formData.password) {
+            return toast.error('Please enter your email and password');
+        }
+
+        setLoading(true);
+        try {
+            await authApi.login({
+                email: formData.email,
+                password: formData.password
+            });
+            toast.success('Successfully signed in!');
+            router.push('/jobs'); // Standard dashboard route
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Invalid credentials');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const patternSvg = `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3Cpath d='M30 60L0 30' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3C/svg%3E`;
 
@@ -91,7 +122,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="bg-cream/5 border border-cream/10 p-10 rounded-2xl space-y-8">
-                        <form className="space-y-6">
+                        <form className="space-y-6" onSubmit={handleSubmit}>
                             <div className="space-y-2 group">
                                 <label className="text-[10px] font-black uppercase text-cream/40 ml-1 group-focus-within:text-cream transition-colors">Email Address</label>
                                 <div className="relative">
@@ -99,6 +130,8 @@ export default function LoginPage() {
                                     <Input
                                         type="email"
                                         placeholder="name@company.com"
+                                        value={formData.email}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, email: e.target.value })}
                                         className="bg-cream/5 border-cream/20 h-14 pl-12 rounded-xl text-cream focus:border-cream/50 transition-all font-medium placeholder:text-cream/20"
                                     />
                                 </div>
@@ -114,6 +147,8 @@ export default function LoginPage() {
                                     <Input
                                         type={showPassword ? "text" : "password"}
                                         placeholder="••••••••"
+                                        value={formData.password}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, password: e.target.value })}
                                         className="bg-cream/5 border-cream/20 h-14 pl-12 pr-12 rounded-xl text-cream focus:border-cream/50 transition-all font-medium placeholder:text-cream/20"
                                     />
                                     <button
@@ -137,8 +172,11 @@ export default function LoginPage() {
                                 </label>
                             </div>
 
-                            <Button className="w-full h-14 bg-cream text-dark hover:bg-white font-black text-md uppercase rounded-xl transition-all shadow-xl shadow-cream/10 group/btn">
-                                Sign In <ArrowRight className="ml-2 w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                            <Button 
+                                type="submit" 
+                                disabled={loading}
+                                className="w-full h-14 bg-cream text-dark hover:bg-white font-black text-md uppercase rounded-xl transition-all shadow-xl shadow-cream/10 group/btn disabled:opacity-50 disabled:cursor-not-allowed">
+                                {loading ? 'Signing In...' : <>Sign In <ArrowRight className="ml-2 w-5 h-5 group-hover/btn:translate-x-1 transition-transform" /></>}
                             </Button>
                         </form>
 

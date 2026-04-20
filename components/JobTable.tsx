@@ -1,18 +1,13 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, MoreVertical, MapPin, Clock, Check } from 'lucide-react';
 import Link from 'next/link';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
-
-const INITIAL_JOBS = [
-  { id: 1, title: 'Senior Frontend Developer', type: 'Full-time', location: 'Remote', posted: '2 days ago', applicants: 45, status: 'Open', color: 'bg-cream' },
-  { id: 2, title: 'Product Designer', type: 'Contract', location: 'San Francisco', posted: '4 days ago', applicants: 32, status: 'Open', color: 'bg-cream' },
-  { id: 3, title: 'Data Scientist', type: 'Full-time', location: 'New York', posted: '1 week ago', applicants: 28, status: 'Closed', color: 'bg-cream' },
-  { id: 4, title: 'DevOps Engineer', type: 'Full-time', location: 'Remote', posted: '1 week ago', applicants: 19, status: 'Open', color: 'bg-cream' },
-  { id: 5, title: 'Backend Engineer', type: 'Full-time', location: 'Austin', posted: '2 weeks ago', applicants: 38, status: 'Open', color: 'bg-cream' },
-];
+import { jobsApi } from '@/lib/api/jobs';
+import { Job } from '@/lib/api/types';
+import toast from 'react-hot-toast';
 
 export default function JobTable() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,9 +16,37 @@ export default function JobTable() {
 
   const [statusFilter, setStatusFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
+  
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        const data = await jobsApi.getJobs();
+        // Fallback mapper for properties missing from base Job schema
+        const mappedJobs = data.map((job: Job) => ({
+          id: job._id,
+          title: job.title,
+          type: job.type || 'Full-time',
+          location: job.location || 'Remote',
+          posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Recently',
+          applicants: Math.floor(Math.random() * 50) + 10, // Mock applicants for now
+          status: job.status ? job.status.charAt(0).toUpperCase() + job.status.slice(1) : 'Open'
+        }));
+        setJobs(mappedJobs);
+      } catch (error) {
+        toast.error('Failed to load jobs');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobs();
+  }, []);
 
   const filteredJobs = useMemo(() => {
-    let result = [...INITIAL_JOBS];
+    let result = [...jobs];
 
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
@@ -49,7 +72,7 @@ export default function JobTable() {
     });
 
     return result;
-  }, [searchTerm, statusFilter, typeFilter, sortBy]);
+  }, [searchTerm, statusFilter, typeFilter, sortBy, jobs]);
 
   return (
     <div className="bg-dark border border-cream/20 overflow-hidden rounded-md">
@@ -156,13 +179,22 @@ export default function JobTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-cream/10">
-            {filteredJobs.length > 0 ? filteredJobs.map((job) => (
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="px-8 py-20 text-center bg-dark/50">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-8 h-8 border-2 border-cream/20 border-t-cream rounded-full animate-spin"></div>
+                    <p className="text-cream/40 font-bold tracking-widest text-sm">Loading jobs...</p>
+                  </div>
+                </td>
+              </tr>
+            ) : filteredJobs.length > 0 ? filteredJobs.map((job) => (
               <tr key={job.id} className="hover:bg-cream/5 transition-colors group cursor-pointer">
                 <td className="px-8 py-6">
                   <Link href={`/jobs/${job.id}`} className="flex items-center gap-4">
                     <div>
                       <div className="font-bold tracking-wider text-cream text-[15px] mb-1 group-hover:text-white transition-colors">{job.title}</div>
-                      <div className="text-[14px] font-medium text-cream/40">ID: JOB-00{job.id}</div>
+                      <div className="text-[14px] font-medium text-cream/40">ID: {String(job.id).slice(-6).toUpperCase()}</div>
                     </div>
                   </Link>
                 </td>
@@ -187,7 +219,7 @@ export default function JobTable() {
                         </div>
                       ))}
                       <div className="w-9 h-9 rounded-md border border-cream bg-dark flex items-center justify-center text-[11px] font-black text-cream">
-                        +{job.applicants - 3}
+                        +{job.applicants > 3 ? job.applicants - 3 : 0}
                       </div>
                     </div>
                   </div>

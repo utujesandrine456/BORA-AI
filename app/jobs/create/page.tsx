@@ -1,17 +1,30 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { X, MapPin } from 'lucide-react';
 import TopNav from '@/components/TopNav';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
-import Input, { Textarea, Select } from '@/components/ui/Input';
+import { Input, Textarea, Select } from '@/components/ui/Input';
+import { jobsApi } from '@/lib/api/jobs';
 import toast from 'react-hot-toast';
 
 export default function CreateJobPage() {
-  const [skills, setSkills] = React.useState<string[]>(['React', 'TypeScript', 'Tailwind CSS']);
-  const [newSkill, setNewSkill] = React.useState('');
+  const router = useRouter();
+  const [skills, setSkills] = useState<string[]>(['React', 'TypeScript', 'Tailwind CSS']);
+  const [newSkill, setNewSkill] = useState('');
+  
+  const [formData, setFormData] = useState({
+    title: '',
+    company: '',
+    type: 'full-time',
+    location: '',
+    description: '',
+    experienceYears: 0
+  });
+  const [saving, setSaving] = useState(false);
 
   const addSkill = () => {
     if (newSkill && !skills.includes(newSkill)) {
@@ -23,6 +36,33 @@ export default function CreateJobPage() {
 
   const removeSkill = (skillToRemove: string) => {
     setSkills(skills.filter(s => s !== skillToRemove));
+  };
+
+  const handlePublish = async (status: 'active' | 'draft' = 'active') => {
+    if (!formData.title || !formData.company || !formData.description) {
+      return toast.error('Title, company, and description are required');
+    }
+
+    setSaving(true);
+    try {
+      await jobsApi.createJob({
+        title: formData.title,
+        company: formData.company,
+        type: formData.type,
+        location: formData.location,
+        description: formData.description,
+        requirements: skills,
+        skills: skills,
+        experienceYears: Number(formData.experienceYears) || 0,
+        status: status
+      });
+      toast.success(`Job ${status === 'active' ? 'published' : 'saved as draft'} successfully`);
+      router.push('/jobs');
+    } catch (error: any) {
+      toast.error('Failed to create job');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -48,22 +88,49 @@ export default function CreateJobPage() {
                 </h2>
 
                 <div className="space-y-8">
-                  <Input label="Job Title" placeholder="E.g. Senior Frontend Developer" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <Input 
+                      label="Job Title" 
+                      placeholder="E.g. Senior Frontend Developer" 
+                      value={formData.title}
+                      onChange={(e: any) => setFormData({...formData, title: e.target.value})}
+                    />
+                    <Input 
+                      label="Company Name" 
+                      placeholder="E.g. TechCorp Inc." 
+                      value={formData.company}
+                      onChange={(e: any) => setFormData({...formData, company: e.target.value})}
+                    />
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <Select
                       label="Job Type"
-                      defaultValue="full-time"
+                      value={formData.type}
+                      onChange={(e: any) => setFormData({...formData, type: e.target.value})}
                       options={[
                         { value: 'full-time', label: 'Full-time' },
                         { value: 'contract', label: 'Contract' },
                         { value: 'freelance', label: 'Freelance' }
                       ]}
                     />
-                    <Input label="Location" placeholder="E.g. Remote" icon={MapPin} />
+                    <Input 
+                      label="Location" 
+                      placeholder="E.g. Remote" 
+                      icon={MapPin} 
+                      value={formData.location}
+                      onChange={(e: any) => setFormData({...formData, location: e.target.value})}
+                    />
                   </div>
 
-                  <Textarea label="Job Description" placeholder="Describe the role..." rows={6} className='text-md font-medium'/>
+                  <Textarea 
+                    label="Job Description" 
+                    placeholder="Describe the role..." 
+                    rows={6} 
+                    className='text-md font-medium'
+                    value={formData.description}
+                    onChange={(e: any) => setFormData({...formData, description: e.target.value})}
+                  />
                 </div>
               </Card>
 
@@ -110,12 +177,14 @@ export default function CreateJobPage() {
                 <div className="space-y-8">
                   <Select
                     label="Experience Level"
+                    value={String(formData.experienceYears)}
+                    onChange={(e: any) => setFormData({...formData, experienceYears: Number(e.target.value)})}
                     options={[
-                      { value: 'entry', label: 'ENTRY LEVEL (0-2 YRS)' },
-                      { value: 'junior', label: 'JUNIOR (2-4 YRS)' },
-                      { value: 'mid', label: 'MID-LEVEL (4-7 YRS)' },
-                      { value: 'senior', label: 'SENIOR (7-10 YRS)' },
-                      { value: 'lead', label: 'LEAD (10+ YRS)' }
+                      { value: '0', label: 'ENTRY LEVEL (0-2 YRS)' },
+                      { value: '2', label: 'JUNIOR (2-4 YRS)' },
+                      { value: '4', label: 'MID-LEVEL (4-7 YRS)' },
+                      { value: '7', label: 'SENIOR (7-10 YRS)' },
+                      { value: '10', label: 'LEAD (10+ YRS)' }
                     ]}
                   />
                   <Select
@@ -130,10 +199,22 @@ export default function CreateJobPage() {
               </Card>
 
               <div className="flex flex-col gap-4">
-                <Button variant="primary" size="lg" className="w-full h-14 text-md border border-cream" onClick={() => toast.success('Job published successfully')}>
-                  Publish Job
+                <Button 
+                  variant="primary" 
+                  size="lg" 
+                  disabled={saving}
+                  className="w-full h-14 text-md border border-cream disabled:opacity-50" 
+                  onClick={() => handlePublish('active')}
+                >
+                  {saving ? 'Publishing...' : 'Publish Job'}
                 </Button>
-                <Button variant="secondary" size="lg" className="w-full h-14 text-md" onClick={() => toast.success('Draft saved successfully')}>
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  disabled={saving}
+                  className="w-full h-14 text-md disabled:opacity-50" 
+                  onClick={() => handlePublish('draft')}
+                >
                   Save Draft
                 </Button>
               </div>
