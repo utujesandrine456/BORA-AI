@@ -14,7 +14,7 @@ export default function SignupPage() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -61,8 +61,8 @@ export default function SignupPage() {
                         <div className="w-10 h-10 border-2 border-cream bg-dark rounded-full flex items-center justify-center transition-transform hover:rotate-12 duration-500 overflow-hidden">
                             <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
                         </div>
-                        <span className="text-3xl font-black tracking-widest uppercase text-cream">
-                            BORA
+                        <span className="text-3xl font-bold tracking-tight text-cream transition-all duration-700">
+                            Bora
                         </span>
                     </Link>
                 </div>
@@ -74,9 +74,9 @@ export default function SignupPage() {
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="space-y-6"
                     >
-                        <h1 className="text-5xl xl:text-6xl font-black text-cream leading-tight">
-                            Unlock Your <br />
-                            <span className="text-transparent bg-clip-text bg-linear-to-r from-cream to-cream/40 italic font-serif">True Potential</span>
+                        <h1 className="text-5xl xl:text-6xl font-bold text-cream leading-tight">
+                            Unlock your <br />
+                            <span className="text-transparent bg-clip-text bg-linear-to-r from-cream to-cream/40 italic font-serif">true potential</span>
                         </h1>
                         <p className="text-xl text-cream/70 max-w-xl leading-relaxed">
                             Join the elite network of talent screened by the world&apos;s most advanced AI recruitment platform.
@@ -84,24 +84,18 @@ export default function SignupPage() {
                         </p>
                     </motion.div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                         <div className="flex items-center gap-4 text-cream/80">
-                            <div className="p-1 rounded-xl bg-cream ">
-                                <span className="w-4 h-4 bg-cream"></span>
-                            </div>
-                            <span className="text-lg font-medium italic">AI-Powered Insights</span>
+                            <div className="w-2 h-2 rounded-full bg-cream shadow-[0_0_10px_rgba(218,197,167,0.5)]"></div>
+                            <span className="text-lg font-medium">AI-powered insights</span>
                         </div>
                         <div className="flex items-center gap-4 text-cream/80">
-                            <div className="p-1 rounded-xl bg-cream ">
-                                <span className="w-4 h-4 bg-cream"></span>
-                            </div>
-                            <span className="text-lg font-medium italic">Verified Talent Network</span>
+                            <div className="w-2 h-2 rounded-full bg-cream shadow-[0_0_10px_rgba(218,197,167,0.5)]"></div>
+                            <span className="text-lg font-medium">Verified talent network</span>
                         </div>
                         <div className="flex items-center gap-4 text-cream/80">
-                            <div className="p-1 rounded-xl bg-cream ">
-                                <span className="w-4 h-4 bg-cream"></span>
-                            </div>
-                            <span className="text-lg font-medium italic">Rapid Application Process</span>
+                            <div className="w-2 h-2 rounded-full bg-cream shadow-[0_0_10px_rgba(218,197,167,0.5)]"></div>
+                            <span className="text-lg font-medium">Rapid application process</span>
                         </div>
                     </div>
                 </div>
@@ -120,19 +114,19 @@ export default function SignupPage() {
                             <div className="w-10 h-10 border border-cream bg-dark rounded-full flex items-center justify-center overflow-hidden">
                                 <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
                             </div>
-                            <span className="text-2xl font-black uppercase text-cream">BORA</span>
+                            <span className="text-2xl font-bold text-cream">Bora</span>
                         </Link>
                     </div>
 
                     <div className="mb-12">
-                        <h2 className="text-3xl font-black text-cream uppercase tracking-tight">Apply for Talent Network</h2>
+                        <h2 className="text-3xl font-bold text-cream tracking-tight">Apply for talent network</h2>
                         <p className="text-cream/50 mt-2 font-medium">Create your profile and let our AI find the best opportunities for you.</p>
                     </div>
 
                     <div className="bg-cream/5 border border-cream/10 p-10 rounded-2xl space-y-8">
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-cream/40 ml-1">Full Name</label>
+                                <label className="text-sm font-medium text-cream/60 ml-1">Full name</label>
                                 <Input
                                     placeholder="Enter your full name"
                                     value={formData.name}
@@ -142,7 +136,7 @@ export default function SignupPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-cream/40 ml-1">Email Address</label>
+                                <label className="text-sm font-medium text-cream/60 ml-1">Email address</label>
                                 <Input
                                     type="email"
                                     placeholder="name@company.com"
@@ -153,7 +147,7 @@ export default function SignupPage() {
                             </div>
 
                             <div className="space-y-2 relative">
-                                <label className="text-[10px] font-black uppercase text-cream/40 ml-1">Password</label>
+                                <label className="text-sm font-medium text-cream/60 ml-1">Password</label>
                                 <Input
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
@@ -172,10 +166,10 @@ export default function SignupPage() {
                             </div>
 
                             <div className="flex items-start gap-3 ml-1">
-                                <input 
-                                    type="checkbox" 
-                                    className="w-4 h-4 rounded border-cream/20 bg-dark text-cream mt-1 accent-cream" 
-                                    id="agree" 
+                                <input
+                                    type="checkbox"
+                                    className="w-4 h-4 rounded border-cream/20 bg-dark text-cream mt-1 accent-cream"
+                                    id="agree"
                                     checked={formData.agreeToTerms}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
                                 />
@@ -184,11 +178,11 @@ export default function SignupPage() {
                                 </label>
                             </div>
 
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 disabled={loading}
-                                className="w-full h-14 bg-cream text-dark hover:bg-white font-black text-md uppercase rounded-xl transition-all shadow-xl shadow-cream/10 disabled:opacity-50 disabled:cursor-not-allowed">
-                                {loading ? 'Applying...' : <>Apply Now <ArrowRight className="ml-2 w-5 h-5" /></>}
+                                className="w-full h-14 bg-cream text-dark hover:bg-white font-bold text-lg rounded-xl transition-all shadow-xl shadow-cream/10 disabled:opacity-50 disabled:cursor-not-allowed">
+                                {loading ? 'Applying...' : <>Apply now <ArrowRight className="ml-2 w-5 h-5" /></>}
                             </Button>
                         </form>
 
@@ -197,13 +191,13 @@ export default function SignupPage() {
                                 <div className="w-full border-t border-cream/10"></div>
                             </div>
                             <div className="relative flex justify-center text-[10px] font-black uppercase tracking-[0.2em]">
-                                <span className="bg-dark/80 px-4 text-cream/20 backdrop-blur-sm">Already have an account?</span>
+                                <span className="bg-dark/80 px-4 text-cream/40 backdrop-blur-sm">Already have an account?</span>
                             </div>
                         </div>
 
                         <Link href="/auth/login" className="block">
-                            <Button variant="secondary" className="w-full h-14 border-cream/10 text-cream/40 hover:text-cream hover:bg-cream/5 font-bold text-sm uppercase rounded-xl transition-all">
-                                Sign In
+                            <Button variant="secondary" className="w-full h-14 border-cream/10 text-cream/60 hover:text-cream hover:bg-cream/5 font-semibold text-md rounded-xl transition-all">
+                                Sign in
                             </Button>
                         </Link>
                     </div>

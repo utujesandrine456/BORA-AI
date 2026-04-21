@@ -11,10 +11,8 @@ export const authApi = {
     const response = await apiClient.post<LoginResponse>('/v1/auth/login', data);
     console.log('authApi.login response data:', response.data);
 
-    // Some backends use 'accessToken' or 'access_token' instead of 'token'
     let token = (response.data as any).token || (response.data as any).accessToken || (response.data as any).access_token;
 
-    // Safety check: if token is an object with accessToken (common in some NestJS patterns)
     if (token && typeof token === 'object' && token.accessToken) {
       token = token.accessToken;
     }
@@ -27,13 +25,20 @@ export const authApi = {
     } else {
       console.warn('No token found in login response!', response.data);
     }
-    
+
     return response.data;
   },
 
-  logout: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
+  logout: async () => {
+    try {
+      await apiClient.post('/v1/auth/logout');
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        window.location.href = '/auth/login';
+      }
     }
   }
 };
