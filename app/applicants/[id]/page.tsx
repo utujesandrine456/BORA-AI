@@ -27,6 +27,10 @@ import TopNav from '@/components/TopNav';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import { profilesApi } from '@/lib/api/profiles';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { TalentProfile } from '@/lib/types/profile';
 
 // Mock data for a candidate
 const CANDIDATE = {
@@ -110,6 +114,74 @@ const CANDIDATE = {
 
 export default function CandidateDetailsPage() {
   const params = useParams();
+  const id = params.id as string;
+  const [candidate, setCandidate] = useState<any>(CANDIDATE);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCandidate = async () => {
+      try {
+        setLoading(true);
+        const p = await profilesApi.getProfileById(id);
+        
+        setCandidate({
+          ...CANDIDATE, // Keep mock for UI structure parity
+          id: (p as any)._id,
+          name: `${p.firstName} ${p.lastName}`,
+          role: p.headline,
+          location: p.location,
+          email: p.email,
+          phone: (p as any).phone || CANDIDATE.phone, // Use backend phone if exists
+          avatar: `${p.firstName[0]}${p.lastName[0]}`,
+          status: (p as any).status || 'New',
+          score: (p as any).score || 85,
+          matchDescription: (p as any).summary || CANDIDATE.matchDescription,
+          skills: {
+            primary: p.skills.slice(0, 5).map(s => s.name),
+            secondary: p.skills.slice(5).map(s => s.name)
+          },
+          experience: p.experience.map(exp => ({
+            role: exp.role,
+            company: exp.company,
+            period: `${exp.startDate} - ${exp.endDate || 'Present'}`,
+            description: exp.description
+          })),
+          education: p.education.map(edu => ({
+            degree: edu.degree,
+            school: edu.institution,
+            year: String(edu.endYear)
+          })),
+          projects: p.projects.map(proj => ({
+            name: proj.name,
+            description: proj.description,
+            technologies: proj.technologies,
+            link: proj.link,
+            year: proj.endDate ? proj.endDate.split('-')[0] : '2024'
+          })),
+          aiInsights: {
+            strengths: (p as any).strengths || CANDIDATE.aiInsights.strengths,
+            weaknesses: (p as any).weaknesses || CANDIDATE.aiInsights.weaknesses,
+            parity: (p as any).summary || 'Profile analysis complete.'
+          },
+          languages: p.languages || CANDIDATE.languages
+        });
+      } catch (error) {
+        toast.error('Failed to load candidate details');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCandidate();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full bg-dark min-h-screen items-center justify-center space-y-4">
+        <div className="w-12 h-12 border-4 border-cream border-t-transparent rounded-full animate-spin opacity-20"></div>
+        <p className="text-cream/40 font-bold tracking-widest text-sm uppercase">Retrieving Profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-dark min-h-screen pb-20">
@@ -136,31 +208,31 @@ export default function CandidateDetailsPage() {
         <Card className="p-8 bg-linear-to-r from-cream/5 to-transparent border-cream/20">
           <div className="flex flex-col md:flex-row gap-8 items-start">
             <div className="w-24 h-24 bg-cream rounded-md flex items-center justify-center text-dark text-3xl font-black shrink-0">
-              {CANDIDATE.avatar}
+              {candidate.avatar}
             </div>
             <div className="flex-1 space-y-4">
               <div>
                 <div className="flex flex-wrap items-center gap-3 mb-1">
-                  <h1 className="text-4xl font-black text-cream tracking-tight">{CANDIDATE.name}</h1>
+                  <h1 className="text-4xl font-black text-cream tracking-tight">{candidate.name}</h1>
                   <Badge variant="success" className="rounded-md px-3 py-1 font-bold text-[10px]">
-                    {CANDIDATE.status}
+                    {candidate.status}
                   </Badge>
                 </div>
-                <p className="text-xl text-cream/70 font-medium italic serif">{CANDIDATE.role}</p>
+                <p className="text-xl text-cream/70 font-medium italic serif">{candidate.role}</p>
               </div>
 
               <div className="flex flex-wrap gap-6 text-sm text-cream/60">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-cream/40" />
-                  {CANDIDATE.location}
+                  {candidate.location}
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-cream/40" />
-                  {CANDIDATE.email}
+                  {candidate.email}
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-cream/40" />
-                  {CANDIDATE.phone}
+                  {candidate.phone}
                 </div>
               </div>
 
@@ -179,7 +251,7 @@ export default function CandidateDetailsPage() {
 
             <div className="w-full md:w-auto text-center md:text-right space-y-2">
               <div className="text-xs text-cream/40 font-bold tracking-wider">AI match score</div>
-              <div className="text-7xl font-black text-cream">{CANDIDATE.score}%</div>
+              <div className="text-7xl font-black text-cream">{candidate.score}%</div>
               <div className="text-xs font-bold text-emerald-500 flex items-center justify-center md:justify-end gap-1">
                 <Zap className="w-3 h-3" fill="currentColor" /> Premium Match
               </div>
@@ -197,7 +269,7 @@ export default function CandidateDetailsPage() {
                 Professional Experience
               </h2>
               <div className="space-y-4">
-                {CANDIDATE.experience.map((exp, i) => (
+                {candidate.experience.map((exp: any, i: number) => (
                   <div key={i} className="p-6 border border-cream/10 bg-dark/30 rounded-md space-y-3 relative group">
                     <div className="absolute left-0 top-6 w-1 h-8 bg-cream/20 group-hover:bg-cream transition-all rounded-r-full" />
                     <div className="flex items-start justify-between">
@@ -224,7 +296,7 @@ export default function CandidateDetailsPage() {
                 Education
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
-                {CANDIDATE.education.map((edu, i) => (
+                {candidate.education.map((edu: any, i: number) => (
                   <div key={i} className="p-5 border border-cream/10 bg-dark/30 rounded-md">
                     <h3 className="font-bold text-cream text-md mb-1">{edu.degree}</h3>
                     <p className="text-sm text-cream/60">{edu.school}</p>
@@ -241,7 +313,7 @@ export default function CandidateDetailsPage() {
                 Featured Projects
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
-                {CANDIDATE.projects.map((project, i) => (
+                {candidate.projects.map((project: any, i: number) => (
                   <div key={i} className="flex flex-col p-5 border border-cream/10 bg-dark/30 rounded-md group hover:border-cream/30 transition-colors">
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="font-bold text-cream text-md leading-tight group-hover:text-cream transition-colors">{project.name}</h3>
@@ -284,7 +356,7 @@ export default function CandidateDetailsPage() {
                 <div>
                   <h3 className="text-[10px] font-bold text-cream/40 tracking-widest mb-3">Primary skills</h3>
                   <div className="flex flex-wrap gap-2">
-                    {CANDIDATE.skills.primary.map(s => (
+                    {candidate.skills.primary.map((s: any) => (
                       <Badge key={s} className="bg-cream text-dark font-black text-[10px] rounded-sm py-1">
                         {s}
                       </Badge>
@@ -294,7 +366,7 @@ export default function CandidateDetailsPage() {
                 <div>
                   <h3 className="text-[10px] font-bold text-cream/40 tracking-widest mb-3">Secondary</h3>
                   <div className="flex flex-wrap gap-2">
-                    {CANDIDATE.skills.secondary.map(s => (
+                    {candidate.skills.secondary.map((s: any) => (
                       <Badge key={s} variant="secondary" className="border-cream/20 text-cream/70 font-bold text-[10px] rounded-sm py-1">
                         {s}
                       </Badge>
@@ -317,7 +389,7 @@ export default function CandidateDetailsPage() {
                     <span className="text-xs font-bold tracking-wider">Key strengths</span>
                   </div>
                   <ul className="space-y-2">
-                    {CANDIDATE.aiInsights.strengths.map((s, i) => (
+                    {candidate.aiInsights.strengths.map((s: any, i: number) => (
                       <li key={i} className="text-xs text-cream/70 flex gap-2">
                         <span className="text-emerald-500/40">•</span> {s}
                       </li>
@@ -331,7 +403,7 @@ export default function CandidateDetailsPage() {
                     <span className="text-xs font-bold tracking-wider">Growth areas</span>
                   </div>
                   <ul className="space-y-2">
-                    {CANDIDATE.aiInsights.weaknesses.map((s, i) => (
+                    {candidate.aiInsights.weaknesses.map((s: any, i: number) => (
                       <li key={i} className="text-xs text-cream/70 flex gap-2">
                         <span className="text-amber-500/40">•</span> {s}
                       </li>
@@ -341,7 +413,7 @@ export default function CandidateDetailsPage() {
 
                 <div className="mt-4 p-4 bg-dark/40 rounded border border-cream/10">
                   <div className="text-[10px] font-bold text-cream/40 tracking-wider mb-2">Requirement parity</div>
-                  <div className="text-sm italic text-cream/80 font-medium">&quot;{CANDIDATE.aiInsights.parity}&quot;</div>
+                  <div className="text-sm italic text-cream/80 font-medium">&quot;{candidate.aiInsights.parity}&quot;</div>
                 </div>
               </Card>
             </section>
@@ -373,7 +445,7 @@ export default function CandidateDetailsPage() {
                 <div className="pt-4 border-t border-cream/10">
                   <h3 className="text-[10px] font-bold text-cream/40 tracking-widest mb-3">Languages</h3>
                   <div className="flex flex-wrap gap-2">
-                    {CANDIDATE.languages.map((lang, i) => (
+                    {candidate.languages.map((lang: any, i: number) => (
                       <Badge key={i} className="bg-cream/5 text-cream border-cream/10 py-1.5 px-3">
                         <span className="font-bold text-cream">{lang.name}</span>
                         <span className="ml-2 text-[10px] opacity-40 italic font-medium text-cream">{lang.proficiency}</span>

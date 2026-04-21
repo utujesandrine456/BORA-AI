@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   LayoutDashboard,
   Briefcase,
@@ -12,7 +12,9 @@ import {
   LucideIcon
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { authApi } from '@/lib/api/auth';
+import toast from 'react-hot-toast';
 
 interface MenuItem {
   name: string;
@@ -32,9 +34,39 @@ const menuItems: MenuItem[] = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    authApi.logout();
+    toast.success('Signed out successfully');
+    router.push('/auth/login');
+  };
 
   const appRoutes = ['/dashboard', '/jobs', '/applicants', '/screening', '/insights', '/settings', '/screening-history', '/notifications'];
   const isAppRoute = appRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      const isAuthPage = pathname.startsWith('/auth/');
+      
+      console.log('Auth Guard Check:', { 
+        pathname, 
+        isAppRoute, 
+        isAuthPage, 
+        tokenExists: !!token,
+        tokenSnippet: token ? `${token.substring(0, 5)}...${token.substring(token.length - 5)}` : 'null'
+      });
+
+      if (!token && isAppRoute) {
+        console.log('Unauthorized access attempt, redirecting to login');
+        router.push('/auth/login');
+      } else if (token && isAuthPage) {
+        console.log('Authenticated user on auth page, redirecting to dashboard');
+        router.push('/jobs');
+      }
+    }
+  }, [isAppRoute, pathname, router]);
 
   if (!isAppRoute) return null;
 
@@ -76,7 +108,10 @@ export default function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-6 border-t border-cream/20">
-        <button className="flex items-center gap-3 px-5 py-3.5 rounded-md bg-cream text-dark hover:bg-cream hover:text-dark/80 transition-all w-full group cursor-pointer text-md font-semibold">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-5 py-3.5 rounded-md bg-cream text-dark hover:bg-cream hover:text-dark/80 transition-all w-full group cursor-pointer text-md font-semibold"
+        >
           <History className="w-5 h-5 group-hover:rotate-12 transition-transform opacity-70" />
           <span>Logout</span>
         </button>

@@ -151,20 +151,76 @@ const JOBS_METADATA: Record<string, Job> = {
   }
 };
 
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { jobsApi } from '@/lib/api/jobs';
+import { screeningApi } from '@/lib/api/screening';
+
 export default function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const [job, setJob] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [screening, setScreening] = useState(false);
 
-  const baseJob = JOBS_METADATA[id] || JOBS_METADATA['1'];
-  const [job] = useState(() => {
-    if (typeof window === 'undefined') return baseJob;
+  useEffect(() => {
+    const fetchJobData = async () => {
+      try {
+        setLoading(true);
+        const data = await jobsApi.getJobById(id);
+        
+        // Enrich data for UI if needed
+        const enrichedJob = {
+          ...data,
+          postedDate: data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'Recently',
+          applicantsCount: Math.floor(Math.random() * 20) + 5, // Mock count since no profiles relation yet
+          requirements: {
+            experience: 'Med-Senior',
+            education: "Bachelor's Degree",
+            location: data.location || 'Remote'
+          },
+          summary: { total: 0, screened: 0, shortlisted: 0 },
+          applicants: []
+        };
+        setJob(enrichedJob);
+      } catch (error) {
+        toast.error('Failed to load job details');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobData();
+  }, [id]);
+
+  const handleRunScreening = async () => {
+    setScreening(true);
+    const toastId = toast.loading('Initiating AI screening...');
     try {
-      const saved = localStorage.getItem(`job-${id}`);
-      if (saved) return { ...baseJob, ...JSON.parse(saved) };
-    } catch {
-      // ignore parse error
+      await screeningApi.triggerScreening(id);
+      toast.success('Screening started successfully!', { id: toastId });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to start screening', { id: toastId });
+    } finally {
+      setScreening(false);
     }
-    return baseJob;
-  });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full bg-dark min-h-screen items-center justify-center">
+        <div className="w-12 h-12 border-4 border-cream border-t-transparent rounded-full animate-spin opacity-20"></div>
+        <p className="text-cream/40 font-bold tracking-widest text-sm uppercase mt-4">Loading Job Details...</p>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="flex flex-col h-full bg-dark min-h-screen items-center justify-center">
+        <p className="text-cream/40 font-bold">Job not found</p>
+        <Link href="/jobs" className="text-cream mt-4 underline">Back to Jobs</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-dark text-cream">
@@ -251,11 +307,16 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
               <Card padding="lg">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 border-b border-cream/10 pb-6">
                   <h2 className="text-[22px] font-black text-cream uppercase tracking-widest">Applicants ({job.applicantsCount})</h2>
-                  <Link href="/screening/loading">
-                    <Button variant="primary" icon={Play} size="md" className="px-8">
-                      Run AI Screening
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="primary" 
+                    icon={Play} 
+                    size="md" 
+                    className="px-8"
+                    onClick={handleRunScreening}
+                    disabled={screening}
+                  >
+                    {screening ? 'Screening...' : 'Run AI Screening'}
+                  </Button>
                 </div>
 
                 <div className="space-y-4">

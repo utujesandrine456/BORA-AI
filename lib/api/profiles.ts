@@ -24,5 +24,10 @@ export const profilesApi = {
   bulkInsertProfiles: async (data: BulkProfileInput): Promise<{ inserted: number; errors: any[] }> => {
     const response = await apiClient.post<{ inserted: number; errors: any[] }>('/v1/profiles/bulk', data);
     return response.data;
+  },
+
+  getProfileById: async (id: string): Promise<TalentProfile> => {
+    const response = await apiClient.get<TalentProfile>(`/v1/profiles/${id}`);
+    return response.data;
   }
 };

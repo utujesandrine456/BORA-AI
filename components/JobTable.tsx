@@ -6,8 +6,10 @@ import Link from 'next/link';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
 import { jobsApi } from '@/lib/api/jobs';
+import { screeningApi } from '@/lib/api/screening';
 import { Job } from '@/lib/api/types';
 import toast from 'react-hot-toast';
+import { Zap } from 'lucide-react';
 
 export default function JobTable() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,31 +21,55 @@ export default function JobTable() {
   
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastRefreshed, setLastRefreshed] = useState('');
+
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const data = await jobsApi.getJobs();
+      console.log('JobTable: RAW FETCH:', data);
+      
+      const rawArray = Array.isArray(data) ? data : (data as any)?.data || (data as any)?.jobs || [];
+      console.log(`JobTable: Received ${rawArray.length} items from backend`);
+
+      // Fallback mapper for properties missing from base Job schema
+      const mappedJobs = rawArray.map((job: any) => ({
+        id: job._id || job.id,
+        title: job.title || 'Untitled Role',
+        type: job.type || 'Full-time',
+        location: job.location || 'Remote',
+        posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Recently',
+        createdAt: job.createdAt || new Date().toISOString(),
+        applicants: job.applicantsCount || Math.floor(Math.random() * 50) + 10,
+        status: job.status ? (job.status.charAt(0).toUpperCase() + job.status.slice(1)) : 'Open'
+      }));
+      
+      console.log('JobTable: MAPPED RESULT:', mappedJobs);
+      setJobs(mappedJobs);
+      setLastRefreshed(new Date().toLocaleTimeString());
+    } catch (error: any) {
+      console.error('JobTable: Failed to fetch jobs:', error.response?.data || error.message);
+      toast.error('Failed to load jobs');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
-        const data = await jobsApi.getJobs();
-        // Fallback mapper for properties missing from base Job schema
-        const mappedJobs = data.map((job: Job) => ({
-          id: job._id,
-          title: job.title,
-          type: job.type || 'Full-time',
-          location: job.location || 'Remote',
-          posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Recently',
-          applicants: Math.floor(Math.random() * 50) + 10, // Mock applicants for now
-          status: job.status ? job.status.charAt(0).toUpperCase() + job.status.slice(1) : 'Open'
-        }));
-        setJobs(mappedJobs);
-      } catch (error) {
-        toast.error('Failed to load jobs');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchJobs();
   }, []);
+
+  const handleScreen = async (jobId: string) => {
+    if (!jobId) return;
+    
+    const id = toast.loading('Initiating AI screening...');
+    try {
+      await screeningApi.triggerScreening(jobId);
+      toast.success('Screening started! Results will appear shortly.', { id });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to start screening', { id });
+    }
+  };
 
   const filteredJobs = useMemo(() => {
     let result = [...jobs];
@@ -68,7 +94,8 @@ export default function JobTable() {
       if (sortBy === 'applicants') {
         return b.applicants - a.applicants;
       }
-      return b.id - a.id;
+      // Latest first (sorting by createdAt string)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
     return result;
@@ -236,9 +263,20 @@ export default function JobTable() {
                   </Badge>
                 </td>
                 <td className="px-8 py-6 text-right">
-                  <button className="p-2 text-cream/40 hover:text-cream hover:bg-cream/10 rounded-md transition-all cursor-pointer">
-                    <MoreVertical className="h-5 w-5" />
-                  </button>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button 
+                      variant="primary" 
+                      size="sm" 
+                      onClick={() => handleScreen(job.id)}
+                      className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest gap-1.5 h-8 border border-cream hover:bg-cream hover:text-dark transition-all"
+                    >
+                      <Zap className="h-3 w-3" fill="currentColor" />
+                      Screen
+                    </Button>
+                    <button className="p-2 text-cream/40 hover:text-cream hover:bg-cream/10 rounded-md transition-all cursor-pointer">
+                      <MoreVertical className="h-5 w-5" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             )) : (
@@ -249,12 +287,23 @@ export default function JobTable() {
                       <Search className="w-8 h-8 text-cream/20" />
                     </div>
                     <p className="text-cream/40 font-bold tracking-widest text-sm">No jobs found matching your criteria</p>
-                    <button
-                      onClick={() => { setSearchTerm(''); setStatusFilter('All'); setTypeFilter('All'); }}
-                      className="text-cream font-black text-xs tracking-widest hover:underline"
-                    >
-                      Clear all filters
-                    </button>
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => { setSearchTerm(''); setStatusFilter('All'); setTypeFilter('All'); }}
+                        className="text-cream font-black text-xs tracking-widest hover:underline"
+                      >
+                        Clear all filters
+                      </button>
+                      <button
+                        onClick={fetchJobs}
+                        className="px-4 py-2 border border-cream/20 text-cream/60 hover:text-cream hover:bg-cream/5 rounded text-xs font-bold transition-all"
+                      >
+                        Force Refresh
+                      </button>
+                    </div>
+                    {lastRefreshed && (
+                      <p className="text-[10px] text-cream/20 font-medium">Last checked: {lastRefreshed}</p>
+                    )}
                   </div>
                 </td>
               </tr>

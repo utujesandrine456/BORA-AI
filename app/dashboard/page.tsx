@@ -60,7 +60,91 @@ const RECENT_APPLICANTS = [
   { id: 5, name: 'David K.', role: 'DevOps Lead', score: 85, status: 'New', date: '2d ago' },
 ];
 
+import { useEffect, useState } from 'react';
+import { jobsApi } from '@/lib/api/jobs';
+import { profilesApi } from '@/lib/api/profiles';
+
 export default function DashboardPage() {
+  const [stats, setStats] = useState<any[]>([]);
+  const [recentApplicants, setRecentApplicants] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const [jobs, profilesResponse] = await Promise.all([
+          jobsApi.getJobs(),
+          profilesApi.getProfiles({ limit: 5 })
+        ]);
+
+        const jobsArray = Array.isArray(jobs) ? jobs : [];
+        const activeJobs = jobsArray.filter((j: any) => j.status === 'active' || j.status === 'open' || j.status === 'Open').length;
+        const totalApplicants = profilesResponse.total;
+        
+        setStats([
+          {
+            label: 'Total Applicants',
+            value: totalApplicants.toLocaleString(),
+            change: '+12.5%',
+            trend: 'up',
+            icon: Users,
+            description: 'Database total'
+          },
+          {
+            label: 'Active Jobs',
+            value: activeJobs.toString(),
+            change: '+2',
+            trend: 'up',
+            icon: Briefcase,
+            description: 'Currently recruiting'
+          },
+          {
+            label: 'Screening Tasks',
+            value: '156', // Keep mock for specific task counts if no backend yet
+            change: '-5%',
+            trend: 'down',
+            icon: ClipboardCheck,
+            description: '45 pending review'
+          },
+          {
+            label: 'Conversion Rate',
+            value: '18.4%',
+            change: '+2.1%',
+            trend: 'up',
+            icon: TrendingUp,
+            description: 'Industry avg: 12.5%'
+          },
+        ]);
+
+        setRecentApplicants(profilesResponse.data.map((p: any) => ({
+          id: p._id,
+          name: `${p.firstName} ${p.lastName[0]}.`,
+          role: p.headline || 'Candidate',
+          score: p.score || 85,
+          status: p.status || 'New',
+          date: 'Recently'
+        })));
+
+      } catch (error) {
+        console.error('Failed to fetch dashboard data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+     return (
+      <div className="flex flex-col h-full bg-dark min-h-screen items-center justify-center">
+        <div className="w-12 h-12 border-4 border-cream border-t-transparent rounded-full animate-spin opacity-20"></div>
+        <p className="text-cream/40 font-bold tracking-widest text-sm uppercase mt-4">Loading Workspace...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-dark min-h-screen">
       <TopNav />
@@ -70,7 +154,7 @@ export default function DashboardPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-cream/10 pb-8">
           <div>
             <h1 className="text-4xl md:text-5xl font-black text-cream tracking-tight mb-2">Workspace Overview</h1>
-            <p className="text-cream/60 font-medium text-lg italic serif">Welcome back, Sarah. Here&apos;s what&apos;s happening today.</p>
+            <p className="text-cream/60 font-medium text-lg italic serif">Welcome back. Here&apos;s what&apos;s happening today.</p>
           </div>
           <div className="text-right">
             <div className="text-[11px] text-cream/40 font-bold tracking-wider mb-1">Status</div>
@@ -83,7 +167,7 @@ export default function DashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {STATS.map((stat, i) => (
+          {stats.map((stat, i) => (
             <Card key={i} className="p-6 group hover:border-cream/40 transition-all duration-300">
               <div className="flex items-start justify-between mb-4">
                 <div className="p-3 bg-cream/5 border border-cream/10 rounded-md text-cream group-hover:scale-110 transition-transform duration-500">
@@ -129,7 +213,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-cream/5">
-                  {RECENT_APPLICANTS.map((applicant) => (
+                  {recentApplicants.map((applicant) => (
                     <tr key={applicant.id} className="group hover:bg-cream/5 transition-all cursor-pointer">
                       <td className="px-6 py-4">
                         <Link href={`/applicants/${applicant.id}`} className="font-bold text-cream hover:underline underline-offset-4 decoration-cream/30">

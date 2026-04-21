@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   Filter,
@@ -18,23 +18,85 @@ import TopNav from '@/components/TopNav';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
+import { profilesApi } from '@/lib/api/profiles';
+import { uploadsApi } from '@/lib/api/uploads';
+import toast from 'react-hot-toast';
+import { TalentProfile } from '@/lib/types/profile';
 
-const INITIAL_APPLICANTS = [
-  { id: 1, name: 'Alexander Chen', role: 'Senior Backend Engineer', location: 'Toronto, CAN', score: 98, status: 'Shortlisted', date: '2h ago', avatar: 'AC' },
-  { id: 2, name: 'Sarah Thompson', role: 'Fullstack Developer', location: 'London, UK', score: 94, status: 'In review', date: '5h ago', avatar: 'ST' },
-  { id: 3, name: 'Michael Laurent', role: 'Node.js Developer', location: 'Paris, FRA', score: 87, status: 'New', date: '1d ago', avatar: 'ML' },
-  { id: 4, name: 'Emily Rodriguez', role: 'Product Designer', location: 'Madrid, ESP', score: 92, status: 'Interviewing', date: '1d ago', avatar: 'ER' },
-  { id: 5, name: 'David Kim', role: 'DevOps Lead', location: 'Seoul, KOR', score: 85, status: 'New', date: '2d ago', avatar: 'DK' },
-  { id: 6, name: 'Jessica Wu', role: 'Frontend Engineer', location: 'New York, US', score: 91, status: 'Shortlisted', date: '2d ago', avatar: 'JW' },
-  { id: 7, name: 'Marcus Berg', role: 'Systems Architect', location: 'Stockholm, SWE', score: 89, status: 'Technical test', date: '3d ago', avatar: 'MB' },
-];
+// Mock Data fallback removed
+
 
 
 export default function ApplicantsPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [selectedApplicants, setSelectedApplicants] = useState<number[]>([]);
+  const [selectedApplicants, setSelectedApplicants] = useState<string[]>([]);
+  const [applicants, setApplicants] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+
+  const fetchApplicants = async () => {
+    try {
+      setLoading(true);
+      const response = await profilesApi.getProfiles();
+      const mapped = response.data.map((p: TalentProfile, index: number) => ({
+        id: index + 1, // Frontend local ID
+        dbId: (p as any)._id,
+        name: `${p.firstName} ${p.lastName}`,
+        role: p.headline,
+        location: p.location,
+        score: Math.floor(Math.random() * 20) + 80, // Default score if not screened
+        status: p.availability?.status || 'New',
+        date: 'Recently',
+        avatar: `${p.firstName[0]}${p.lastName[0]}`
+      }));
+      setApplicants(mapped);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to fetch applicants');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApplicants();
+  }, []);
+
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const id = toast.loading('Uploading and analyzing resume...');
+    try {
+      await uploadsApi.uploadResume(file);
+      toast.success('Resume analyzed and profile created!', { id });
+      fetchApplicants(); // Refresh list
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Upload failed', { id });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const id = toast.loading('Uploading CSV talent pool...');
+    try {
+      await uploadsApi.uploadCsv(file);
+      toast.success('Talent pool imported successfully!', { id });
+      fetchApplicants(); // Refresh list
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'CSV Import failed', { id });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSelectApplicant = (id: number, checked: boolean) => {
     setSelectedApplicants(prev =>
@@ -45,13 +107,13 @@ export default function ApplicantsPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredApplicants = useMemo(() => {
-    return INITIAL_APPLICANTS.filter(applicant => {
+    return applicants.filter(applicant => {
       const matchesSearch = applicant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         applicant.role.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || applicant.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, applicants]);
 
   return (
     <div className="flex flex-col h-full bg-dark min-h-screen">
@@ -65,9 +127,46 @@ export default function ApplicantsPage() {
             <p className="text-cream/60 font-medium text-lg italic serif">Review and manage candidates across all active job openings.</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="secondary" className="gap-2">
-              <Download className="w-4 h-4" /> Export
-            </Button>
+            <div className="relative">
+              <input
+                type="file"
+                id="resume-upload"
+                className="hidden"
+                accept=".pdf,.doc,.docx"
+                onChange={handleResumeUpload}
+                disabled={uploading}
+              />
+              <Button 
+                variant="primary" 
+                className="gap-2"
+                onClick={() => document.getElementById('resume-upload')?.click()}
+                disabled={uploading}
+              >
+                <div className="flex items-center gap-2">
+                  <Zap className={`w-4 h-4 ${uploading ? 'animate-pulse' : ''}`} />
+                  {uploading ? 'Analyzing...' : 'Scan Resume'}
+                </div>
+              </Button>
+            </div>
+            <div className="relative">
+              <input
+                type="file"
+                id="csv-upload"
+                className="hidden"
+                accept=".csv,.xlsx,.xls"
+                onChange={handleCsvUpload}
+                disabled={uploading}
+              />
+              <Button 
+                variant="secondary" 
+                className="gap-2"
+                onClick={() => document.getElementById('csv-upload')?.click()}
+                disabled={uploading}
+              >
+                <Download className="w-4 h-4" />
+                {uploading ? 'Importing...' : 'Batch Import'}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -131,7 +230,12 @@ export default function ApplicantsPage() {
 
         {/* Applicants Grid/List */}
         <div className="grid grid-cols-1 gap-4">
-          {filteredApplicants.length > 0 ? filteredApplicants.map((applicant) => (
+          {loading ? (
+            <div className="py-20 text-center space-y-4">
+              <div className="w-10 h-10 border-2 border-cream border-t-transparent rounded-full animate-spin mx-auto opacity-20"></div>
+              <p className="text-cream/40 font-bold tracking-widest text-sm uppercase">Loading talent database...</p>
+            </div>
+          ) : filteredApplicants.length > 0 ? filteredApplicants.map((applicant) => (
             <div
               key={applicant.id}
               className="group relative block"
@@ -142,14 +246,14 @@ export default function ApplicantsPage() {
                   <div className="relative z-10 flex items-center justify-center pt-2 md:pt-0">
                     <input
                       type="checkbox"
-                      checked={selectedApplicants.includes(applicant.id)}
-                      onChange={(e) => handleSelectApplicant(applicant.id, e.target.checked)}
+                      checked={selectedApplicants.includes(applicant.dbId)}
+                      onChange={(e) => handleSelectApplicant(applicant.dbId, e.target.checked)}
                       className="w-5 h-5 accent-cream/80 cursor-pointer rounded border-cream/20 bg-dark/50"
                     />
                   </div>
 
                   {/* Absolute Link */}
-                  <Link href={`/applicants/${applicant.id}`} className="absolute inset-0 z-0" />
+                  <Link href={`/applicants/${applicant.dbId || applicant.id}`} className="absolute inset-0 z-0" />
 
                   <div className="relative z-0 w-14 h-14 bg-cream/10 border border-cream/20 rounded-md flex items-center justify-center text-cream font-black text-xl group-hover:bg-cream group-hover:text-dark transition-colors duration-500">
                     {applicant.avatar}

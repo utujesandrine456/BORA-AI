@@ -8,8 +8,9 @@ export const screeningApi = {
   },
 
   getResults: async (jobId: string): Promise<ScreeningResult[]> => {
-    const response = await apiClient.get<ScreeningResult[]>(`/v1/results/${jobId}`);
-    return response.data;
+    const response = await apiClient.get<any>(`/v1/results/${jobId}`);
+    // Handle both direct array and paginated { data: [] } response
+    return Array.isArray(response.data) ? response.data : (response.data?.data || []);
   },
 
   getResultVersions: async (jobId: string): Promise<{ version: number; createdAt: string }[]> => {

@@ -95,17 +95,39 @@ const JOBS_METADATA: Record<string, Job> = {
   }
 };
 
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { jobsApi } from '@/lib/api/jobs';
+
 export default function EditJobPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
 
-  // Select job data based on ID, fallback to Senior Frontend if not found
-  const initialJob = JOBS_METADATA[id] || JOBS_METADATA['1'];
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [location, setLocation] = useState('');
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const [title, setTitle] = React.useState(initialJob.title);
-  const [description, setDescription] = React.useState(initialJob.description);
-  const [location, setLocation] = React.useState(initialJob.location);
-  const [skills, setSkills] = React.useState<string[]>(initialJob.skills);
-  const [newSkill, setNewSkill] = React.useState('');
+  useEffect(() => {
+    const fetchJob = async () => {
+      try {
+        setLoading(true);
+        const data = await jobsApi.getJobById(id);
+        setTitle(data.title);
+        setDescription(data.description || '');
+        setLocation(data.location || '');
+        setSkills(data.skills || []);
+      } catch (error) {
+        toast.error('Failed to load job data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJob();
+  }, [id]);
 
   const addSkill = () => {
     if (newSkill && !skills.includes(newSkill)) {
@@ -118,20 +140,31 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
     setSkills(skills.filter(s => s !== skillToRemove));
   };
 
-  const router = useRouter();
-
-  const handleSave = () => {
-    const updatedJob = {
-      ...initialJob,
-      title,
-      description,
-      location,
-      skills,
-    };
-    localStorage.setItem(`job-${id}`, JSON.stringify(updatedJob));
-    toast.success('Job updated successfully!');
-    router.push(`/jobs/${id}`);
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      await jobsApi.updateJob(id, {
+        title,
+        description,
+        location,
+        skills,
+      });
+      toast.success('Job updated successfully!');
+      router.push(`/jobs/${id}`);
+    } catch (error) {
+      toast.error('Failed to update job');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-dark">
+        <div className="w-8 h-8 border-2 border-cream/20 border-t-cream rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-dark text-cream">

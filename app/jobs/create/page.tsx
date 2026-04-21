@@ -22,7 +22,9 @@ export default function CreateJobPage() {
     type: 'full-time',
     location: '',
     description: '',
-    experienceYears: 0
+    experienceYears: 0,
+    experienceLevel: 'mid',
+    education: 'bachelor'
   });
   const [saving, setSaving] = useState(false);
 
@@ -38,28 +40,33 @@ export default function CreateJobPage() {
     setSkills(skills.filter(s => s !== skillToRemove));
   };
 
-  const handlePublish = async (status: 'active' | 'draft' = 'active') => {
+  const handlePublish = async (status: 'open' | 'draft' = 'open') => {
     if (!formData.title || !formData.company || !formData.description) {
       return toast.error('Title, company, and description are required');
     }
 
     setSaving(true);
+    // Strip properties that the backend forbids (based on 400 error logs)
+    const payload = {
+      title: formData.title,
+      company: formData.company,
+      location: formData.location,
+      description: formData.description,
+      requirements: skills,
+      skills: skills,
+      experienceYears: Number(formData.experienceYears) || 0,
+      status: status
+    };
+
+    console.log('Publishing Job with stripped payload:', payload);
+
     try {
-      await jobsApi.createJob({
-        title: formData.title,
-        company: formData.company,
-        type: formData.type,
-        location: formData.location,
-        description: formData.description,
-        requirements: skills,
-        skills: skills,
-        experienceYears: Number(formData.experienceYears) || 0,
-        status: status
-      });
-      toast.success(`Job ${status === 'active' ? 'published' : 'saved as draft'} successfully`);
+      await jobsApi.createJob(payload);
+      toast.success(`Job ${status === 'open' ? 'published' : 'saved as draft'} successfully`);
       router.push('/jobs');
     } catch (error: any) {
-      toast.error('Failed to create job');
+      console.error('CreateJobPage Error:', error.response?.data || error.message);
+      toast.error(error.response?.data?.message || 'Failed to create job');
     } finally {
       setSaving(false);
     }
@@ -177,18 +184,20 @@ export default function CreateJobPage() {
                 <div className="space-y-8">
                   <Select
                     label="Experience Level"
-                    value={String(formData.experienceYears)}
-                    onChange={(e: any) => setFormData({...formData, experienceYears: Number(e.target.value)})}
+                    value={formData.experienceLevel}
+                    onChange={(e: any) => setFormData({...formData, experienceLevel: e.target.value})}
                     options={[
-                      { value: '0', label: 'ENTRY LEVEL (0-2 YRS)' },
-                      { value: '2', label: 'JUNIOR (2-4 YRS)' },
-                      { value: '4', label: 'MID-LEVEL (4-7 YRS)' },
-                      { value: '7', label: 'SENIOR (7-10 YRS)' },
-                      { value: '10', label: 'LEAD (10+ YRS)' }
+                      { value: 'entry', label: 'ENTRY LEVEL (0-2 YRS)' },
+                      { value: 'junior', label: 'JUNIOR (2-4 YRS)' },
+                      { value: 'mid', label: 'MID-LEVEL (4-7 YRS)' },
+                      { value: 'senior', label: 'SENIOR (7-10 YRS)' },
+                      { value: 'lead', label: 'LEAD (10+ YRS)' }
                     ]}
                   />
                   <Select
                     label="Education"
+                    value={formData.education}
+                    onChange={(e: any) => setFormData({...formData, education: e.target.value})}
                     options={[
                       { value: 'bachelor', label: "BACHELOR'S DEGREE" },
                       { value: 'master', label: "MASTER'S DEGREE" },
@@ -204,7 +213,7 @@ export default function CreateJobPage() {
                   size="lg" 
                   disabled={saving}
                   className="w-full h-14 text-md border border-cream disabled:opacity-50" 
-                  onClick={() => handlePublish('active')}
+                  onClick={() => handlePublish('open')}
                 >
                   {saving ? 'Publishing...' : 'Publish Job'}
                 </Button>

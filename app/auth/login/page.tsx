@@ -30,12 +30,14 @@ export default function LoginPage() {
 
         setLoading(true);
         try {
+            console.log('Attempting login for:', formData.email);
             await authApi.login({
                 email: formData.email,
                 password: formData.password
             });
+            console.log('Login successful, token set in localStorage. Redirecting...');
             toast.success('Successfully signed in!');
-            router.push('/jobs'); // Standard dashboard route
+            window.location.href = '/jobs'; // Force a hard refresh to ensure Sidebar and API clients pick up the token
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Invalid credentials');
         } finally {

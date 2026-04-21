@@ -21,9 +21,14 @@ const STEPS = [
   { id: 5, name: 'Finalizing AI Insights', icon: BarChart3, duration: 2000 },
 ];
 
+import { useRouter, useSearchParams } from 'next/navigation';
+
 export default function ScreeningLoadingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const jobId = searchParams.get('jobId');
 
   useEffect(() => {
     const totalDuration = STEPS.reduce((acc, step) => acc + step.duration, 0);
@@ -45,6 +50,15 @@ export default function ScreeningLoadingPage() {
       if (index < STEPS.length) {
         setCurrentStep(index);
         stepTimeout = setTimeout(() => runSteps(index + 1), STEPS[index].duration);
+      } else {
+        // Redirection logic when steps are done
+        setTimeout(() => {
+          if (jobId) {
+            router.push(`/screening/results?jobId=${jobId}`);
+          } else {
+            router.push('/screening-history');
+          }
+        }, 1000);
       }
     };
 
@@ -54,7 +68,7 @@ export default function ScreeningLoadingPage() {
       clearInterval(timer);
       clearTimeout(stepTimeout);
     };
-  }, []);
+  }, [jobId, router]);
 
   return (
     <div className="flex flex-col h-full bg-dark text-cream min-h-screen overflow-hidden">

@@ -50,7 +50,6 @@ export interface Job {
   skills?: string[];
   experienceYears?: number;
   location?: string;
-  type?: string; // Additional from UI
   status?: string;
   createdAt?: string;
   updatedAt?: string;
