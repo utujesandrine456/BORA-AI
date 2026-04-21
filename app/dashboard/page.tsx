@@ -79,9 +79,12 @@ export default function DashboardPage() {
         ]);
 
         const jobsArray = Array.isArray(jobs) ? jobs : [];
-        const activeJobs = jobsArray.filter((j: any) => j.status === 'active' || j.status === 'open' || j.status === 'Open').length;
+        const activeJobs = jobsArray.filter((j: any) => {
+          const status = String(j.status || '').toLowerCase();
+          return status === 'active' || status === 'open' || status === 'published';
+        }).length;
         const totalApplicants = profilesResponse.total;
-        
+
         setStats([
           {
             label: 'Total Applicants',
@@ -137,7 +140,7 @@ export default function DashboardPage() {
   }, []);
 
   if (loading) {
-     return (
+    return (
       <div className="flex flex-col h-full bg-dark min-h-screen items-center justify-center">
         <div className="w-12 h-12 border-4 border-cream border-t-transparent rounded-full animate-spin opacity-20"></div>
         <p className="text-cream/40 font-bold tracking-widest text-sm uppercase mt-4">Loading Workspace...</p>
@@ -154,7 +157,7 @@ export default function DashboardPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-cream/10 pb-8">
           <div>
             <h1 className="text-4xl md:text-5xl font-black text-cream tracking-tight mb-2">Workspace Overview</h1>
-            <p className="text-cream/60 font-medium text-lg italic serif">Welcome back. Here&apos;s what&apos;s happening today.</p>
+            <p className="text-cream/60 font-medium text-md italic serif">Welcome back. Here&apos;s what&apos;s happening today.</p>
           </div>
           <div className="text-right">
             <div className="text-[11px] text-cream/40 font-bold tracking-wider mb-1">Status</div>
@@ -205,10 +208,10 @@ export default function DashboardPage() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-cream/10 text-left">
-                    <th className="px-6 py-4 text-xs font-bold text-cream/40 tracking-wider">Candidate</th>
-                    <th className="px-6 py-4 text-xs font-bold text-cream/40 tracking-wider">Role</th>
-                    <th className="px-6 py-4 text-xs font-bold text-cream/40 tracking-wider text-center">Match</th>
-                    <th className="px-6 py-4 text-xs font-bold text-cream/40 tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-sm font-bold text-cream/40 tracking-wider">Candidate</th>
+                    <th className="px-6 py-4 text-sm font-bold text-cream/40 tracking-wider">Role</th>
+                    <th className="px-6 py-4 text-sm font-bold text-cream/40 tracking-wider text-center">Match</th>
+                    <th className="px-6 py-4 text-sm font-bold text-cream/40 tracking-wider">Status</th>
                     <th className="px-6 py-4"></th>
                   </tr>
                 </thead>
@@ -225,8 +228,8 @@ export default function DashboardPage() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className={`inline-flex items-center justify-center w-10 h-10 rounded-md border text-sm font-black ${applicant.score >= 90 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                            applicant.score >= 80 ? 'bg-cream/10 border-cream/20 text-cream' :
-                              'bg-amber-500/10 border-amber-500/20 text-amber-500'
+                          applicant.score >= 80 ? 'bg-cream/10 border-cream/20 text-cream' :
+                            'bg-amber-500/10 border-amber-500/20 text-amber-500'
                           }`}>
                           {applicant.score}
                         </div>
@@ -277,7 +280,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="mt-8 pt-6 border-t border-cream/10">
-                <button className="w-full py-3 bg-cream text-dark font-semibold text-sm rounded-md hover:bg-white transition-all shadow-xl">
+                <button className="cursor-pointer w-full py-3 bg-cream text-dark font-semibold text-sm rounded-md hover:bg-white transition-all shadow-xl">
                   Download Report
                 </button>
               </div>

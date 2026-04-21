@@ -46,9 +46,12 @@ export interface Job {
   title: string;
   company: string;
   description: string;
+  type?: string;
   requirements?: string[];
   skills?: string[];
   experienceYears?: number;
+  experienceLevel?: string;
+  education?: string;
   location?: string;
   status?: string;
   createdAt?: string;

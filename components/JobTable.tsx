@@ -18,7 +18,7 @@ export default function JobTable() {
 
   const [statusFilter, setStatusFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
-  
+
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefreshed, setLastRefreshed] = useState('');
@@ -28,23 +28,36 @@ export default function JobTable() {
       setLoading(true);
       const data = await jobsApi.getJobs();
       console.log('JobTable: RAW FETCH:', data);
-      
+
       const rawArray = Array.isArray(data) ? data : (data as any)?.data || (data as any)?.jobs || [];
       console.log(`JobTable: Received ${rawArray.length} items from backend`);
 
       // Fallback mapper for properties missing from base Job schema
-      const mappedJobs = rawArray.map((job: any) => ({
-        id: job._id || job.id,
-        title: job.title || 'Untitled Role',
-        type: job.type || 'Full-time',
-        location: job.location || 'Remote',
-        posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Recently',
-        createdAt: job.createdAt || new Date().toISOString(),
-        applicants: job.applicantsCount || Math.floor(Math.random() * 50) + 10,
-        status: job.status ? (job.status.charAt(0).toUpperCase() + job.status.slice(1)) : 'Open'
-      }));
-      
+      const mappedJobs = rawArray.map((job: any) => {
+        // Handle varied status strings: 'open' | 'active' | 'draft' | 'published'
+        const rawStatus = job.status || 'open';
+        let displayStatus = 'Open';
+
+        if (rawStatus.toLowerCase() === 'draft') displayStatus = 'Draft';
+        else if (rawStatus.toLowerCase() === 'closed') displayStatus = 'Closed';
+        else if (rawStatus.toLowerCase() === 'published' || rawStatus.toLowerCase() === 'active') displayStatus = 'Open';
+
+        return {
+          id: job._id || job.id,
+          title: job.title || 'Untitled Role',
+          type: job.type ? (job.type.charAt(0).toUpperCase() + job.type.slice(1)) : 'Full-time',
+          location: job.location || 'Remote',
+          posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Recently',
+          createdAt: job.createdAt || new Date().toISOString(),
+          applicants: job.applicantsCount || Math.floor(Math.random() * 50) + 10,
+          status: displayStatus
+        };
+      });
+
       console.log('JobTable: MAPPED RESULT:', mappedJobs);
+      if (mappedJobs.length === 0) {
+        console.warn('JobTable: No jobs mapped from raw response:', data);
+      }
       setJobs(mappedJobs);
       setLastRefreshed(new Date().toLocaleTimeString());
     } catch (error: any) {
@@ -61,7 +74,7 @@ export default function JobTable() {
 
   const handleScreen = async (jobId: string) => {
     if (!jobId) return;
-    
+
     const id = toast.loading('Initiating AI screening...');
     try {
       await screeningApi.triggerScreening(jobId);
@@ -92,10 +105,12 @@ export default function JobTable() {
 
     result.sort((a, b) => {
       if (sortBy === 'applicants') {
-        return b.applicants - a.applicants;
+        return (b.applicants || 0) - (a.applicants || 0);
       }
       // Latest first (sorting by createdAt string)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+      return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
     });
 
     return result;
@@ -130,7 +145,6 @@ export default function JobTable() {
               )}
             </Button>
 
-            {/* Simple Dropdown Menu */}
             {showFilters && (
               <>
                 <div
@@ -140,9 +154,9 @@ export default function JobTable() {
                 <div className="absolute right-0 mt-3 w-64 bg-dark border border-cream/30 rounded-md shadow-2xl p-6 z-40 animate-in fade-in zoom-in duration-200">
                   <div className="space-y-6">
                     <div>
-                      <label className="text-[10px] font-black text-cream/40 tracking-widest mb-3 block">Job Status</label>
+                      <label className="text-[14px] font-bold text-cream/40 mb-3 block">Job Status</label>
                       <div className="flex flex-col gap-1">
-                        {['All', 'Open', 'Closed'].map(s => (
+                        {['All', 'Open', 'Closed', 'Draft'].map(s => (
                           <button
                             key={s}
                             onClick={() => setStatusFilter(s)}
@@ -155,13 +169,13 @@ export default function JobTable() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-[10px] font-black text-cream/40 tracking-widest mb-3 block">Job Type</label>
+                      <label className="text-[14px] font-bold text-cream/40 mb-3 block">Job Type</label>
                       <div className="flex flex-col gap-1">
                         {['All', 'Full-time', 'Contract'].map(t => (
                           <button
                             key={t}
                             onClick={() => setTypeFilter(t)}
-                            className={`flex items-center justify-between px-3 py-2 rounded-md uppercase tracking-widest text-xs transition-colors ${typeFilter === t ? 'bg-cream/10 text-cream font-bold border border-cream/30' : 'text-cream/60 hover:bg-cream/5'}`}
+                            className={`flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors ${typeFilter === t ? 'bg-cream/10 text-cream font-bold border border-cream/30' : 'text-cream/60 hover:bg-cream/5'}`}
                           >
                             {t}
                             {typeFilter === t && <Check className="w-4 h-4 text-cream" />}
@@ -171,7 +185,7 @@ export default function JobTable() {
                     </div>
                     <button
                       onClick={() => { setStatusFilter('All'); setTypeFilter('All'); }}
-                      className="text-[10px] text-cream/40 hover:text-cream font-bold underline decoration-dotted underline-offset-4"
+                      className="text-[14px] text-cream/40 hover:text-cream font-medium underline decoration-dotted underline-offset-4"
                     >
                       Reset filters
                     </button>
@@ -211,7 +225,7 @@ export default function JobTable() {
                 <td colSpan={6} className="px-8 py-20 text-center bg-dark/50">
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-8 h-8 border-2 border-cream/20 border-t-cream rounded-full animate-spin"></div>
-                    <p className="text-cream/40 font-bold tracking-widest text-sm">Loading jobs...</p>
+                    <p className="text-cream/40 font-semibold text-sm">Loading jobs...</p>
                   </div>
                 </td>
               </tr>
@@ -264,9 +278,9 @@ export default function JobTable() {
                 </td>
                 <td className="px-8 py-6 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <Button 
-                      variant="primary" 
-                      size="sm" 
+                    <Button
+                      variant="primary"
+                      size="sm"
                       onClick={() => handleScreen(job.id)}
                       className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest gap-1.5 h-8 border border-cream hover:bg-cream hover:text-dark transition-all"
                     >
@@ -286,17 +300,17 @@ export default function JobTable() {
                     <div className="w-16 h-16 border border-cream/20 flex items-center justify-center">
                       <Search className="w-8 h-8 text-cream/20" />
                     </div>
-                    <p className="text-cream/40 font-bold tracking-widest text-sm">No jobs found matching your criteria</p>
+                    <p className="text-cream/40 font-medium text-md">No jobs found matching your criteria</p>
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => { setSearchTerm(''); setStatusFilter('All'); setTypeFilter('All'); }}
-                        className="text-cream font-black text-xs tracking-widest hover:underline"
+                        className="cursor-pointer text-cream font-medium text-sm hover:underline"
                       >
                         Clear all filters
                       </button>
                       <button
                         onClick={fetchJobs}
-                        className="px-4 py-2 border border-cream/20 text-cream/60 hover:text-cream hover:bg-cream/5 rounded text-xs font-bold transition-all"
+                        className="cursor-pointer px-4 py-2 border border-cream/20 text-cream/60 hover:text-cream hover:bg-cream/5 rounded text-sm font-semibold transition-all"
                       >
                         Force Refresh
                       </button>

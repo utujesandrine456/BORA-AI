@@ -78,8 +78,7 @@ export default function Sidebar() {
           <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-cream tracking-widest uppercase leading-none">BORA</h1>
-          <p className="text-[16px] text-cream/60 font-medium mt-1">Dashboard</p>
+          <h1 className="text-2xl font-black text-cream uppercase leading-none">BORA</h1>
         </div>
       </div>
 
