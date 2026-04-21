@@ -25,7 +25,8 @@ export default function CandidateResults() {
     const searchParams = useSearchParams();
     const jobId = searchParams.get('jobId');
     const [loading, setLoading] = useState(true);
-    const [analysis, setAnalysis] = useState<any>(null);
+    interface JobAnalysis { role: string; company: string; matchScore: number; lastScreened: string; recommendation: string; strengths: string[]; gaps: string[]; aiReasoning: string; }
+    const [analysis, setAnalysis] = useState<JobAnalysis | null>(null);
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -49,7 +50,6 @@ export default function CandidateResults() {
                     return;
                 }
 
-                }
                 const myResult = results.find((r: ScreeningResult) => r.profileId === profile._id);
 
                 if (myResult) {
@@ -59,11 +59,11 @@ export default function CandidateResults() {
                         matchScore: myResult.score,
                         lastScreened: new Date(myResult.createdAt).toLocaleDateString(),
                         recommendation: myResult.score >= 90 ? 'Strong Fit' : (myResult.score >= 70 ? 'Good Fit' : 'Requires Review'),
-                        strengths: (myResult as any).strengths || [
+                        strengths: [
                             "Strong alignment with " + job.title + " requirements",
                             "Solid technical foundation in core technologies"
                         ],
-                        gaps: (myResult as any).weaknesses || [
+                        gaps: [
                             "Deeper project documentation could benefit evaluation",
                             "Specific architectural patterns require further validation"
                         ],

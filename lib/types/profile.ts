@@ -79,4 +79,7 @@ export interface TalentProfile {
     projects: Project[];
     availability: Availability;
     socialLinks?: SocialLinks;
+    // Optional fields returned by the API after screening
+    matchScore?: number;
+    summary?: string;
 }

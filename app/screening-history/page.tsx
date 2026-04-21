@@ -30,7 +30,8 @@ import toast from 'react-hot-toast';
 
 export default function ScreeningHistoryPage() {
     const [searchQuery, setSearchQuery] = useState('');
-    const [history, setHistory] = useState<any[]>([]);
+    interface HistoryEntry { id: string | undefined; role: string; date: string | undefined; candidates: number; avgScore: number; topMatch: string; status: string; matchQuality: string; }
+    const [history, setHistory] = useState<HistoryEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

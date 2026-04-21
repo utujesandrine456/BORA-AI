@@ -13,51 +13,27 @@ import TopNav from '@/components/TopNav';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
-
-// Types for Job Data
-interface Applicant {
-  name: string;
-  skills: string;
-  experience: string;
-  match: number;
-}
-
-interface JobRequirements {
-  experience: string;
-  education: string;
-  location: string;
-}
-
-interface JobSummary {
-  total: number;
-  screened: number;
-  shortlisted: number;
-}
-
-interface Job {
-  title: string;
-  location: string;
-  postedDate: string;
-  applicantsCount: number;
-  description: string;
-  skills: string[];
-  requirements: JobRequirements;
-  summary: JobSummary;
-  applicants: Applicant[];
-}
-
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { jobsApi } from '@/lib/api/jobs';
-import { screeningApi } from '@/lib/api/screening';
 import { profilesApi } from '@/lib/api/profiles';
+import { Job as ApiJob } from '@/lib/api/types';
 import { TalentProfile } from '@/lib/types/profile';
+
+
+interface EnrichedJob extends Omit<ApiJob, 'requirements'> {
+  postedDate: string;
+  applicantsCount: number;
+  requirements: { experience: string; education: string; location: string };
+  summary: { total: number; screened: number; shortlisted: number };
+  applicants: { name: string; skills: string; experience: string; match: number }[];
+}
 
 export default function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const [job, setJob] = useState<any>(null);
+  const [job, setJob] = useState<EnrichedJob | null>(null);
   const [loading, setLoading] = useState(true);
   const [screening, setScreening] = useState(false);
 
@@ -108,21 +84,6 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
     fetchJobData();
   }, [id]);
 
-  const handleRunScreening = async () => {
-    setScreening(true);
-    const toastId = toast.loading('Initiating AI screening...');
-    try {
-      await screeningApi.triggerScreening(id);
-      toast.success('Screening started successfully!', { id: toastId });
-      // Redirect to results after a short delay or immediately
-      router.push(`/screening/results?jobId=${id}`);
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to start screening';
-      toast.error(msg, { id: toastId });
-    } finally {
-      setScreening(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -215,7 +176,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                   Technical requirements
                 </h2>
                 <div className="flex flex-wrap gap-3">
-                  {job.skills.map((skill: string) => (
+                  {(job.skills || []).map((skill: string) => (
                     <Badge key={skill} variant="secondary" className="px-6 py-2.5 text-xs">
                       {skill}
                     </Badge>
@@ -250,7 +211,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                 </div>
 
                 <div className="space-y-4">
-                  {job.applicants.map((applicant: any) => (
+                  {job.applicants.map((applicant) => (
                     <div key={applicant.name} className="p-8 border border-cream/20 bg-dark rounded-md hover:border-cream hover:bg-cream/5 transition-all group cursor-pointer relative overflow-hidden">
                       <div className="absolute top-0 right-0 w-32 h-32 bg-cream/5 rounded-md -mr-16 -mt-16 group-hover:bg-cream/10 transition-colors"></div>
                       <div className="flex items-start justify-between relative z-10">

@@ -43,17 +43,22 @@ export interface User {
 
 export interface Job {
   _id?: string;
+  id?: string;
   title: string;
   company: string;
   description: string;
   type?: string;
   requirements?: string[];
   skills?: string[];
+  tags?: string[];
   experienceYears?: number;
   experienceLevel?: string;
   education?: string;
   location?: string;
   status?: string;
+  posted?: string;
+  salary?: string;
+  match?: number;
   createdAt?: string;
   updatedAt?: string;
 }

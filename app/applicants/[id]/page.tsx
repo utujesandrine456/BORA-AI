@@ -33,7 +33,17 @@ import { TalentProfile } from '@/lib/types/profile';
 export default function CandidateDetailsPage() {
   const params = useParams();
   const id = params.id as string;
-  const [candidate, setCandidate] = useState<any>(null);
+  interface CandidateDetail {
+    id: string | undefined; name: string; role: string; location: string; email: string; phone: string; avatar: string;
+    status: string; score: number; matchDescription: string;
+    skills: { primary: string[]; secondary: string[] };
+    experience: { role: string; company: string; period: string; description: string }[];
+    education: { degree: string; school: string; year: string }[];
+    projects: { name: string; description: string; technologies: string[]; link?: string; year: string }[];
+    aiInsights: { strengths: string[]; weaknesses: string[]; parity: string };
+    certifications: string[]; languages: { name: string; proficiency: string }[];
+  }
+  const [candidate, setCandidate] = useState<CandidateDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

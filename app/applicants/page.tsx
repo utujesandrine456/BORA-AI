@@ -25,16 +25,14 @@ import { uploadsApi } from '@/lib/api/uploads';
 import toast from 'react-hot-toast';
 import { TalentProfile } from '@/lib/types/profile';
 
-// Mock Data fallback removed
-
-
 
 export default function ApplicantsPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedApplicants, setSelectedApplicants] = useState<(string | number)[]>([]);
-  const [applicants, setApplicants] = useState<any[]>([]);
+  interface Applicant { id: number; dbId: string | undefined; name: string; role: string | undefined; location: string | undefined; score: number; status: string; date: string; avatar: string; }
+  const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
@@ -92,8 +90,8 @@ export default function ApplicantsPage() {
     const id = toast.loading('Uploading CSV talent pool...');
     try {
       await uploadsApi.uploadCsv(file);
-      toast.success('Talent pool imported successfully!', { id });
-      fetchApplicants(); // Refresh list
+      toast.success('Applicants List imported successfully!', { id });
+      fetchApplicants();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'CSV Import failed';
       toast.error(message, { id });
@@ -113,7 +111,7 @@ export default function ApplicantsPage() {
   const filteredApplicants = useMemo(() => {
     return applicants.filter(applicant => {
       const matchesSearch = applicant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        applicant.role.toLowerCase().includes(searchTerm.toLowerCase());
+        (applicant.role?.toLowerCase() || '').includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || applicant.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -242,7 +240,6 @@ export default function ApplicantsPage() {
           </div>
         </motion.div>
 
-        {/* Applicants Grid/List */}
         <motion.div
           variants={staggerContainer}
           initial="initial"
@@ -261,13 +258,11 @@ export default function ApplicantsPage() {
               className="group relative block"
             >
               <Card variant="glass" className="p-8 transition-all duration-500 overflow-hidden relative border-cream/10 group-hover:border-cream/40">
-                {/* Background Decor */}
                 <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
                   <Sparkles className="w-32 h-32 -mr-16 -mt-16" />
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                  {/* Checkbox Wrapper */}
                   <div className="flex items-center justify-center">
                     <input
                       type="checkbox"
@@ -277,7 +272,6 @@ export default function ApplicantsPage() {
                     />
                   </div>
 
-                  {/* Absolute Link */}
                   <Link href={`/applicants/${applicant.dbId || applicant.id}`} className="absolute inset-0 z-0" />
 
                   <div className="w-16 h-16 bg-cream/10 border border-cream/20 rounded-lg flex items-center justify-center text-cream font-black text-2xl group-hover:bg-cream group-hover:text-dark transition-all duration-500 shadow-xl shadow-black/20">
