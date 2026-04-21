@@ -5,20 +5,19 @@ import { Search, Bell } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TopNav() {
-  const [user, setUser] = useState<{ name: string; role: string; photo?: string } | null>(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState<{ name: string; role: string; photo?: string } | null>(() => {
     if (typeof window !== 'undefined') {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         try {
-          setUser(JSON.parse(storedUser));
-        } catch (e) {
-          console.error('Failed to parse user from localStorage');
+          return JSON.parse(storedUser);
+        } catch (_e) {
+          // ignore
         }
       }
     }
-  }, []);
+    return null;
+  });
 
   const getInitials = (name: string) => {
     return name
@@ -35,25 +34,25 @@ export default function TopNav() {
 
   return (
     <>
-      <header className="fixed top-5 left-[300px] right-6 h-20 bg-dark/90 backdrop-blur-xl border border-cream/10 rounded-md flex items-center justify-between px-10 z-40 shadow-2xl">
+      <header className="fixed top-6 left-[300px] right-8 h-20 bg-dark/40 backdrop-blur-3xl border border-cream/10 rounded-md flex items-center justify-between px-10 z-40 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
         <div className="flex-1 max-w-2xl relative">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-cream/60" />
+          <div className="absolute inset-y-0 left-4 gap-4 flex items-center pointer-events-none">
+            <Search className="h-3 w-3 text-cream/30" />
           </div>
           <input
             type="text"
-            placeholder="Search Jobs, Candidates..."
-            className="w-full pl-12 pr-4 py-3 bg-dark border border-cream/30 rounded-md focus:outline-none focus:ring-1 focus:ring-cream focus:border-cream transition-all text-cream font-medium text-sm placeholder:text-cream/40 cursor-pointer"
+            placeholder="Search jobs, candidates, or insights..."
+            className="w-full pl-8 pr-4 py-3 bg-white/5 border border-cream/10 rounded-md focus:outline-none focus:ring-1 focus:ring-cream/40 focus:border-cream/40 transition-all text-cream font-medium text-sm placeholder:text-cream/20 cursor-pointer backdrop-blur-md"
           />
         </div>
 
-        <div className="flex items-center gap-6 relative z-10">
-          <Link href="/notifications" className="relative p-3 text-cream/60 hover:text-cream hover:bg-cream/10 rounded-md transition-all border border-transparent cursor-pointer block">
+        <div className="flex items-center gap-8 relative z-10">
+          <Link href="/notifications" className="relative p-3 text-cream/40 hover:text-cream hover:bg-cream/5 rounded-md transition-all border cursor-pointer block border-cream/5">
             <Bell className="h-5 w-5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-600 rounded-full"></span>
+            <span className="absolute top-3 right-3 w-2 h-2 bg-emerald-500 rounded-full border-2 border-dark shadow-lg"></span>
           </Link>
 
-          <div className="flex items-center gap-5 pl-6 border-l border-cream/20">
+          <div className="flex items-center gap-6 pl-8 border-l border-cream/10">
             <div className="flex flex-col items-end">
               <span className="text-sm font-bold text-cream underline decoration-cream/20 underline-offset-4">{displayName}</span>
               <span className="text-xs text-cream/60 font-medium uppercase tracking-widest">{displayRole}</span>
@@ -72,7 +71,7 @@ export default function TopNav() {
           </div>
         </div>
       </header>
-      <div className="h-26" />
+      <div className="h-28" />
     </>
   );
 }

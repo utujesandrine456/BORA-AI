@@ -161,7 +161,7 @@ function ScreeningLoadingContent() {
 
           <div className="text-center mb-12 space-y-4">
             <motion.h1
-              className="text-4xl md:text-5xl font-black text-cream tracking-tighter uppercase leading-none"
+              className="text-4xl md:text-5xl font-black text-cream leading-none"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >

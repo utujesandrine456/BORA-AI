@@ -12,89 +12,6 @@ import Input, { Textarea, Select } from '@/components/ui/Input';
 import toast from 'react-hot-toast';
 import { jobsApi } from '@/lib/api/jobs';
 
-// Types for Job Data
-interface JobRequirements {
-  experience: string;
-  education: string;
-  location: string;
-}
-
-interface Job {
-  title: string;
-  location: string;
-  postedDate: string;
-  applicantsCount: number;
-  description: string;
-  skills: string[];
-  requirements: JobRequirements;
-}
-
-// Re-using mock data
-const JOBS_METADATA: Record<string, Job> = {
-  '1': {
-    title: 'Senior Frontend Developer',
-    location: 'Remote',
-    postedDate: '2026-04-05',
-    applicantsCount: 45,
-    description: 'We are looking for an experienced Frontend Developer to join our team. You will be responsible for building responsive web applications using modern frameworks and best practices.',
-    skills: ['React', 'TypeScript', 'Tailwind CSS', 'Next.js', 'GraphQL'],
-    requirements: { experience: 'Senior (5+ years)', education: "Bachelor's Degree", location: 'Remote' },
-  },
-  '2': {
-    title: 'Product Designer',
-    location: 'San Francisco',
-    postedDate: '2026-04-03',
-    applicantsCount: 32,
-    description: 'Join our design team to create beautiful and intuitive user experiences. You will work closely with product managers and engineers to bring features to life from ideation to launch.',
-    skills: ['Figma', 'UI/UX Design', 'Design Systems', 'Prototyping', 'User Research'],
-    requirements: { experience: 'Mid-Senior (4+ years)', education: "Bachelor's in Design/HCI", location: 'San Francisco (Hybrid)' },
-  },
-  '3': {
-    title: 'Data Scientist',
-    location: 'New York',
-    postedDate: '2026-04-01',
-    applicantsCount: 28,
-    description: 'We are seeking a Data Scientist to help us extract value from our data. You will be responsible for building machine learning models and providing actionable insights to the business.',
-    skills: ['Python', 'R', 'SQL', 'Machine Learning', 'TensorFlow', 'Statistics'],
-    requirements: { experience: 'Mid-Level (3+ years)', education: "Master's or PhD in STEM", location: 'New York (On-site)' },
-  },
-  '4': {
-    title: 'DevOps Engineer',
-    location: 'Remote',
-    postedDate: '2026-03-28',
-    applicantsCount: 19,
-    description: 'Help us build and scale our infrastructure. You will be responsible for automating our deployments, monitoring system health, and ensuring high availability.',
-    skills: ['AWS', 'Docker', 'Kubernetes', 'CI/CD', 'Terraform', 'Linux'],
-    requirements: { experience: 'Senior (6+ years)', education: "BS in Computer Science", location: 'Remote' },
-  },
-  '5': {
-    title: 'Backend Engineer',
-    location: 'Austin',
-    postedDate: '2026-03-25',
-    applicantsCount: 38,
-    description: 'Design and implement robust server-side logic and database schemas. You will work on high-performance APIs and ensure the scalability of our backend systems.',
-    skills: ['Node.js', 'Go', 'PostgreSQL', 'Redis', 'Microservices', 'gRPC'],
-    requirements: { experience: 'Mid-Senior (5+ years)', education: "BS/MS in CS", location: 'Austin (Remote Friendly)' },
-  },
-  '6': {
-    title: 'Mobile Developer',
-    location: 'Remote',
-    postedDate: '2026-03-22',
-    applicantsCount: 24,
-    description: 'Build premium mobile experiences for iOS and Android. You will be responsible for developing high-impact features and ensuring a smooth mobile user experience.',
-    skills: ['React Native', 'Swift', 'Kotlin', 'Firebase', 'Mobile CI/CD'],
-    requirements: { experience: 'Mid-Level (3+ years)', education: "BS in CS", location: 'Remote' },
-  },
-  '7': {
-    title: 'QA Engineer',
-    location: 'Boston',
-    postedDate: '2026-03-18',
-    applicantsCount: 15,
-    description: 'Ensure the quality and reliability of our products. You will build automated test suites, perform manual testing, and work closely with developers to fix bugs.',
-    skills: ['Selenium', 'Jest', 'Cypress', 'Load Testing', 'API Testing', 'Bug Reporting'],
-    requirements: { experience: 'Junior-Mid (2+ years)', education: "BS in CS or similar", location: 'Boston (On-site)' },
-  }
-};
 
 
 
@@ -107,6 +24,7 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
   const [location, setLocation] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState('');
+  const [type, setType] = useState('full-time');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -119,7 +37,8 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
         setDescription(data.description || '');
         setLocation(data.location || '');
         setSkills(data.skills || []);
-      } catch (error) {
+        setType(data.type || 'full-time');
+      } catch (_error) {
         toast.error('Failed to load job data');
       } finally {
         setLoading(false);
@@ -147,10 +66,11 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
         description,
         location,
         skills,
+        type,
       });
       toast.success('Job updated successfully!');
-      router.push(`/jobs/${id}`);
-    } catch (error) {
+      router.push('/jobs');
+    } catch (_error) {
       toast.error('Failed to update job');
     } finally {
       setSaving(false);
@@ -178,7 +98,7 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div>
-              <h1 className="text-5xl md:text-6xl font-black text-cream tracking-widest mb-2">Edit Job</h1>
+              <h1 className="text-5xl md:text-6xl font-black text-cream mb-2">Edit Job</h1>
               <p className="text-cream/60 font-normal text-lg">Update role requirements and candidate criteria</p>
             </div>
           </div>
@@ -203,7 +123,8 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <Select
                       label="Job Type"
-                      defaultValue="full-time"
+                      value={type}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setType(e.target.value)}
                       options={[
                         { value: 'full-time', label: 'Full-time' },
                         { value: 'contract', label: 'Contract' },
@@ -248,7 +169,7 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-2">
-                    {skills.map(skill => (
+                    {skills.map((skill: string) => (
                       <Badge key={skill} className="px-5 py-2 flex items-center gap-2 group">
                         {skill}
                         <X
@@ -291,11 +212,11 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
               </Card>
 
               <div className="flex flex-col gap-4">
-                <Button variant="primary" size="lg" className="w-full shadow-xl shadow-[#0c2d48]/20 h-14 text-lg" onClick={handleSave}>
+                <Button variant="primary" size="md" className="w-full shadow-xl shadow-[#0c2d48]/20 h-14 text-lg" onClick={handleSave}>
                   Save Changes
                 </Button>
                 <Link href={`/jobs/${id}`} className="w-full">
-                  <Button variant="secondary" size="lg" className="w-full h-14 text-lg">
+                  <Button variant="secondary" size="md" className="w-full h-14 text-lg">
                     Cancel
                   </Button>
                 </Link>

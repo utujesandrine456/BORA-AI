@@ -41,7 +41,7 @@ export default function NotFound() {
                 <div className="w-10 h-10 border border-cream/20 rounded-full flex items-center justify-center overflow-hidden grayscale opacity-40">
                     <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
                 </div>
-                <span className="text-xl font-black tracking-widest uppercase text-cream/60">BORA</span>
+                <span className="text-xl font-black text-cream/60">Bora</span>
             </motion.div>
 
             {/* Main content */}
@@ -58,12 +58,12 @@ export default function NotFound() {
                     <motion.span
                         animate={{ x: [0, -3, 3, -2, 0], opacity: [1, 0.8, 0.9, 0.7, 1] }}
                         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2 }}
-                        className="absolute inset-0 text-[10rem] md:text-[14rem] font-black leading-none tracking-tighter text-cream/10 blur-sm pointer-events-none"
+                        className="absolute inset-0 text-[10rem] md:text-[14rem] font-black leading-none text-cream/10 blur-sm pointer-events-none"
                         aria-hidden="true"
                     >
                         404
                     </motion.span>
-                    <span className="relative text-[10rem] md:text-[14rem] font-black leading-none tracking-tighter text-cream">
+                    <span className="relative text-[10rem] md:text-[14rem] font-black leading-none text-cream">
                         404
                     </span>
                 </motion.div>
@@ -81,9 +81,9 @@ export default function NotFound() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.4 }}
-                    className="text-3xl md:text-5xl font-black uppercase tracking-tight text-cream mb-4"
+                    className="text-3xl md:text-5xl font-black text-cream mb-4"
                 >
-                    Page Not Found
+                    Page not found
                 </motion.h1>
 
                 {/* Sub text */}

@@ -1,13 +1,32 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform, AnimatePresence, Variants } from 'framer-motion';
 import { ArrowRight, Zap, ShieldCheck, BrainCircuit, Send, ChevronDown, ChevronUp, UserCheck, Star } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 import Header from '@/components/Header';
+import { profilesApi } from '@/lib/api/profiles';
 
 export default function LandingPage() {
+  const [liveStats, setLiveStats] = useState({ totalResumes: '1,280', topMatches: '42' });
+
+  useEffect(() => {
+    const fetchLiveStats = async () => {
+      try {
+        const profilesRes = await profilesApi.getProfiles({ limit: 1 });
+        if (profilesRes && profilesRes.total !== undefined) {
+          setLiveStats({
+            totalResumes: profilesRes.total.toLocaleString(),
+            topMatches: Math.max(12, Math.floor(profilesRes.total * 0.08)).toString()
+          });
+        }
+      } catch (_e) {
+        console.log('Public landing page: using nominal defaults');
+      }
+    };
+    fetchLiveStats();
+  }, []);
   const scrollYProgress = useScroll().scrollYProgress;
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
 
@@ -43,9 +62,9 @@ export default function LandingPage() {
               variants={staggerContainer}
               className="flex flex-col items-start"
             >
-              <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl lg:text-[4rem] font-black tracking-tight leading-none mb-8 text-cream uppercase">
-                Where Talent <br />
-                <span className="italic font-serif opacity-90 tracking-normal">Meets True Value.</span>
+              <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl lg:text-[4rem] font-black leading-none mb-8 text-cream">
+                Where talent <br />
+                <span className="italic font-serif opacity-90">meets true value.</span>
               </motion.h1>
 
               <motion.p variants={fadeUp} className="text-lg md:text-xl text-cream/70 max-w-xl mb-12 leading-relaxed font-medium">
@@ -53,11 +72,8 @@ export default function LandingPage() {
               </motion.p>
 
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-5">
-                <Link href="/jobs" className="bg-cream text-dark px-10 py-4 rounded-md text-md font-semibold hover:bg-white transition-all duration-300 flex items-center justify-center gap-3 shadow-xl">
-                  Start Screening <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link href="#workflow" className="border border-cream text-cream px-10 py-4 rounded-md text-md font-semibold hover:bg-cream/10 transition-all duration-300 flex items-center justify-center shadow-lg">
-                  Explore Workflow
+                <Link href="/auth/signup" className="bg-cream text-dark px-6 py-4 rounded-md text-md font-semibold hover:bg-white transition-all duration-300 flex items-center justify-center gap-3">
+                  Get Started <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </motion.div>
             </motion.div>
@@ -102,12 +118,12 @@ export default function LandingPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 border border-cream/10 bg-cream/5 rounded-md">
-                      <div className="text-[10px] text-cream/40 uppercase font-bold mb-1">Total Resumes</div>
-                      <div className="text-2xl font-black text-cream">1,280</div>
+                      <div className="text-[10px] text-cream/40 font-bold mb-1">Total resumes</div>
+                      <div className="text-2xl font-black text-cream">{liveStats.totalResumes}</div>
                     </div>
                     <div className="p-4 border border-cream/10 bg-cream/5 rounded-md">
-                      <div className="text-[10px] text-cream/40 uppercase font-bold mb-1">Top Matches</div>
-                      <div className="text-2xl font-black text-cream">42</div>
+                      <div className="text-[10px] text-cream/40 font-bold mb-1">Top matches</div>
+                      <div className="text-2xl font-black text-cream">{liveStats.topMatches}</div>
                     </div>
                   </div>
 
@@ -124,7 +140,7 @@ export default function LandingPage() {
                       </div>
                       <div className="text-right">
                         <div className="text-xl font-black text-cream">98%</div>
-                        <div className="text-[9px] uppercase font-bold text-emerald-500">Perfect</div>
+                        <div className="text-[9px] font-bold text-emerald-500">Perfect</div>
                       </div>
                     </div>
                   </div>
@@ -143,7 +159,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <div className="text-xs font-bold text-cream">High Parity</div>
-                    <div className="text-[9px] text-cream/40 uppercase">AI Verified</div>
+                    <div className="text-[9px] text-cream/40">AI verified</div>
                   </div>
                 </div>
               </motion.div>
@@ -153,7 +169,7 @@ export default function LandingPage() {
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                 className="absolute -bottom-10 -left-10 p-5 border border-cream/30 bg-dark rounded-md shadow-2xl backdrop-blur-md z-20 max-w-[180px]"
               >
-                <div className="text-[10px] font-bold text-cream/40 uppercase mb-2">Efficiency Boost</div>
+                <div className="text-[10px] font-bold text-cream/40 mb-2">Efficiency boost</div>
                 <div className="text-3xl font-black text-cream mb-1">12.5x</div>
                 <div className="text-[14px] text-emerald-500 font-bold">Faster Hiring</div>
               </motion.div>
@@ -190,8 +206,8 @@ export default function LandingPage() {
               className="mb-24 flex flex-col md:flex-row md:items-end justify-between border-b border-cream/20 pb-12 gap-6"
             >
               <div>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-cream/60 mb-4">Modern Recruitment</h2>
-                <h3 className="text-4xl md:text-6xl font-black text-cream uppercase leading-none">Built For<br />Precision.</h3>
+                <h2 className="text-xs font-bold text-cream/60 mb-4">Modern recruitment</h2>
+                <h3 className="text-4xl md:text-6xl font-black text-cream leading-none">Built for<br />precision.</h3>
               </div>
               <p className="text-cream/70 max-w-sm text-lg md:text-right">
                 BORA automates the heavy lifting of high-volume applicant screening so you can focus on finding the best.
@@ -214,7 +230,7 @@ export default function LandingPage() {
                   <div className="mb-10 w-14 h-14 border border-cream/30 rounded-md flex items-center justify-center text-cream group-hover:scale-110 transition-transform duration-500">
                     <feature.icon className="w-6 h-6" strokeWidth={1.5} />
                   </div>
-                  <h4 className="text-xl font-bold uppercase text-cream mb-4 tracking-wider">{feature.title}</h4>
+                  <h4 className="text-xl font-bold text-cream mb-4">{feature.title}</h4>
                   <p className="text-cream/60 text-base leading-relaxed">{feature.desc}</p>
                 </motion.div>
               ))}
@@ -232,7 +248,7 @@ export default function LandingPage() {
               variants={fadeUp}
               className="text-center mb-20"
             >
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-cream">The Pipeline</h2>
+              <h2 className="text-4xl md:text-6xl font-black text-cream">The pipeline</h2>
             </motion.div>
 
             <div className="grid lg:grid-cols-2 gap-20 items-center">
@@ -254,7 +270,7 @@ export default function LandingPage() {
                       {item.step}
                     </div>
                     <div className="pt-2">
-                      <h4 className="text-xl font-bold uppercase tracking-wider text-cream mb-2">{item.title}</h4>
+                      <h4 className="text-xl font-bold text-cream mb-2">{item.title}</h4>
                       <p className="text-cream/60">{item.desc}</p>
                     </div>
                   </motion.div>
@@ -272,7 +288,7 @@ export default function LandingPage() {
                   <div className="absolute -top-3 -left-3 w-6 h-6 border-t-2 border-l-2 border-cream rounded-tl-sm"></div>
                   <div className="absolute -bottom-3 -right-3 w-6 h-6 border-b-2 border-r-2 border-cream rounded-br-sm"></div>
 
-                  <h5 className="uppercase text-xs font-bold text-cream/70 tracking-widest mb-6 pb-4 border-b border-cream/20">Output Terminal</h5>
+                  <h5 className="text-xs font-bold text-cream/70 mb-6 pb-4 border-b border-cream/20">Output terminal</h5>
 
                   <div className="space-y-3">
                     {[
@@ -287,7 +303,7 @@ export default function LandingPage() {
                         </div>
                         <div className="text-right">
                           <div className="text-2xl font-black text-cream">{row.score}%</div>
-                          <div className="text-[10px] uppercase font-bold text-cream/50 tracking-widest">Match</div>
+                          <div className="text-[10px] font-bold text-cream/50">Match</div>
                         </div>
                       </div>
                     ))}
@@ -308,7 +324,7 @@ export default function LandingPage() {
               variants={fadeUp}
               className="text-center mb-16"
             >
-              <h2 className="text-4xl font-black uppercase text-cream tracking-tight mb-4">FAQ</h2>
+              <h2 className="text-4xl font-black text-cream mb-4">FAQ</h2>
               <p className="text-cream/60">Frequently asked questions about the BORA platform.</p>
             </motion.div>
 
@@ -340,8 +356,8 @@ export default function LandingPage() {
             variants={fadeUp}
             className="max-w-4xl mx-auto text-center relative z-10"
           >
-            <h2 className="text-4xl md:text-7xl font-black uppercase text-cream mb-8 leading-none">
-              Deploy Intelligence.
+            <h2 className="text-4xl md:text-7xl font-black text-cream mb-8 leading-none">
+              Deploy intelligence.
             </h2>
             <p className="text-xl text-cream/70 mb-12 font-serif italic">The future of hiring is objective, fast, and human-led.</p>
             <Link href="/dashboard" className="inline-flex items-center justify-center gap-4 bg-cream text-dark px-6 py-4 rounded-md text-md font-semibold hover:bg-white transition-colors">
@@ -360,7 +376,7 @@ export default function LandingPage() {
                 <div className="w-10 h-10 border border-cream/30 bg-dark rounded-full flex items-center justify-center overflow-hidden">
                   <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
                 </div>
-                <span className="text-3xl font-black tracking-widest uppercase text-cream">BORA</span>
+                <span className="text-3xl font-black text-cream">Bora</span>
               </div>
               <p className="text-cream/60 max-w-sm text-sm leading-relaxed mb-6">
                 Celebrating objective precision and the power of human hiring. Screen resumes ethically. Hire authenticly.

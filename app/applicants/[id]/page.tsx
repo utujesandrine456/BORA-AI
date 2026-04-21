@@ -16,10 +16,8 @@ import {
   Zap,
   CheckCircle2,
   AlertCircle,
-  FileText,
   Download,
-  Code2,
-  Globe
+  Code2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -32,90 +30,20 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { TalentProfile } from '@/lib/types/profile';
 
-// Mock data for a candidate
-const CANDIDATE = {
-  id: 1,
-  name: 'Alexander Chen',
-  role: 'Senior Backend Engineer',
-  location: 'Toronto, Canada (Remote)',
-  email: 'a.chen@example.com',
-  phone: '+1 (555) 012-3456',
-  avatar: 'AC',
-  status: 'Shortlisted',
-  score: 98,
-  matchDescription: 'Perfect parity with technical requirements. Strong architectural mindset and proven experience in high-scale distributed systems.',
-  skills: {
-    primary: ['Node.js', 'PostgreSQL', 'Redis', 'AWS', 'Kubernetes', 'gRPC'],
-    secondary: ['TypeScript', 'GraphQL', 'Docker', 'Terraform', 'React']
-  },
-  experience: [
-    {
-      role: 'Senior Backend Engineer',
-      company: 'TechFlow Systems',
-      period: '2021 - Present',
-      description: 'Built and maintained high-performance microservices serving 1M+ concurrent users. Optimized database queries reducing latency by 45%.'
-    },
-    {
-      role: 'Fullstack Developer',
-      company: 'Nova Interactive',
-      period: '2018 - 2021',
-      description: 'Led the backend transition from monolithic to microservices architecture. Managed a team of 4 junior developers.'
-    }
-  ],
-  education: [
-    {
-      degree: 'M.Sc. in Computer Science',
-      school: 'University of Waterloo',
-      year: '2018'
-    },
-    {
-      degree: 'B.Sc. in Software Engineering',
-      school: 'University of British Columbia',
-      year: '2016'
-    }
-  ],
-  aiInsights: {
-    strengths: [
-      'Deep expertise in distributed systems architecture',
-      'Strong proficiency in cloud-native technologies (Kubernetes/AWS)',
-      'Excellent track record of performance optimization'
-    ],
-    weaknesses: [
-      'Limited recent experience with Python-based backends',
-      'No formal management certification (though led teams)'
-    ],
-    parity: '9.8/10 correlation with job description requirements.'
-  },
-  projects: [
-    {
-      name: 'Distributed Cache Service',
-      description: 'A high-performance distributed caching service built with Go and Redis, achieving 99.99% uptime and handling 50k req/s.',
-      technologies: ['Go', 'Redis', 'Docker'],
-      link: 'https://github.com/example/cache',
-      year: '2020'
-    },
-    {
-      name: 'Cloud Infrastructure Automation',
-      description: 'Terraform modules for zero-downtime deployments on AWS, reducing deployment time by 60%.',
-      technologies: ['Terraform', 'AWS', 'Python'],
-      link: 'https://github.com/example/infra',
-      year: '2022'
-    }
-  ],
-  certifications: [
-    { name: 'AWS Certified Solutions Architect - Professional', issuer: 'Amz Web Services', year: '2023' },
-    { name: 'Certified Kubernetes Administrator (CKA)', issuer: 'CNCF', year: '2022' }
-  ],
-  languages: [
-    { name: 'English', proficiency: 'Native' },
-    { name: 'French', proficiency: 'Professional Working' }
-  ]
-};
-
 export default function CandidateDetailsPage() {
   const params = useParams();
   const id = params.id as string;
-  const [candidate, setCandidate] = useState<any>(CANDIDATE);
+  interface CandidateDetail {
+    id: string | undefined; name: string; role: string; location: string; email: string; phone: string; avatar: string;
+    status: string; score: number; matchDescription: string;
+    skills: { primary: string[]; secondary: string[] };
+    experience: { role: string; company: string; period: string; description: string }[];
+    education: { degree: string; school: string; year: string }[];
+    projects: { name: string; description: string; technologies: string[]; link?: string; year: string }[];
+    aiInsights: { strengths: string[]; weaknesses: string[]; parity: string };
+    certifications: string[]; languages: { name: string; proficiency: string }[];
+  }
+  const [candidate, setCandidate] = useState<CandidateDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -123,19 +51,18 @@ export default function CandidateDetailsPage() {
       try {
         setLoading(true);
         const p = await profilesApi.getProfileById(id);
-        
+
         setCandidate({
-          ...CANDIDATE, // Keep mock for UI structure parity
-          id: (p as any)._id,
+          id: p._id,
           name: `${p.firstName} ${p.lastName}`,
-          role: p.headline,
-          location: p.location,
+          role: p.headline || 'Applicant',
+          location: p.location || 'Remote',
           email: p.email,
-          phone: (p as any).phone || CANDIDATE.phone, // Use backend phone if exists
+          phone: 'Not provided',
           avatar: `${p.firstName[0]}${p.lastName[0]}`,
-          status: (p as any).status || 'New',
-          score: (p as any).score || 85,
-          matchDescription: (p as any).summary || CANDIDATE.matchDescription,
+          status: p.availability?.status || 'Applied',
+          score: p.matchScore || 85,
+          matchDescription: p.summary || 'Profile analysis complete. Screening results are being processed by the BORA AI engine.',
           skills: {
             primary: p.skills.slice(0, 5).map(s => s.name),
             secondary: p.skills.slice(5).map(s => s.name)
@@ -159,13 +86,22 @@ export default function CandidateDetailsPage() {
             year: proj.endDate ? proj.endDate.split('-')[0] : '2024'
           })),
           aiInsights: {
-            strengths: (p as any).strengths || CANDIDATE.aiInsights.strengths,
-            weaknesses: (p as any).weaknesses || CANDIDATE.aiInsights.weaknesses,
-            parity: (p as any).summary || 'Profile analysis complete.'
+            strengths: [
+              'Strong technical foundation in ' + p.skills.slice(0, 2).map(s => s.name).join(', '),
+              'Relevant professional background in ' + (p.experience[0]?.role || 'engineering'),
+              'Clear career progression and focus'
+            ],
+            weaknesses: [
+              'Requires validation on specific architectural patterns',
+              'Benefit from deeper project-specific documentation'
+            ],
+            parity: p.summary || `${p.matchScore || 85}/100 alignment with core job requirements.`
           },
-          languages: p.languages || CANDIDATE.languages
+          certifications: [],
+          languages: p.languages || []
         });
       } catch (error) {
+        console.error('Failed to load candidate details:', error);
         toast.error('Failed to load candidate details');
       } finally {
         setLoading(false);
@@ -174,11 +110,11 @@ export default function CandidateDetailsPage() {
     fetchCandidate();
   }, [id]);
 
-  if (loading) {
+  if (loading || !candidate) {
     return (
       <div className="flex flex-col h-full bg-dark min-h-screen items-center justify-center space-y-4">
         <div className="w-12 h-12 border-4 border-cream border-t-transparent rounded-full animate-spin opacity-20"></div>
-        <p className="text-cream/40 font-bold tracking-widest text-sm uppercase">Retrieving Profile...</p>
+        <p className="text-cream/40 font-bold text-sm">Retrieving profile...</p>
       </div>
     );
   }
@@ -213,7 +149,7 @@ export default function CandidateDetailsPage() {
             <div className="flex-1 space-y-4">
               <div>
                 <div className="flex flex-wrap items-center gap-3 mb-1">
-                  <h1 className="text-4xl font-black text-cream tracking-tight">{candidate.name}</h1>
+                  <h1 className="text-4xl font-black text-cream">{candidate.name}</h1>
                   <Badge variant="success" className="rounded-md px-3 py-1 font-bold text-[10px]">
                     {candidate.status}
                   </Badge>
@@ -250,7 +186,7 @@ export default function CandidateDetailsPage() {
             </div>
 
             <div className="w-full md:w-auto text-center md:text-right space-y-2">
-              <div className="text-xs text-cream/40 font-bold tracking-wider">AI match score</div>
+              <div className="text-xs text-cream/40 font-bold">AI match score</div>
               <div className="text-7xl font-black text-cream">{candidate.score}%</div>
               <div className="text-xs font-bold text-emerald-500 flex items-center justify-center md:justify-end gap-1">
                 <Zap className="w-3 h-3" fill="currentColor" /> Premium Match
@@ -386,7 +322,7 @@ export default function CandidateDetailsPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-emerald-500 mb-1">
                     <CheckCircle2 className="w-4 h-4" />
-                    <span className="text-xs font-bold tracking-wider">Key strengths</span>
+                    <span className="text-xs font-bold">Key strengths</span>
                   </div>
                   <ul className="space-y-2">
                     {candidate.aiInsights.strengths.map((s: any, i: number) => (
@@ -428,17 +364,21 @@ export default function CandidateDetailsPage() {
                 <div>
                   <h3 className="text-[10px] font-bold text-cream/40 tracking-widest mb-3">Certifications</h3>
                   <div className="space-y-3">
-                    {CANDIDATE.certifications.map((cert, i) => (
-                      <div key={i} className="flex gap-3 items-start group">
-                        <div className="p-1.5 bg-cream/5 rounded-md mt-0.5 border border-cream/10 group-hover:border-cream/30 transition-colors">
-                          <Zap className="w-3 h-3 text-cream/60" />
+                    {candidate.certifications && candidate.certifications.length > 0 ? (
+                      candidate.certifications.map((cert: any, i: number) => (
+                        <div key={i} className="flex gap-3 items-start group">
+                          <div className="p-1.5 bg-cream/5 rounded-md mt-0.5 border border-cream/10 group-hover:border-cream/30 transition-colors">
+                            <Zap className="w-3 h-3 text-cream/60" />
+                          </div>
+                          <div>
+                            <h4 className="text-[13px] font-bold text-cream leading-tight">{cert.name}</h4>
+                            <p className="text-[10px] text-cream/40 font-bold mt-1">{cert.issuer} • {cert.year}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="text-[13px] font-bold text-cream leading-tight">{cert.name}</h4>
-                          <p className="text-[10px] text-cream/40 font-bold mt-1">{cert.issuer} • {cert.year}</p>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-xs text-cream/40 italic">No certifications listed</p>
+                    )}
                   </div>
                 </div>
 

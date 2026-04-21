@@ -31,18 +31,47 @@ export const jobsApi = {
   },
 
   getJobs: async (): Promise<Job[]> => {
-    const response = await apiClient.get<any>('/v1/jobs');
-    // Extreme resilience: check all common data wrappers
-    const rawData = response.data;
-    let apiJobs: any[] = [];
-    if (Array.isArray(rawData)) apiJobs = rawData;
-    else if (Array.isArray(rawData?.data)) apiJobs = rawData.data;
-    else if (Array.isArray(rawData?.jobs)) apiJobs = rawData.jobs;
-    else if (Array.isArray(rawData?.results)) apiJobs = rawData.results;
-    else if (Array.isArray(rawData?.items)) apiJobs = rawData.items;
+    type JobsResponse = Job[] | { data?: Job[]; total?: number; length?: number; [key: string]: unknown };
+    const response = await apiClient.get<JobsResponse>('/v1/jobs?status=all');
+    let rawData: JobsResponse = response.data;
 
-    // Merge with locally stored jobs to fill any backend sync gap
-    return mergeWithLocalJobs(apiJobs) as Job[];
+    if ((!rawData || (Array.isArray((rawData as {data?: unknown}).data) && (rawData as {total?: number}).total === 0)) && !(rawData as unknown[]).length) {
+      try {
+        const resp2 = await apiClient.get<JobsResponse>('/v1/jobs/');
+        if (resp2.data && ((Array.isArray((resp2.data as {data?: unknown}).data) && ((resp2.data as {total?: number}).total ?? 0) > 0) || (resp2.data as unknown[]).length > 0)) {
+          rawData = resp2.data;
+        }
+      } catch (_e) { }
+    }
+
+    if (typeof window !== 'undefined') {
+      (window as Window & { __LAST_JOBS_API_RESPONSE__?: unknown; __LAST_JOBS_API_STATUS__?: number }).__LAST_JOBS_API_RESPONSE__ = rawData;
+      (window as Window & { __LAST_JOBS_API_RESPONSE__?: unknown; __LAST_JOBS_API_STATUS__?: number }).__LAST_JOBS_API_STATUS__ = response.status;
+    }
+
+    const findArray = (obj: unknown): unknown[] | null => {
+      if (Array.isArray(obj)) return obj;
+      if (obj && typeof obj === 'object') {
+        const priorityKeys = ['jobs', 'data', 'items', 'results', 'list'];
+        for (const key of priorityKeys) {
+          if (Array.isArray((obj as Record<string, unknown>)[key])) return (obj as Record<string, unknown>)[key] as unknown[];
+        }
+
+        for (const key in (obj as Record<string, unknown>)) {
+          const val = (obj as Record<string, unknown>)[key];
+          if (Array.isArray(val)) return val;
+          if (val && typeof val === 'object' && !Array.isArray(val)) {
+            for (const subKey in (val as Record<string, unknown>)) {
+              if (Array.isArray((val as Record<string, unknown>)[subKey])) return (val as Record<string, unknown>)[subKey] as unknown[];
+            }
+          }
+        }
+      }
+      return null;
+    };
+
+    const jobsArray = findArray(rawData) || [];
+    return mergeWithLocalJobs(jobsArray) as Job[];
   },
 
   getJobById: async (id: string): Promise<Job> => {

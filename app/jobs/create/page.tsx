@@ -16,7 +16,7 @@ export default function CreateJobPage() {
   const router = useRouter();
   const [skills, setSkills] = useState<string[]>(['React', 'TypeScript', 'Tailwind CSS']);
   const [newSkill, setNewSkill] = useState('');
-  
+
   const [formData, setFormData] = useState({
     title: '',
     company: '',
@@ -53,6 +53,7 @@ export default function CreateJobPage() {
       company: formData.company,
       location: formData.location,
       description: formData.description,
+      type: formData.type,
       requirements: skills,
       skills: skills,
       experienceYears: Number(formData.experienceYears) || 0,
@@ -67,12 +68,14 @@ export default function CreateJobPage() {
     // the duplication caused by temporary 'local-' IDs.
 
     try {
-      await jobsApi.createJob(payload);
+      const response = await jobsApi.createJob(payload);
+      console.log('CreateJobPage: Creation Response:', response);
       toast.success(`Job ${status === 'open' ? 'published' : 'saved as draft'} successfully`);
       router.push('/jobs');
-    } catch (error: any) {
-      console.error('CreateJobPage Error:', error.response?.data || error.message);
-      toast.error(error.response?.data?.message || 'Failed to create job');
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Failed to create job';
+      console.error('CreateJobPage Error:', msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -95,24 +98,24 @@ export default function CreateJobPage() {
             {/* Main Form */}
             <div className="lg:col-span-2 space-y-10">
               <Card padding="lg">
-                <h2 className="text-[24px] font-black text-cream uppercase mb-8 flex items-center gap-3">
+                <h2 className="text-[24px] font-black text-cream mb-8 flex items-center gap-3">
                   <div className="w-2 h-8 bg-cream rounded-md"></div>
                   Basic Information
                 </h2>
 
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <Input 
-                      label="Job Title" 
-                      placeholder="E.g. Senior Frontend Developer" 
+                    <Input
+                      label="Job Title"
+                      placeholder="E.g. Senior Frontend Developer"
                       value={formData.title}
-                      onChange={(e: any) => setFormData({...formData, title: e.target.value})}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
                     />
-                    <Input 
-                      label="Company Name" 
-                      placeholder="E.g. TechCorp Inc." 
+                    <Input
+                      label="Company Name"
+                      placeholder="E.g. TechCorp Inc."
                       value={formData.company}
-                      onChange={(e: any) => setFormData({...formData, company: e.target.value})}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, company: e.target.value })}
                     />
                   </div>
 
@@ -120,35 +123,35 @@ export default function CreateJobPage() {
                     <Select
                       label="Job Type"
                       value={formData.type}
-                      onChange={(e: any) => setFormData({...formData, type: e.target.value})}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, type: e.target.value })}
                       options={[
                         { value: 'full-time', label: 'Full-time' },
                         { value: 'contract', label: 'Contract' },
                         { value: 'freelance', label: 'Freelance' }
                       ]}
                     />
-                    <Input 
-                      label="Location" 
-                      placeholder="E.g. Remote" 
-                      icon={MapPin} 
+                    <Input
+                      label="Location"
+                      placeholder="E.g. Remote"
+                      icon={MapPin}
                       value={formData.location}
-                      onChange={(e: any) => setFormData({...formData, location: e.target.value})}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, location: e.target.value })}
                     />
                   </div>
 
-                  <Textarea 
-                    label="Job Description" 
-                    placeholder="Describe the role..." 
-                    rows={6} 
+                  <Textarea
+                    label="Job Description"
+                    placeholder="Describe the role..."
+                    rows={6}
                     className='text-md font-medium'
                     value={formData.description}
-                    onChange={(e: any) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
               </Card>
 
               <Card padding="lg">
-                <h2 className="text-[24px] font-black text-cream uppercase mb-8 flex items-center gap-3">
+                <h2 className="text-[24px] font-black text-cream mb-8 flex items-center gap-3">
                   <div className="w-2 h-8 bg-cream rounded-md"></div>
                   Skills & Expertise
                 </h2>
@@ -191,7 +194,7 @@ export default function CreateJobPage() {
                   <Select
                     label="Experience Level"
                     value={formData.experienceLevel}
-                    onChange={(e: any) => setFormData({...formData, experienceLevel: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, experienceLevel: e.target.value })}
                     options={[
                       { value: 'entry', label: 'ENTRY LEVEL (0-2 YRS)' },
                       { value: 'junior', label: 'JUNIOR (2-4 YRS)' },
@@ -203,7 +206,7 @@ export default function CreateJobPage() {
                   <Select
                     label="Education"
                     value={formData.education}
-                    onChange={(e: any) => setFormData({...formData, education: e.target.value})}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, education: e.target.value })}
                     options={[
                       { value: 'bachelor', label: "BACHELOR'S DEGREE" },
                       { value: 'master', label: "MASTER'S DEGREE" },
@@ -214,20 +217,20 @@ export default function CreateJobPage() {
               </Card>
 
               <div className="flex flex-col gap-4">
-                <Button 
-                  variant="primary" 
-                  size="lg" 
+                <Button
+                  variant="primary"
+                  size="lg"
                   disabled={saving}
-                  className="w-full h-14 text-md border border-cream disabled:opacity-50" 
+                  className="w-full h-14 text-md border border-cream disabled:opacity-50"
                   onClick={() => handlePublish('open')}
                 >
                   {saving ? 'Publishing...' : 'Publish Job'}
                 </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
+                <Button
+                  variant="secondary"
+                  size="lg"
                   disabled={saving}
-                  className="w-full h-14 text-md disabled:opacity-50" 
+                  className="w-full h-14 text-md disabled:opacity-50"
                   onClick={() => handlePublish('draft')}
                 >
                   Save Draft

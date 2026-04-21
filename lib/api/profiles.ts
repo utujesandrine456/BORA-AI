@@ -21,8 +21,8 @@ export const profilesApi = {
     return response.data;
   },
 
-  bulkInsertProfiles: async (data: BulkProfileInput): Promise<{ inserted: number; errors: any[] }> => {
-    const response = await apiClient.post<{ inserted: number; errors: any[] }>('/v1/profiles/bulk', data);
+  bulkInsertProfiles: async (data: BulkProfileInput): Promise<{ inserted: number; errors: unknown[] }> => {
+    const response = await apiClient.post<{ inserted: number; errors: unknown[] }>('/v1/profiles/bulk', data);
     return response.data;
   },
 

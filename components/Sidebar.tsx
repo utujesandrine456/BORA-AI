@@ -7,7 +7,6 @@ import {
   Users,
   ClipboardCheck,
   History,
-  BarChart3,
   Settings,
   LucideIcon
 } from 'lucide-react';
@@ -16,25 +15,46 @@ import { usePathname, useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api/auth';
 import toast from 'react-hot-toast';
 
+
 interface MenuItem {
   name: string;
   icon: LucideIcon;
   href: string;
 }
 
-const menuItems: MenuItem[] = [
+const adminMenuItems: MenuItem[] = [
   { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { name: 'Jobs', icon: Briefcase, href: '/jobs' },
   { name: 'Applicants', icon: Users, href: '/applicants' },
   { name: 'Screening Results', icon: ClipboardCheck, href: '/screening' },
   { name: 'Screening History', icon: History, href: '/screening-history' },
-  { name: 'Candidate Insights', icon: BarChart3, href: '/insights' },
   { name: 'Settings', icon: Settings, href: '/settings' },
+];
+
+const candidateMenuItems: MenuItem[] = [
+  { name: 'Dashboard', icon: LayoutDashboard, href: '/candidate/dashboard' },
+  { name: 'Jobs', icon: Briefcase, href: '/candidate/jobs' },
+  { name: 'Screening Results', icon: ClipboardCheck, href: '/candidate/results' },
+  { name: 'Settings', icon: Settings, href: '/candidate/settings' },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [role] = React.useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          return parsed.role?.toLowerCase() || 'admin';
+        } catch (_e) {
+          // ignore
+        }
+      }
+    }
+    return 'admin';
+  });
 
   const handleLogout = () => {
     authApi.logout();
@@ -42,34 +62,30 @@ export default function Sidebar() {
     router.push('/auth/login');
   };
 
-  const appRoutes = ['/dashboard', '/jobs', '/applicants', '/screening', '/insights', '/settings', '/screening-history', '/notifications'];
+  const appRoutes = [
+    '/dashboard', '/jobs', '/applicants', '/screening', '/insights', '/settings', '/screening-history', '/notifications',
+    '/candidate/dashboard', '/candidate/jobs', '/candidate/results', '/candidate/settings'
+  ];
   const isAppRoute = appRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
       const isAuthPage = pathname.startsWith('/auth/');
-      
-      console.log('Auth Guard Check:', { 
-        pathname, 
-        isAppRoute, 
-        isAuthPage, 
-        tokenExists: !!token,
-        tokenSnippet: token ? `${token.substring(0, 5)}...${token.substring(token.length - 5)}` : 'null'
-      });
 
       if (!token && isAppRoute) {
-        console.log('Unauthorized access attempt, redirecting to login');
         router.push('/auth/login');
       } else if (token && isAuthPage) {
-        console.log('Authenticated user on auth page, redirecting to dashboard');
-        router.push('/jobs');
+        router.push(role === 'candidate' ? '/candidate/dashboard' : '/dashboard');
       }
     }
-  }, [isAppRoute, pathname, router]);
+  }, [isAppRoute, pathname, router, role]);
 
   if (!isAppRoute) return null;
 
+  // Determine menu items based on current portal path for immediate UI update
+  const isCandidatePortal = pathname.startsWith('/candidate');
+  const menuItems = isCandidatePortal ? candidateMenuItems : adminMenuItems;
 
   return (
     <div className="w-[280px] min-h-screen h-full bg-dark flex flex-col p-6 border-r border-cream/20 sticky top-0">
@@ -78,8 +94,7 @@ export default function Sidebar() {
           <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-cream tracking-widest uppercase leading-none">BORA</h1>
-          <p className="text-[16px] text-cream/60 font-medium mt-1">Dashboard</p>
+          <h1 className="text-2xl font-black text-cream leading-none">BORA</h1>
         </div>
       </div>
 
@@ -87,8 +102,8 @@ export default function Sidebar() {
         {menuItems.map((item) => {
           const isActive =
             pathname === item.href ||
-            (item.name === 'Jobs' && pathname === '/') ||
-            (item.name === 'Screening Results' && (pathname === '/screening' || pathname.startsWith('/screening/results')));
+            (item.name === 'Jobs' && (pathname === '/' || pathname === '/candidate/jobs')) ||
+            (item.name === 'Screening Results' && (pathname === '/screening' || pathname.startsWith('/screening/results') || pathname === '/candidate/results'));
           const Icon = item.icon;
 
           return (
@@ -108,7 +123,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-6 border-t border-cream/20">
-        <button 
+        <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-5 py-3.5 rounded-md bg-cream text-dark hover:bg-cream hover:text-dark/80 transition-all w-full group cursor-pointer text-md font-semibold"
         >

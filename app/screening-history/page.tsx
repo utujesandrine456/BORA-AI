@@ -31,7 +31,8 @@ import { downloadAsFile, jsonToCsv } from '@/lib/utils/download';
 
 export default function ScreeningHistoryPage() {
     const [searchQuery, setSearchQuery] = useState('');
-    const [history, setHistory] = useState<any[]>([]);
+    interface HistoryEntry { id: string | undefined; role: string; date: string | undefined; candidates: number; avgScore: number; topMatch: string; status: string; matchQuality: string; }
+    const [history, setHistory] = useState<HistoryEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -39,7 +40,7 @@ export default function ScreeningHistoryPage() {
             try {
                 setLoading(true);
                 const jobs = await jobsApi.getJobs();
-                
+
                 if (!Array.isArray(jobs)) {
                     console.error('ScreeningHistoryPage: Received non-array data from getJobs:', jobs);
                     setHistory([]);
@@ -57,8 +58,9 @@ export default function ScreeningHistoryPage() {
                     matchQuality: 'High'
                 }));
                 setHistory(mapped);
-            } catch (error: any) {
-                console.error('ScreeningHistoryPage: Failed to fetch history:', error.response?.data || error.message);
+            } catch (error: unknown) {
+                const msg = error instanceof Error ? error.message : 'Failed to load history';
+                console.error('ScreeningHistoryPage: Failed to fetch history:', msg);
                 toast.error('Failed to load history');
             } finally {
                 setLoading(false);
@@ -97,8 +99,8 @@ export default function ScreeningHistoryPage() {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div className="space-y-1">
-                        <h1 className="text-4xl md:text-5xl font-black text-cream tracking-tighter leading-none">
-                            Screening <span className="text-cream/40 italic serif">History</span>
+                        <h1 className="text-4xl md:text-5xl font-black text-cream leading-none">
+                            Screening <span className="text-cream/40 italic serif">history</span>
                         </h1>
                         <p className="text-cream/60 font-medium text-lg italic serif max-w-2xl">
                             Track and review all historical assessment results and candidate matches.
@@ -187,23 +189,23 @@ export default function ScreeningHistoryPage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-cream/5 border-b border-cream/10">
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-cream/40">Reference</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-cream/40">Role Name</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-cream/40 text-center">Date</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-cream/40 text-center">Batch Size</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-cream/40 text-center">Avg. Score</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-cream/40">Top Candidate</th>
-                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-cream/40">Status</th>
+                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40">Reference</th>
+                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40">Role Name</th>
+                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40 text-center">Date</th>
+                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40 text-center">Batch Size</th>
+                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40 text-center">Avg. Score</th>
+                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40">Top Candidate</th>
+                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40">Status</th>
                                     <th className="px-6 py-5"></th>
                                 </tr>
                             </thead>
-                             <tbody className="divide-y divide-cream/5">
+                            <tbody className="divide-y divide-cream/5">
                                 {loading ? (
                                     <tr>
                                         <td colSpan={8} className="px-6 py-20 text-center">
                                             <div className="flex flex-col items-center gap-4 opacity-40">
                                                 <div className="w-10 h-10 border-2 border-cream border-t-transparent rounded-full animate-spin"></div>
-                                                <p className="text-sm font-bold tracking-widest uppercase">Fetching history...</p>
+                                                <p className="text-sm font-bold">Fetching history...</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -248,7 +250,7 @@ export default function ScreeningHistoryPage() {
                                         <td className="px-6 py-5">
                                             <Badge
                                                 variant={item.status === 'Completed' ? 'success' : 'secondary'}
-                                                className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-wider ${item.status === 'Archived' ? 'bg-cream/5 text-cream/40 border-cream/5' : ''
+                                                className={`px-3 py-1 rounded-md text-[10px] font-black ${item.status === 'Archived' ? 'bg-cream/5 text-cream/40 border-cream/5' : ''
                                                     }`}
                                             >
                                                 {item.status}
@@ -265,9 +267,7 @@ export default function ScreeningHistoryPage() {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan={8} className="px-6 py-20 text-center text-cream/20 font-bold tracking-widest italic uppercase">
-                                            No screening history found.
-                                        </td>
+                                        No screening history found.
                                     </tr>
                                 )}
                             </tbody>

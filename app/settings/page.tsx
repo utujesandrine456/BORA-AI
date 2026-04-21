@@ -1,36 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  User,
-  Lock,
-  Bell,
-  Shield,
-  Save,
-  Mail,
-  Building2,
-  Globe,
-  Key
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  User, 
+  Shield, 
+  Laptop, 
+  Mail, 
+  Building2, 
+  Globe, 
+  Lock, 
+  Key, 
+  Save, 
+  Bell 
 } from 'lucide-react';
 import TopNav from '@/components/TopNav';
+import Card, { fadeUp, staggerContainer } from '@/components/ui/Card';
+import { motion } from 'framer-motion';
 import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { Input, Select } from '@/components/ui/Input';
 import toast from 'react-hot-toast';
 
 const TABS = [
   { id: 'general', label: 'General Info', icon: User },
-  { id: 'security', label: 'Security', icon: Lock },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'security', label: 'Security & Access', icon: Shield },
+  { id: 'notifications', label: 'Alert Preferences', icon: Bell },
+  { id: 'ai', label: 'AI Parameters', icon: Laptop },
 ];
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
   const [user, setUser] = useState<{ name: string; email: string; role: string; photo?: string } | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
@@ -67,9 +70,8 @@ export default function SettingsPage() {
   const lastName = displayName.split(' ').slice(1).join(' ') || '';
 
   return (
-    <div className="flex flex-col h-full bg-dark min-h-screen">
+    <div className="flex flex-col h-full bg-dark min-h-screen font-sans">
       <TopNav />
-
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -78,20 +80,20 @@ export default function SettingsPage() {
         onChange={handlePhotoChange} 
       />
 
-      <div className="flex-1 p-8 max-w-7xl mx-auto w-full">
+      <div className="flex-1 p-8 max-w-7xl mx-auto w-full space-y-12 pb-32">
         {/* Header Section */}
-        <div className="mb-10 border-b border-cream/10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <motion.div variants={fadeUp} initial="initial" animate="animate" className="border-b border-cream/10 pb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
-            <h1 className="text-4xl lg:text-5xl font-black text-cream tracking-tight mb-2">Settings</h1>
-            <p className="text-cream/60 font-medium text-lg italic serif">Manage your account preferences and platform configuration.</p>
+            <h1 className="text-6xl font-black text-cream leading-none mb-4">Platform Settings</h1>
+            <p className="text-cream/40 font-medium text-lg">Configure your recruitment environment and AI parameters</p>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="secondary" className="font-semibold px-6">Discard</Button>
-            <Button variant="primary" className="gap-2 font-semibold px-6">
+            <Button variant="primary" className="gap-2 font-semibold px-6 bg-cream text-dark">
               <Save className="w-4 h-4" /> Save changes
             </Button>
           </div>
-        </div>
+        </motion.div>
 
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Settings Sidebar */}
@@ -119,10 +121,9 @@ export default function SettingsPage() {
 
           {/* Settings Content */}
           <div className="flex-1 space-y-8">
-
             {activeTab === 'general' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <Card className="p-8 space-y-8">
+              <motion.div variants={fadeUp} initial="initial" animate="animate" className="space-y-8">
+                <Card className="p-8 space-y-8 bg-dark/40 border-cream/10">
                   <div>
                     <h2 className="text-2xl font-bold text-cream mb-1">Profile Information</h2>
                     <p className="text-cream/50 text-sm font-medium">Update your personal identifying details and public profile.</p>
@@ -159,10 +160,10 @@ export default function SettingsPage() {
                   </div>
                 </Card>
 
-                <Card className="p-8 space-y-8">
+                <Card className="p-8 space-y-8 bg-dark/40 border-cream/10">
                   <div>
                     <h2 className="text-2xl font-bold text-cream mb-1">Company Details</h2>
-                    <p className="text-cream/50 text-sm font-medium">Manage your organization&apos;s core information.</p>
+                    <p className="text-cream/50 text-sm font-medium">Manage your organization's core information.</p>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
@@ -190,12 +191,12 @@ export default function SettingsPage() {
                     />
                   </div>
                 </Card>
-              </div>
+              </motion.div>
             )}
 
             {activeTab === 'security' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <Card className="p-8 space-y-8">
+              <motion.div variants={fadeUp} initial="initial" animate="animate" className="space-y-8">
+                <Card className="p-8 space-y-8 bg-dark/40 border-cream/10">
                   <div>
                     <h2 className="text-2xl font-bold text-cream mb-1">Password & Authentication</h2>
                     <p className="text-cream/50 text-sm font-medium">Keep your account secure with strong credentials.</p>
@@ -208,41 +209,16 @@ export default function SettingsPage() {
                     <Button variant="secondary" className="font-semibold w-full mt-4">Change Password</Button>
                   </div>
                 </Card>
-
-                <Card className="p-8 space-y-8 border-emerald-500/20 bg-emerald-500/5">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h2 className="text-2xl font-bold text-cream mb-1 flex items-center gap-2">
-                        <Shield className="w-6 h-6 text-emerald-500" /> Two-Factor Authentication
-                      </h2>
-                      <p className="text-cream/60 text-sm font-medium">Add an extra layer of security to your account.</p>
-                    </div>
-                    <Badge variant="success" className="bg-emerald-500/20 text-emerald-400 font-bold">Enabled</Badge>
-                  </div>
-
-                  <div className="p-4 bg-dark/40 border border-cream/10 rounded-md">
-                    <p className="text-sm text-cream/70 leading-relaxed font-medium">
-                      Two-factor authentication is currently enabled via <strong className="text-cream">Authenticator App</strong>.
-                      You will be asked to enter a 6-digit code when logging in from a new device.
-                    </p>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <Button variant="secondary" className="font-semibold text-red-500 border-red-500/30 hover:bg-red-500/10">Disable 2FA</Button>
-                    <Button variant="secondary" className="font-semibold">Generate Recovery Codes</Button>
-                  </div>
-                </Card>
-              </div>
+              </motion.div>
             )}
 
             {activeTab === 'notifications' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <Card className="p-8 space-y-8">
+              <motion.div variants={fadeUp} initial="initial" animate="animate" className="space-y-8">
+                <Card className="p-8 space-y-8 bg-dark/40 border-cream/10">
                   <div>
                     <h2 className="text-2xl font-bold text-cream mb-1">Alert Preferences</h2>
                     <p className="text-cream/50 text-sm font-medium">Choose what events you want to be notified about.</p>
                   </div>
-
                   <div className="space-y-1">
                     {[
                       { id: 'n1', title: 'New Application Received', desc: 'When a candidate applies directly to a job board.' },
@@ -263,7 +239,21 @@ export default function SettingsPage() {
                     ))}
                   </div>
                 </Card>
-              </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'ai' && (
+              <motion.div variants={fadeUp} initial="initial" animate="animate" className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card variant="glass" className="p-8 space-y-6 group cursor-pointer hover:border-cream/40 transition-all">
+                  <div className="w-12 h-12 bg-emerald-500/5 border border-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                    <Laptop className="w-6 h-6" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-2xl font-black text-cream mb-2">AI Preferences</h3>
+                    <p className="text-sm text-cream/40 leading-relaxed">Adjust screening weights and explainability detail levels.</p>
+                  </div>
+                </Card>
+              </motion.div>
             )}
           </div>
         </div>
@@ -271,4 +261,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-

@@ -1,7 +1,7 @@
 import { apiClient } from './client';
 
 export const uploadsApi = {
-  uploadCsv: async (file: File): Promise<any> => {
+  uploadCsv: async (file: File): Promise<unknown> => {
     const formData = new FormData();
     formData.append('file', file);
     
@@ -9,7 +9,7 @@ export const uploadsApi = {
     return response.data;
   },
 
-  uploadResume: async (file: File): Promise<any> => {
+  uploadResume: async (file: File): Promise<unknown> => {
     const formData = new FormData();
     formData.append('file', file);
     

@@ -1,75 +1,35 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users,
   Briefcase,
   ClipboardCheck,
-  TrendingUp,
   ArrowUpRight,
   ArrowDownRight,
   Clock,
   ChevronRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 import TopNav from '@/components/TopNav';
-import Card from '@/components/ui/Card';
+import Card, { fadeUp, staggerContainer } from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-
-const STATS = [
-  {
-    label: 'Total Applicants',
-    value: '2,840',
-    change: '+12.5%',
-    trend: 'up',
-    icon: Users,
-    description: 'Updated 2 hours ago'
-  },
-  {
-    label: 'Active Jobs',
-    value: '12',
-    change: '+2',
-    trend: 'up',
-    icon: Briefcase,
-    description: '3 ending this week'
-  },
-  {
-    label: 'Screening Tasks',
-    value: '156',
-    change: '-5%',
-    trend: 'down',
-    icon: ClipboardCheck,
-    description: '45 pending review'
-  },
-  {
-    label: 'Conversion Rate',
-    value: '18.4%',
-    change: '+2.1%',
-    trend: 'up',
-    icon: TrendingUp,
-    description: 'Industry avg: 12.5%'
-  },
-];
-
-const RECENT_APPLICANTS = [
-  { id: 1, name: 'Alexander C.', role: 'Senior Backend Engineer', score: 98, status: 'Shortlisted', date: '2h ago' },
-  { id: 2, name: 'Sarah T.', role: 'Fullstack Developer', score: 94, status: 'Under Review', date: '5h ago' },
-  { id: 3, name: 'Michael L.', role: 'Node.js Developer', score: 87, status: 'New', date: '1d ago' },
-  { id: 4, name: 'Emily R.', role: 'Product Designer', score: 92, status: 'Interviewing', date: '1d ago' },
-  { id: 5, name: 'David K.', role: 'DevOps Lead', score: 85, status: 'New', date: '2d ago' },
-];
-
-import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import Button from '@/components/ui/Button';
 import { jobsApi } from '@/lib/api/jobs';
 import { profilesApi } from '@/lib/api/profiles';
 import { downloadAsFile, jsonToCsv } from '@/lib/utils/download';
 import toast from 'react-hot-toast';
+import { Job } from '@/lib/api/types';
+import { TalentProfile } from '@/lib/types/profile';
 
-
-export default function DashboardPage() {
-  const [stats, setStats] = useState<any[]>([]);
-  const [recentApplicants, setRecentApplicants] = useState<any[]>([]);
+export default function Dashboard() {
+  interface Stat { label: string; value: string; change: string; trend: string; icon: React.ElementType; color: string; }
+  interface Applicant { id: string; name: string; role: string; match: number; status: string; avatar: string; }
+  const [stats, setStats] = useState<Stat[]>([]);
+  const [recentApplicants, setRecentApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -81,56 +41,50 @@ export default function DashboardPage() {
           profilesApi.getProfiles({ limit: 5 })
         ]);
 
-        const jobsArray = Array.isArray(jobs) ? jobs : [];
-        const activeJobs = jobsArray.filter((j: any) => j.status === 'active' || j.status === 'open' || j.status === 'Open').length;
-        const totalApplicants = profilesResponse.total;
-        
+        // Calculate Stats
+        const activeJobs = jobs.filter((j: Job) => j.status !== 'closed' && j.status !== 'archived').length;
+        const totalApplicants = profilesResponse.total || 0;
+
         setStats([
           {
             label: 'Total Applicants',
             value: totalApplicants.toLocaleString(),
-            change: '+12.5%',
+            change: '+5.2%',
             trend: 'up',
             icon: Users,
-            description: 'Database total'
+            color: 'text-cream'
           },
           {
             label: 'Active Jobs',
             value: activeJobs.toString(),
-            change: '+2',
+            change: '+1',
             trend: 'up',
             icon: Briefcase,
-            description: 'Currently recruiting'
+            color: 'text-emerald-500'
           },
           {
             label: 'Screening Tasks',
-            value: '156', // Keep mock for specific task counts if no backend yet
-            change: '-5%',
+            value: (activeJobs * 3).toString(), // Mocked derivation
+            change: '-2',
             trend: 'down',
             icon: ClipboardCheck,
-            description: '45 pending review'
-          },
-          {
-            label: 'Conversion Rate',
-            value: '18.4%',
-            change: '+2.1%',
-            trend: 'up',
-            icon: TrendingUp,
-            description: 'Industry avg: 12.5%'
-          },
+            color: 'text-amber-500'
+          }
         ]);
 
-        setRecentApplicants(profilesResponse.data.map((p: any) => ({
+        // Map Recent Applicants
+        const mappedApplicants = (profilesResponse.data || []).slice(0, 3).map((p: TalentProfile) => ({
           id: p._id,
-          name: `${p.firstName} ${p.lastName[0]}.`,
-          role: p.headline || 'Candidate',
-          score: p.score || 85,
-          status: p.status || 'New',
-          date: 'Recently'
-        })));
+          name: `${p.firstName} ${p.lastName}`,
+          role: p.headline || 'Applicant',
+          match: p.matchScore || 85, // Fallback if not screened
+          status: p.matchScore && p.matchScore >= 90 ? 'High Match' : 'In Review',
+          avatar: `${p.firstName?.[0] || ''}${p.lastName?.[0] || ''}` || '?'
+        }));
 
+        setRecentApplicants(mappedApplicants);
       } catch (error) {
-        console.error('Failed to fetch dashboard data', error);
+        console.error('Dashboard: Failed to fetch real data:', error);
       } finally {
         setLoading(false);
       }
@@ -146,8 +100,7 @@ export default function DashboardPage() {
       Metric: s.label,
       Value: s.value,
       Trend: s.trend,
-      Change: s.change,
-      Context: s.description
+      Change: s.change
     }));
 
     const csvContent = jsonToCsv(exportData);
@@ -168,131 +121,178 @@ export default function DashboardPage() {
     <div className="flex flex-col h-full bg-dark min-h-screen">
       <TopNav />
 
-      <div className="flex-1 p-8 space-y-10 max-w-7xl mx-auto w-full">
+      <div className="flex-1 p-8 max-w-7xl mx-auto w-full space-y-12 pb-32">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-cream/10 pb-8">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-black text-cream tracking-tight mb-2">Workspace Overview</h1>
-            <p className="text-cream/60 font-medium text-lg italic serif">Welcome back. Here&apos;s what&apos;s happening today.</p>
+        <motion.div
+          variants={fadeUp}
+          initial="initial"
+          animate="animate"
+          className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-4 border-b border-cream/10 pb-12"
+        >
+          <div className="flex-1">
+            <h1 className="text-5xl font-black text-cream leading-none">
+              Recruitment Intelligence
+            </h1>
           </div>
-          <div className="text-right">
-            <div className="text-[11px] text-cream/40 font-bold tracking-wider mb-1">Status</div>
-            <div className="text-sm font-bold text-cream flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Live Analysis
+
+          <div className="flex items-center gap-4">
+            <div className="text-right mr-4">
+              <div className="text-xs font-medium text-cream/30 mb-1">System health</div>
+              <div className="flex items-center gap-2 text-emerald-500">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-sm font-bold">AI Engine Active</span>
+              </div>
             </div>
+            <Link href="/jobs">
+              <Button variant="primary" className="py-4 px-8 bg-cream text-dark">
+                Post New Job
+              </Button>
+            </Link>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, i) => (
-            <Card key={i} className="p-6 group hover:border-cream/40 transition-all duration-300">
-              <div className="flex items-start justify-between mb-4">
-                <div className="p-3 bg-cream/5 border border-cream/10 rounded-md text-cream group-hover:scale-110 transition-transform duration-500">
-                  <stat.icon className="w-5 h-5" strokeWidth={1.5} />
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
+          {stats.map((stat, i: number) => (
+            <motion.div key={i} variants={fadeUp}>
+              <Card variant="glass" className="p-8 relative group overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <stat.icon className="w-24 h-24 -mr-8 -mt-8" />
                 </div>
-                <div className={`flex items-center gap-1 text-xs font-bold ${stat.trend === 'up' ? 'text-emerald-500' : 'text-amber-500'}`}>
-                  {stat.change}
-                  {stat.trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 bg-cream/10 border border-cream/20 rounded-md text-cream shadow-xl">
+                    <stat.icon className="w-5 h-5" strokeWidth={1.5} />
+                  </div>
+                  <div className="text-md font-bold text-cream/80">{stat.label}</div>
                 </div>
-              </div>
-              <div>
-                <div className="text-3xl font-black text-cream mb-1">{stat.value}</div>
-                <div className="text-sm font-bold text-cream/70 mb-2">{stat.label}</div>
-                <div className="text-[11px] text-cream/40 font-medium">{stat.description}</div>
-              </div>
-            </Card>
+
+                <div className="flex items-baseline gap-3">
+                  <div className={`text-4xl font-black ${stat.color}`}>
+                    {loading ? (
+                      <div className="w-20 h-10 bg-cream/5 animate-pulse rounded" />
+                    ) : (
+                      stat.value
+                    )}
+                  </div>
+                  {!loading && (
+                    <div className={`flex items-center text-[10px] font-black ${stat.trend === 'up' ? 'text-emerald-500' : 'text-red-500'}`}>
+                      {stat.trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {stat.change}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        {/* content grid */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Recent Applicants Table */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-bold text-cream flex items-center gap-2">
-                Recent Applicants
-                <span className="px-2 py-0.5 bg-cream/10 border border-cream/20 rounded-md text-[10px] text-cream/60 font-black tracking-widest">Live</span>
-              </h2>
-              <Link href="/applicants" className="text-xs font-bold text-cream/40 hover:text-cream transition-colors flex items-center gap-1 group">
-                View All <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-              </Link>
+        {/* Tables/Lists Section */}
+        <div className="grid lg:grid-cols-3 gap-12 pt-4">
+          {/* Main Activity */}
+          <motion.div
+            variants={fadeUp}
+            initial="initial"
+            animate="animate"
+            className="lg:col-span-2 space-y-8"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-black text-cream">Recent applicants</h2>
+              <Link href="/applicants" className="text-[10px] font-black text-cream/40 hover:text-cream underline underline-offset-4 transition-colors text-right">View All Candidates</Link>
             </div>
 
-            <div className="bg-dark/50 border border-cream/10 rounded-md overflow-hidden backdrop-blur-sm">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-cream/10 text-left">
-                    <th className="px-6 py-4 text-xs font-bold text-cream/40 tracking-wider">Candidate</th>
-                    <th className="px-6 py-4 text-xs font-bold text-cream/40 tracking-wider">Role</th>
-                    <th className="px-6 py-4 text-xs font-bold text-cream/40 tracking-wider text-center">Match</th>
-                    <th className="px-6 py-4 text-xs font-bold text-cream/40 tracking-wider">Status</th>
-                    <th className="px-6 py-4"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-cream/5">
-                  {recentApplicants.map((applicant) => (
-                    <tr key={applicant.id} className="group hover:bg-cream/5 transition-all cursor-pointer">
-                      <td className="px-6 py-4">
-                        <Link href={`/applicants/${applicant.id}`} className="font-bold text-cream hover:underline underline-offset-4 decoration-cream/30">
-                          {applicant.name}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-cream/60">{applicant.role}</div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className={`inline-flex items-center justify-center w-10 h-10 rounded-md border text-sm font-black ${applicant.score >= 90 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                            applicant.score >= 80 ? 'bg-cream/10 border-cream/20 text-cream' :
-                              'bg-amber-500/10 border-amber-500/20 text-amber-500'
-                          }`}>
-                          {applicant.score}
+            <div className="space-y-4">
+              {loading ? (
+                [1, 2, 3].map(i => (
+                  <div key={i} className="h-24 w-full bg-cream/5 rounded-md animate-pulse" />
+                ))
+              ) : recentApplicants.length > 0 ? (
+                recentApplicants.map((app) => (
+                  <Link key={app.id} href={`/applicants/${app.id}`}>
+                    <Card variant="glass" className="p-6 hover:border-cream/40 transition-all group cursor-pointer relative overflow-hidden mb-4">
+                      <div className="flex items-center gap-6 relative z-10">
+                        <div className="w-14 h-14 bg-cream/10 border border-cream/20 rounded-md flex items-center justify-center text-cream font-black text-lg group-hover:bg-cream group-hover:text-dark transition-all duration-500">
+                          {app.avatar}
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant={applicant.status === 'Shortlisted' ? 'success' : 'secondary'} className="px-3 py-1 rounded-md text-[10px] font-bold">
-                          {applicant.status}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="p-2 text-cream/20 hover:text-cream/60 transition-colors">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-          {/* Activity Feed / Insights */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-cream">System Insights</h2>
-            <Card className="p-6 bg-linear-to-br from-cream/5 to-transparent border-cream/20">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-md bg-cream/10 flex items-center justify-center border border-cream/20">
-                  <TrendingUp className="w-5 h-5 text-cream" />
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-xl font-black text-cream group-hover:text-white transition-colors">{app.name}</h3>
+                            <Badge variant={app.match >= 90 ? 'success' : 'secondary'} className="px-2 py-0.5 rounded text-[8px] font-black border-cream/20">
+                              {app.status}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-cream/40 font-bold">{app.role}</div>
+                        </div>
+
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="text-[10px] font-black text-cream/30">Match score</div>
+                          <div className="text-2xl font-black text-cream">{app.match}%</div>
+                        </div>
+
+                        <div className="pl-4">
+                          <ChevronRight className="w-5 h-5 text-cream/20 group-hover:text-cream group-hover:translate-x-1 transition-all" />
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                ))
+              ) : (
+                <div className="text-center py-20 bg-cream/5 rounded-md border border-dashed border-cream/10">
+                  <Users className="w-10 h-10 text-cream/10 mx-auto mb-4" />
+                  <p className="text-cream/40 font-medium">No recent applicants found</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Side Panel: System Insights */}
+          <motion.div
+            variants={fadeUp}
+            initial="initial"
+            animate="animate"
+            className="space-y-8"
+          >
+            <h2 className="text-2xl font-black text-cream">Live insights</h2>
+
+            <Card variant="glass" className="p-8 border-emerald-500/20 relative group">
+              <div className="absolute top-0 right-0 p-4">
+                <Sparkles className="w-12 h-12 text-emerald-500/10 group-hover:rotate-12 transition-transform duration-700" />
+              </div>
+
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+                  <Clock className="w-6 h-6 text-emerald-500" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-cream">Hiring Velocity</div>
-                  <div className="text-[11px] text-cream/40">Efficiency report</div>
+                  <div className="text-xs font-black text-cream/40">Average TTH</div>
+                  <div className="text-lg font-black text-cream">4.2 Days</div>
                 </div>
               </div>
 
-              <div className="space-y-5">
-                <div className="flex items-end justify-between mb-1">
-                  <div className="text-xs font-bold text-cream/60">Time to Hire</div>
-                  <div className="text-2xl font-black text-cream">14.2d</div>
+              <p className="text-sm text-cream/60 leading-relaxed font-medium mb-8">
+                Your current screening process is performing <span className="text-emerald-500 font-black">15% faster</span> than the previous month. AI shortlisting is saving an average of <span className="text-cream font-black italic">22 hours</span> per role.
+              </p>
+
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[12px] font-semibold text-cream/40">Matching accuracy</span>
+                    <span className="text-xs font-black text-cream">94.8%</span>
+                  </div>
+                  <div className="h-2 w-full bg-cream/10 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: '94.8%' }}
+                      transition={{ duration: 1.5, ease: "easeOut" }}
+                      className="h-full bg-cream blur-[0.5px]"
+                    />
+                  </div>
                 </div>
-                <div className="h-1.5 w-full bg-cream/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-cream w-[65%]" />
-                </div>
-                <p className="text-xs text-cream/50 leading-relaxed italic">
-                  You&apos;re currently <span className="text-emerald-500 font-bold">12% faster</span> than last month.
-                  High-score applicants are responding 20% quicker.
-                </p>
               </div>
 
               <div className="mt-8 pt-6 border-t border-cream/10">
@@ -305,26 +305,19 @@ export default function DashboardPage() {
               </div>
             </Card>
 
-            <div className="bg-dark/30 border border-cream/10 rounded-md p-5 space-y-4">
-              <h3 className="text-xs font-bold text-cream/40 tracking-wider">Pending tasks</h3>
-              {[1, 2].map((i) => (
-                <div key={i} className="flex items-center gap-3 group cursor-pointer">
-                  <div className="w-2 h-2 rounded-full bg-amber-500/40 group-hover:bg-amber-500 transition-colors" />
-                  <div className="flex-1">
-                    <div className="text-sm font-bold text-cream/80 group-hover:text-cream transition-colors">Screening #J-00{i + 2}</div>
-                    <div className="text-[10px] text-cream/40 flex items-center gap-1">
-                      <Clock className="w-2 h-2" /> 4h pending
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-cream/20 group-hover:text-cream/40 transition-all group-hover:translate-x-1" />
-                </div>
-              ))}
-            </div>
-          </div>
+            <Card variant="glass" className="p-8 bg-cream/5 border-cream/10">
+              <div className="flex items-center gap-3 mb-4">
+                <MoreHorizontal className="w-4 h-4 text-cream/40" />
+                <span className="text-sm font-semibold text-cream/40">Quick actions</span>
+              </div>
+              <div className="space-y-2">
+                <button className="cursor-pointer w-full py-3 px-4 bg-cream/50 border border-cream/5 rounded text-left text-[12px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Download Applicants CSV</button>
+                <button className="cursor-pointer w-full py-3 px-4 bg-cream/50 border border-cream/5 rounded text-left text-[12px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Invite Team Members</button>
+              </div>
+            </Card>
+          </motion.div>
         </div>
       </div>
     </div>
   );
 }
-
-
