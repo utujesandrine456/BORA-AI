@@ -22,7 +22,7 @@ import { Job as ApiJob } from '@/lib/api/types';
 import { TalentProfile } from '@/lib/types/profile';
 
 
-interface EnrichedJob extends Omit<ApiJob, 'requirements'> {
+interface EnrichedJob extends Omit<ApiJob, 'requirements' | 'applicants'> {
   postedDate: string;
   applicantsCount: number;
   requirements: { experience: string; education: string; location: string };

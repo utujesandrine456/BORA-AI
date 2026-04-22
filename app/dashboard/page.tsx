@@ -10,13 +10,14 @@ import {
   Clock,
   ChevronRight,
   MoreHorizontal,
-  Sparkles
+  Sparkles,
+  Download
 } from 'lucide-react';
 import Link from 'next/link';
 import TopNav from '@/components/TopNav';
-import Card, { fadeUp, staggerContainer } from '@/components/ui/Card';
+import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
+
 import { jobsApi } from '@/lib/api/jobs';
 import { profilesApi } from '@/lib/api/profiles';
 import { Job } from '@/lib/api/types';
@@ -28,6 +29,21 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stat[]>([]);
   const [recentApplicants, setRecentApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [csvDownloading, setCsvDownloading] = useState(false);
+  const [csvError, setCsvError] = useState<string | null>(null);
+
+  const handleDownloadCSV = async () => {
+    try {
+      setCsvError(null);
+      setCsvDownloading(true);
+      await profilesApi.downloadApplicantsCSV();
+    } catch (err: any) {
+      console.error('CSV download failed:', err);
+      setCsvError('Failed to download CSV. Please try again.');
+    } finally {
+      setCsvDownloading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -272,9 +288,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <Button variant="primary" className="w-full mt-8 py-4 bg-cream text-dark hover:bg-cream/60 hover:text-dark text-sm font-semibold transition-all">
-                Generate report
-              </Button>
             </Card>
 
             <Card variant="glass" className="p-8 bg-cream/5 border-cream/10">
@@ -283,8 +296,17 @@ export default function Dashboard() {
                 <span className="text-sm font-semibold text-cream/40">Quick actions</span>
               </div>
               <div className="space-y-2">
-                <button className="cursor-pointer w-full py-3 px-4 bg-cream/50 border border-cream/5 rounded text-left text-[12px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Download Applicants CSV</button>
-                <button className="cursor-pointer w-full py-3 px-4 bg-cream/50 border border-cream/5 rounded text-left text-[12px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Invite Team Members</button>
+                <button
+                  onClick={handleDownloadCSV}
+                  disabled={csvDownloading}
+                  className="cursor-pointer w-full py-3 px-4 bg-cream/50 border border-cream/5 rounded text-left text-[12px] font-bold text-dark hover:border-cream/20 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <Download className="w-3.5 h-3.5 shrink-0" />
+                  {csvDownloading ? 'Downloading…' : 'Download Applicants CSV'}
+                </button>
+                {csvError && (
+                  <p className="text-[10px] text-red-400 font-semibold px-1 pt-1">{csvError}</p>
+                )}
               </div>
             </Card>
           </div>

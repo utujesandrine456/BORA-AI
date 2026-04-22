@@ -2,9 +2,18 @@ import { apiClient } from './client';
 import { Job } from './types';
 
 export const jobsApi = {
-  createJob: async (data: Job): Promise<Job> => {
-    const response = await apiClient.post<Job>('/v1/jobs', data);
-    return response.data;
+  createJob: async (data: Partial<Job>): Promise<Job> => {
+    console.log('[API Jobs] Creating job with data:', data);
+    try {
+      const response = await apiClient.post<Job>('/v1/jobs', data);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        console.error('[API Jobs] 400 Bad Request Payload:', JSON.stringify(data, null, 2));
+        console.error('[API Jobs] 400 Bad Request Response:', JSON.stringify(error.response?.data, null, 2));
+      }
+      throw error;
+    }
   },
 
   getJobs: async (): Promise<Job[]> => {

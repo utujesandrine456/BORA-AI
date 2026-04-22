@@ -48,8 +48,9 @@ apiClient.interceptors.response.use(
           localStorage.removeItem('user');
           window.location.href = '/auth/login?reason=session_expired';
         }
-        // If already on an auth page, silently reject to avoid redirect loop
       }
+    } else if (status === 400) {
+      console.error('[API Client] 400 Bad Request:', error.response?.data);
     }
     return Promise.reject(error);
   }

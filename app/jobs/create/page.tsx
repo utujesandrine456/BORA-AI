@@ -46,30 +46,28 @@ export default function CreateJobPage() {
     }
 
     setSaving(true);
-    // Strip properties that the backend forbids (based on 400 error logs)
     const payload = {
       title: formData.title,
       company: formData.company,
-      location: formData.location,
       description: formData.description,
-      type: formData.type,
-      requirements: skills,
+      location: formData.location || 'Remote',
       skills: skills,
-      experienceYears: Number(formData.experienceYears) || 0,
-      status: status
+      requirements: skills,
+      status: 'open'
     };
 
-    console.log('Publishing Job with stripped payload:', payload);
+    console.log('Publishing Job (Fixed Payload):', JSON.stringify(payload, null, 2));
 
     try {
-      const response = await jobsApi.createJob(payload);
+      const response = await jobsApi.createJob(payload as any);
       console.log('CreateJobPage: Creation Response:', response);
-      toast.success(`Job ${status === 'open' ? 'published' : 'saved as draft'} successfully`);
+      toast.success(`Job published successfully`);
       router.push('/jobs');
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to create job';
-      console.error('CreateJobPage Error:', msg);
-      toast.error(msg);
+    } catch (error: any) {
+      console.error('CreateJobPage FULL ERROR:', error);
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || error.response?.statusText;
+      const msg = serverMessage || (error instanceof Error ? error.message : 'Failed to create job');
+      toast.error(`Error: ${msg}`);
     } finally {
       setSaving(false);
     }

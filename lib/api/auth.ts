@@ -58,5 +58,27 @@ export const authApi = {
   getMe: async (): Promise<any> => {
     const response = await apiClient.get('/v1/auth/me');
     return response.data;
-  }
+  },
+
+  /**
+   * Change password for the currently logged-in user.
+   * Calls our internal Next.js API route.
+   */
+  changePassword: async (newPassword: string): Promise<{ message: string }> => {
+    const response = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ newPassword })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to change password');
+    }
+
+    return response.json();
+  },
 };
