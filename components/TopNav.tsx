@@ -3,19 +3,34 @@
 import { Search, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { authApi } from '@/lib/api/auth';
 
 export default function TopNav() {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
 
   useEffect(() => {
+    // 1. Initial load from localStorage for fast initial paint
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (_e) {
-        // ignore
-      }
+      } catch (_e) { /* ignore */ }
     }
+
+    const fetchUser = async () => {
+      try {
+        const res = await authApi.getMe();
+        const freshUser = res.user || res; // Handle both wrapped and unwrapped response
+        if (freshUser) {
+          setUser(freshUser);
+          localStorage.setItem('user', JSON.stringify(freshUser));
+        }
+      } catch (error) {
+        console.warn('TopNav: Failed to fetch fresh user data from /auth/me:', error);
+      }
+    };
+
+    fetchUser();
   }, []);
 
   const initials = user?.name

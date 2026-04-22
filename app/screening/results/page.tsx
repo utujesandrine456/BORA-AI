@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useCallback, useEffect } from 'react';
 import {
   Filter,
   Trophy,
@@ -13,7 +13,6 @@ import TopNav from '@/components/TopNav';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
 import { screeningApi } from '@/lib/api/screening';
 import { jobsApi } from '@/lib/api/jobs';
 import { profilesApi } from '@/lib/api/profiles';
@@ -24,56 +23,101 @@ function ScreeningResultsContent() {
   const searchParams = useSearchParams();
   const jobId = searchParams.get('jobId');
 
-  interface MappedResult { id: string; name: string; score: number; isBest: boolean; barColor: string; matchAnalysis: string; role: string; }
+  interface MappedResult {
+    id: string; name: string; score: number; isBest: boolean; barColor: string; matchAnalysis: string; role: string;
+    stats: { skills: number; experience: number; education: number };
+  }
   const [results, setResults] = useState<MappedResult[]>([]);
   const [jobInfo, setJobInfo] = useState<{ title?: string; company?: string } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [topLimit, setTopLimit] = useState('10');
+  const [customLimit, setCustomLimit] = useState('4');
+  const [showCustomInput, setShowCustomInput] = useState(false);
+
+  const finalLimit = showCustomInput ? parseInt(customLimit, 10) : (topLimit === 'all' ? undefined : parseInt(topLimit, 10));
 
   const displayResults = results
     .filter(r => r.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .slice(0, topLimit === 'all' ? undefined : parseInt(topLimit, 10));
+    .slice(0, isNaN(finalLimit as number) ? undefined : (finalLimit as any) === undefined ? undefined : finalLimit as number);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!jobId) return;
-      try {
-        setLoading(true);
-        const [resultsData, jobsData, profilesResponse] = await Promise.all([
-          screeningApi.getResults(jobId),
-          jobsApi.getJobs(),
-          profilesApi.getProfiles()
-        ]);
-
-        const job = jobsData.find((j) => j._id === jobId);
-        setJobInfo(job ?? null);
-
-        const mappedResults = resultsData.map((res, index) => {
-          const profile = profilesResponse.data.find((p) => p._id === res.profileId);
-          return {
-            id: res.profileId,
-            name: profile ? `${profile.firstName} ${profile.lastName}` : `Candidate ${index + 1}`,
-            score: res.score,
-            isBest: index === 0,
-            barColor: res.score >= 90 ? 'bg-emerald-500' : 'bg-blue-500',
-            matchAnalysis: res.matchAnalysis,
-            role: profile?.headline || 'Applicant'
-          };
-        });
-
-        setResults(mappedResults);
-        if (mappedResults.length > 0) setActiveCandidateId(mappedResults[0].id);
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : 'Failed to load screening results';
-        console.error('ScreeningResultsPage: Failed to fetch results:', msg);
-        toast.error('Failed to load screening results');
-      } finally {
-        setLoading(false);
+    if (displayResults.length > 0 && searchTerm) {
+      const currentExistsInDisplay = displayResults.some(r => r.id === activeCandidateId);
+      if (!currentExistsInDisplay) {
+        setActiveCandidateId(displayResults[0].id);
       }
-    };
-    fetchData();
+    }
+  }, [searchTerm, displayResults]);
+
+  const fetchData = useCallback(async () => {
+    if (!jobId) {
+      setLoading(false);
+      return;
+    }
+    try {
+      setLoading(true);
+      const [resultsData, jobsData, profilesResponse] = await Promise.all([
+        screeningApi.getResults(jobId),
+        jobsApi.getJobs(),
+        profilesApi.getProfiles({ jobId, limit: 100 })
+      ]);
+
+      const job = jobsData.find((j) => j._id === jobId);
+      setJobInfo(job ?? null);
+
+      const mappedResults = resultsData.map((res: any, index) => {
+        const profile = profilesResponse.data.find((p) => p._id === res.profileId);
+        const score = res.score ?? res.matchScore ?? 0;
+
+        const jobSkills = job?.skills || [];
+        const profileSkills = profile?.skills?.map(s => s.name.toLowerCase()) || [];
+        const matchedSkills = jobSkills.filter(s => profileSkills.includes(s.toLowerCase()));
+        const skillsScore = jobSkills.length > 0 ? Math.round((matchedSkills.length / jobSkills.length) * 100) : score;
+
+        const totalExpYears = profile?.experience?.reduce((acc, exp) => {
+          const start = new Date(exp.startDate).getTime();
+          const end = exp.endDate === 'Present' ? Date.now() : new Date(exp.endDate).getTime();
+          return acc + (end - start) / (1000 * 60 * 60 * 24 * 365.25);
+        }, 0) || 0;
+        const expScore = job?.experienceYears ? Math.min(100, Math.round((totalExpYears / job.experienceYears) * 100)) : Math.max(0, score - 5);
+
+        const hasEducationMatch = job?.education && profile?.education?.some(edu =>
+          edu.degree.toLowerCase().includes(job.education!.toLowerCase()) ||
+          edu.fieldOfStudy.toLowerCase().includes(job.education!.toLowerCase())
+        );
+        const eduScore = hasEducationMatch ? 100 : (profile?.education && profile.education.length > 0 ? 85 : 70);
+
+        return {
+          id: res.profileId,
+          name: profile ? `${profile.firstName} ${profile.lastName}` : `Candidate ${index + 1}`,
+          score: score,
+          isBest: index === 0,
+          barColor: score >= 90 ? 'bg-emerald-500' : 'bg-blue-500',
+          matchAnalysis: res.matchAnalysis,
+          role: profile?.headline || 'Applicant',
+          stats: {
+            skills: skillsScore,
+            experience: expScore,
+            education: eduScore
+          }
+        };
+      });
+
+      setResults(mappedResults);
+      if (mappedResults.length > 0) setActiveCandidateId(mappedResults[0].id);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Failed to load screening results';
+      console.error('ScreeningResultsPage: Failed to fetch results:', msg);
+      toast.error('Failed to load screening results');
+    } finally {
+      setLoading(false);
+    }
   }, [jobId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const activeCandidate = results.find(c => c.id === activeCandidateId);
 
@@ -111,6 +155,11 @@ GENERATED BY BORA AI PLATFORM
     toast.success('Professional report downloaded');
   };
 
+  const handleRefresh = () => {
+    setLoading(true);
+    fetchData();
+  };
+
   return (
     <div className="flex flex-col h-full bg-dark text-cream">
       <TopNav />
@@ -130,9 +179,15 @@ GENERATED BY BORA AI PLATFORM
               <Card padding="md" className="h-[800px] flex flex-col">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-bold text-cream">Top candidates</h2>
-                  <button className="text-cream/60 hover:text-cream transition-colors">
-                    <Filter className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleRefresh}
+                      className="p-2 text-cream/40 hover:text-emerald-500 transition-colors border border-cream/10 rounded-md hover:border-emerald-500/30"
+                      title="Refresh Results"
+                    >
+                      <Filter className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mb-6 space-y-4">
@@ -143,16 +198,39 @@ GENERATED BY BORA AI PLATFORM
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-dark border border-cream/20 rounded-md px-4 py-3 text-sm text-cream font-bold outline-none focus:border-cream"
                   />
-                  <select
-                    value={topLimit}
-                    onChange={(e) => setTopLimit(e.target.value)}
-                    className="w-full bg-dark border border-cream/20 rounded-md px-4 py-3 text-sm text-cream font-bold outline-none focus:border-cream cursor-pointer appearance-none"
-                  >
-                    <option value="10">Top 10 Candidates</option>
-                    <option value="25">Top 25 Candidates</option>
-                    <option value="50">Top 50 Candidates</option>
-                    <option value="all">All Candidates</option>
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      value={showCustomInput ? 'other' : topLimit}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'other') {
+                          setShowCustomInput(true);
+                        } else {
+                          setShowCustomInput(false);
+                          setTopLimit(val);
+                        }
+                      }}
+                      className="flex-1 bg-dark border border-cream/20 rounded-md px-4 py-3 text-sm text-cream font-bold outline-none focus:border-cream cursor-pointer appearance-none"
+                    >
+                      <option value="10">Top 10 Candidates</option>
+                      <option value="25">Top 25 Candidates</option>
+                      <option value="50">Top 50 Candidates</option>
+                      <option value="all">All Candidates</option>
+                      <option value="other">Other...</option>
+                    </select>
+
+                    {showCustomInput && (
+                      <input
+                        type="number"
+                        min="1"
+                        max={results.length}
+                        value={customLimit}
+                        onChange={(e) => setCustomLimit(e.target.value)}
+                        placeholder="N"
+                        className="w-20 bg-dark border border-cream/20 rounded-md px-3 py-3 text-sm text-cream font-bold outline-none focus:border-cream"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto pr-2 space-y-4">
@@ -167,11 +245,14 @@ GENERATED BY BORA AI PLATFORM
                       <div
                         key={candidate.id}
                         onClick={() => setActiveCandidateId(candidate.id)}
-                        className={`p-5 rounded-md border cursor-pointer transition-all ${isActive
-                          ? 'bg-cream/10 border-cream border-l-4 border-l-emerald-500'
-                          : 'bg-cream/5 border-cream/10 border-l-4 border-l-transparent hover:border-cream/30'
+                        className={`p-5 rounded-md border cursor-pointer transition-all duration-300 relative group/item ${isActive
+                          ? 'bg-emerald-500/10 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.15)] scale-[1.02] z-10'
+                          : 'bg-cream/5 border-cream/10 hover:border-cream/30 hover:bg-cream/8 hover:translate-x-1'
                           }`}
                       >
+                        {isActive && (
+                          <div className="absolute inset-0 rounded-md border border-emerald-500/50 animate-pulse-slow pointer-events-none" />
+                        )}
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex items-center gap-3">
                             {candidate.isBest ? (
@@ -276,10 +357,10 @@ GENERATED BY BORA AI PLATFORM
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
                   {[
-                    { label: 'Skills', value: `${((activeCandidate?.score ?? 0) + 2 > 100 ? 100 : (activeCandidate?.score ?? 0) + 2)}%` },
-                    { label: 'Experience', value: `${(activeCandidate?.score ?? 0) - 3}%` },
-                    { label: 'Education', value: '90%' },
-                    { label: 'Relevance', value: `${activeCandidate?.score}%` }
+                    { label: 'Skills', value: `${activeCandidate?.stats?.skills ?? 0}%` },
+                    { label: 'Experience', value: `${activeCandidate?.stats?.experience ?? 0}%` },
+                    { label: 'Education', value: `${activeCandidate?.stats?.education ?? 0}%` },
+                    { label: 'Relevance', value: `${activeCandidate?.score ?? 0}%` }
                   ].map((stat, i) => (
                     <div key={i} className="bg-cream/5 border border-cream/10 rounded-md p-6 text-center hover:bg-cream/10 transition-colors">
                       <div className="text-3xl font-black text-cream mb-1">{stat.value}</div>

@@ -28,6 +28,7 @@ export default function JobTable() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [screeningJob, setScreeningJob] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const pendingJobIdRef = React.useRef<string | null>(null);
 
@@ -132,16 +133,17 @@ export default function JobTable() {
   const handleScreen = async (jobId: string) => {
     if (!jobId) return;
 
-    const id = toast.loading('Initiating AI analysis...');
+    setScreeningJob(jobId);
+    const id = toast.loading('Initiating AI analysis for all candidates...');
     try {
       await screeningApi.triggerScreening(jobId);
-      toast.success('Analysis initiated! Redirecting to results...', { id });
-      setTimeout(() => {
-        router.push('/screening');
-      }, 1500);
+      toast.success('Analysis complete! Opening ranking dashboard...', { id });
+      router.push(`/screening/results?jobId=${jobId}`);
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Failed to start analysis';
       toast.error(msg, { id });
+    } finally {
+      setScreeningJob(null);
     }
   };
 
@@ -381,11 +383,15 @@ export default function JobTable() {
                       <Button
                         variant="primary"
                         size="sm"
-                        onClick={() => handleScreen(job.id as string)}
+                        disabled={screeningJob === (job.id as string)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleScreen(job.id as string);
+                        }}
                         className="px-4 py-2 text-xs font-black shadow-none transition-all group-hover:shadow-xl group-hover:shadow-cream/5"
                       >
-                        <Zap className="h-3.5 w-3.5" />
-                        Actions
+                        <Zap className={`h-3.5 w-3.5 ${screeningJob === (job.id as string) ? 'animate-pulse text-emerald-400' : ''}`} />
+                        {screeningJob === (job.id as string) ? 'Screening...' : 'Screen Candidates'}
                       </Button>
                       <div className="relative">
                         <button
@@ -471,8 +477,14 @@ export default function JobTable() {
                           >
                             {uploading === job.id ? 'Importing...' : 'Import CSV / Excel'}
                           </Button>
-                          <Button variant="primary" size="sm" className="bg-emerald-500 text-dark font-black hover:bg-emerald-400 border-none transition-all" onClick={() => handleScreen(job.id as string)}>
-                            Screen Candidates
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            disabled={screeningJob === (job.id as string)}
+                            className="bg-emerald-500 text-dark font-black hover:bg-emerald-400 border-none transition-all"
+                            onClick={() => handleScreen(job.id as string)}
+                          >
+                            {screeningJob === (job.id as string) ? 'Screening candidates...' : 'Screen Candidates'}
                           </Button>
                         </div>
                       </div>

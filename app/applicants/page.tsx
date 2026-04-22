@@ -22,12 +22,11 @@ import { uploadsApi } from '@/lib/api/uploads';
 import toast from 'react-hot-toast';
 import { TalentProfile } from '@/lib/types/profile';
 
-
 export default function ApplicantsPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [selectedApplicants, setSelectedApplicants] = useState<(string | number)[]>([]);
+  const [selectedId, setSelectedId] = useState<string | number | null>(null);
   interface Applicant { id: number; dbId: string | undefined; name: string; role: string | undefined; location: string | undefined; score: number; status: string; date: string; avatar: string; screened: boolean; jobStatus: string; }
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,11 +81,7 @@ export default function ApplicantsPage() {
   };
 
 
-  const handleSelectApplicant = (id: string | number, checked: boolean) => {
-    setSelectedApplicants(prev =>
-      checked ? [...prev, id] : prev.filter(aId => aId !== id)
-    );
-  };
+
 
   const [showFilters, setShowFilters] = useState(false);
 
@@ -192,21 +187,24 @@ export default function ApplicantsPage() {
           ) : filteredApplicants.length > 0 ? (
             <div className="space-y-4">
               {filteredApplicants.map((applicant: any) => (
-                <div key={applicant.id} className="group relative block">
-                  <Card variant="glass" className="p-8 transition-all duration-500 overflow-hidden relative border-cream/10 group-hover:border-cream/40">
+                <div
+                  key={applicant.dbId || applicant.id}
+                  onClick={() => setSelectedId(applicant.dbId || applicant.id)}
+                  className="group relative block"
+                >
+                  <Card
+                    variant="glass"
+                    className={`p-8 transition-all duration-500 overflow-hidden relative border-cream/10 cursor-pointer group/item ${selectedId === (applicant.dbId || applicant.id) ? 'bg-cream/10 border-cream/60 shadow-[0_0_40px_rgba(218,197,167,0.15)] scale-[1.01] z-20' : 'group-hover:border-cream/40'}`}
+                  >
+                    {selectedId === (applicant.dbId || applicant.id) && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-cream shadow-[0_0_15px_rgba(218,197,167,0.8)] animate-in slide-in-from-left duration-300" />
+                    )}
                     <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
                       <Sparkles className="w-32 h-32 -mr-16 -mt-16" />
                     </div>
 
                     <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                      <div className="flex items-center justify-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedApplicants.includes(applicant.dbId)}
-                          onChange={(e) => handleSelectApplicant(applicant.dbId, e.target.checked)}
-                          className="w-6 h-6 accent-cream/80 cursor-pointer rounded-lg border-cream/20 bg-dark/50"
-                        />
-                      </div>
+
 
                       <div className="w-16 h-16 bg-cream/10 border border-cream/20 rounded-lg flex items-center justify-center text-cream font-black text-2xl group-hover:bg-cream group-hover:text-dark transition-all duration-500 shadow-xl shadow-black/20">
                         {applicant.avatar}
@@ -233,24 +231,19 @@ export default function ApplicantsPage() {
                         </div>
                       </div>
 
-                      <div className="flex flex-row md:flex-col items-center md:items-end gap-10 md:gap-2 ml-auto shrink-0">
-                        <div className="text-right">
-                          <div className="text-[10px] font-black text-cream/30 mb-1">AI potential</div>
-                          <div className="flex items-center gap-3">
-                            {applicant.score >= 90 && (
-                              <div className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-emerald-500 text-[9px] font-black">High Match</div>
-                            )}
-                            <span className={`text-4xl font-black ${applicant.score >= 90 ? 'text-cream' : 'text-cream/40'}`}>
-                              {applicant.score}%
-                            </span>
-                          </div>
-                        </div>
-                        <div className="text-[10px] font-black text-cream/20">Joined {applicant.date}</div>
-                      </div>
-
-                      <div className="hidden md:flex items-center justify-center p-3 text-cream/10 group-hover:text-cream/60 group-hover:scale-125 transition-all">
+                      <div className="flex flex-col gap-3 ml-auto shrink-0">
+                        {applicant.screened && (
+                          <Link href={`/screening/results?jobId=${applicant.jobId || 'all'}`}>
+                            <button className="cursor-pointer w-full inline-flex items-center justify-center gap-2 py-3 px-6 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-dark transition-all rounded-md font-bold text-xs uppercase tracking-tighter">
+                              <Sparkles className="w-3.5 h-3.5" />
+                              Screening Results
+                            </button>
+                          </Link>
+                        )}
                         <Link href={`/applicants/${applicant.dbId || applicant.id}`}>
-                          <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                          <button className="cursor-pointer w-full inline-flex items-center justify-center gap-2 py-3 px-6 bg-cream text-dark hover:bg-white transition-all rounded-md font-black text-xs uppercase tracking-tighter">
+                            View Details
+                          </button>
                         </Link>
                       </div>
                     </div>
@@ -278,49 +271,7 @@ export default function ApplicantsPage() {
         </div>
       </div>
 
-      {/* Floating Action Bar */}
-      {selectedApplicants.length > 0 && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-8 bg-cream text-dark px-10 py-5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.4)] font-black border border-white/20 backdrop-blur-3xl animate-in slide-in-from-bottom-2 duration-300">
-          <div className="flex items-center gap-4 border-r border-dark/10 pr-8">
-            <div className="bg-dark text-cream w-8 h-8 rounded flex items-center justify-center text-sm shadow-inner group-hover:scale-110 transition-transform">
-              {selectedApplicants.length}
-            </div>
-            <div className="text-xs opacity-60">Candidates selected</div>
-          </div>
 
-          <div className="flex items-center gap-4">
-            {selectedApplicants.length === 1 ? (
-              <>
-                <button
-                  className="cursor-pointer inline-flex items-center justify-center gap-2 bg-dark text-cream py-3 px-8 text-xs hover:bg-black/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-md font-semibold"
-                >
-                  Trigger Screen
-                </button>
-                <button
-                  className="cursor-pointer inline-flex items-center justify-center gap-2 bg-dark/5 border border-dark/10 text-dark py-3 px-8 text-xs hover:bg-dark/10 transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-md font-semibold"
-                  onClick={() => router.push(`/applicants/${selectedApplicants[0]}`)}
-                >
-                  Inspect details
-                </button>
-              </>
-            ) : (
-              <button
-                className="cursor-pointer inline-flex items-center justify-center gap-2 bg-dark text-cream py-4 px-12 text-sm hover:scale-[1.02] shadow-2xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-md font-black"
-              >
-                Screen & Rank (AI)
-              </button>
-            )}
-          </div>
-
-          <button
-            onClick={() => setSelectedApplicants([])}
-            className="p-3 ml-4 bg-dark/5 hover:bg-dark/10 rounded-full transition-colors"
-            aria-label="Clear selection"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-      )}
     </div>
   );
 }
