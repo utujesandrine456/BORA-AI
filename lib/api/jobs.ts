@@ -8,14 +8,15 @@ export const jobsApi = {
   },
 
   getJobs: async (): Promise<Job[]> => {
-    type JobsResponse = Job[] | { data?: Job[]; total?: number; length?: number; [key: string]: unknown };
-    const response = await apiClient.get<JobsResponse>('/v1/jobs?status=all');
+    type JobsResponse = Job[] | { data?: Job[]; total?: number; length?: number;[key: string]: unknown };
+    // Try the base endpoint first, it usually returns all for the authenticated recruiter
+    const response = await apiClient.get<JobsResponse>('/v1/jobs');
     let rawData: JobsResponse = response.data;
 
-    if ((!rawData || (Array.isArray((rawData as {data?: unknown}).data) && (rawData as {total?: number}).total === 0)) && !(rawData as unknown[]).length) {
+    if (!rawData || (Array.isArray((rawData as { data?: unknown }).data) && (rawData as { total?: number }).total === 0 && (rawData as { data?: Job[] }).data?.length === 0)) {
       try {
-        const resp2 = await apiClient.get<JobsResponse>('/v1/jobs/');
-        if (resp2.data && ((Array.isArray((resp2.data as {data?: unknown}).data) && ((resp2.data as {total?: number}).total ?? 0) > 0) || (resp2.data as unknown[]).length > 0)) {
+        const resp2 = await apiClient.get<JobsResponse>('/v1/jobs?status=all');
+        if (resp2.data && ((Array.isArray((resp2.data as { data?: unknown }).data) && ((resp2.data as { total?: number }).total ?? 0) > 0) || (resp2.data as unknown[]).length > 0)) {
           rawData = resp2.data;
         }
       } catch (_e) { }

@@ -43,13 +43,13 @@ export default function LoginPage() {
         }
     };
 
-    const patternSvg = `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3Cpath d='M30 60L0 30' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3C/svg%3E`;
+    const patternSvg = `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='none' stroke='%23DAC5A7' stroke-opacity='0.15' stroke-width='1'/%3E%3Cpath d='M30 60L0 30' fill='none' stroke='%23DAC5A7' stroke-opacity='0.15' stroke-width='1'/%3E%3C/svg%3E`;
 
     return (
         <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-dark relative overflow-hidden">
             <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.22 }}
+                animate={{ opacity: 0.05 }}
                 transition={{ duration: 1.5 }}
                 className="fixed inset-0 z-0 pointer-events-none"
                 style={{ backgroundImage: `url("${patternSvg}")`, backgroundSize: '70px' }}

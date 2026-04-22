@@ -35,7 +35,7 @@ export default function Dashboard() {
         setLoading(true);
         const [jobs, profilesResponse] = await Promise.all([
           jobsApi.getJobs(),
-          profilesApi.getProfiles({ limit: 5 })
+          profilesApi.getProfiles({ limit: 1000 })
         ]);
 
         // Calculate Stats
@@ -43,7 +43,7 @@ export default function Dashboard() {
         const totalApplicants = profilesResponse.total || 0;
 
         // Calculate Screening Progress
-        const profilesWithScores = profilesResponse.data.filter((p: any) => p.matchScore && p.matchScore > 0).length;
+        const profilesWithScores = profilesResponse.data.filter((p: any) => p.aiScore && p.aiScore > 0).length;
         const totalProfiles = profilesResponse.total || 0;
         const screeningProgress = totalProfiles > 0 ? Math.round((profilesWithScores / totalProfiles) * 100) : 0;
 
@@ -80,8 +80,8 @@ export default function Dashboard() {
           id: p._id || '',
           name: `${p.firstName} ${p.lastName}`,
           role: p.headline || 'Applicant',
-          match: p.matchScore || 85,
-          status: p.matchScore && p.matchScore >= 90 ? 'High Match' : 'In Review',
+          match: p.aiScore || 0,
+          status: p.aiScore && p.aiScore >= 90 ? 'High Match' : (p.aiScore && p.aiScore > 0 ? 'In Review' : 'Not Screened'),
           avatar: `${p.firstName?.[0] || ''}${p.lastName?.[0] || ''}` || '?'
         }));
 
@@ -265,8 +265,8 @@ export default function Dashboard() {
                 <span className="text-sm font-semibold text-cream/40">Quick actions</span>
               </div>
               <div className="space-y-2">
-                <button className="cursor-pointer w-full py-3 px-4 bg-cream/50 border border-cream/5 rounded text-left text-[12px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Download Applicants CSV</button>
-                <button className="cursor-pointer w-full py-3 px-4 bg-cream/50 border border-cream/5 rounded text-left text-[12px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Invite Team Members</button>
+                <button className="cursor-pointer w-full py-3 px-4 bg-cream border border-cream/5 rounded text-center text-[13px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Download Applicants CSV</button>
+                <button className="cursor-pointer w-full py-3 px-4 bg-cream border border-cream/5 rounded text-center text-[13px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Invite Team Members</button>
               </div>
             </Card>
           </div>

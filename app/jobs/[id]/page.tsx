@@ -22,7 +22,7 @@ import { Job as ApiJob } from '@/lib/api/types';
 import { TalentProfile } from '@/lib/types/profile';
 
 
-interface EnrichedJob extends Omit<ApiJob, 'requirements'> {
+interface EnrichedJob extends Omit<ApiJob, 'requirements' | 'applicants'> {
   postedDate: string;
   applicantsCount: number;
   requirements: { experience: string; education: string; location: string };
@@ -37,7 +37,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
   const [loading, setLoading] = useState(true);
   const [screening, setScreening] = useState(false);
 
-  
+
   useEffect(() => {
     const fetchJobData = async () => {
       try {
@@ -51,7 +51,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
           name: `${p.firstName} ${p.lastName}`,
           skills: p.headline || 'Candidate',
           experience: p.experience?.[0]?.role || 'Professional',
-          match: p.matchScore || 0
+          match: p.aiScore || 0
         }));
 
         const screened = applicants.filter(a => a.match > 0).length;
@@ -228,8 +228,8 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                         </div>
                         <div className="text-right">
                           <div className="flex flex-col items-end">
-                            <span className="text-4xl font-black text-cream leading-none">{applicant.match}%</span>
-                            <span className="text-cream/60 font-black text-[10px] mt-2">Score match</span>
+                            <span className="text-4xl font-black text-cream leading-none">{applicant.match > 0 ? `${applicant.match}%` : '—'}</span>
+                            <span className="text-cream/60 font-black text-[10px] mt-2">{applicant.match > 0 ? 'Score match' : 'Not screened'}</span>
                           </div>
                         </div>
                       </div>

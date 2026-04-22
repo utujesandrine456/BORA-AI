@@ -35,18 +35,18 @@ export default function ApplicantsPage() {
   const fetchApplicants = async () => {
     try {
       setLoading(true);
-      const response = await profilesApi.getProfiles();
+      const response = await profilesApi.getProfiles({ limit: 1000 });
       const mapped = response.data.map((p: TalentProfile, index: number) => ({
         id: index + 1,
         dbId: p._id,
         name: `${p.firstName} ${p.lastName}`,
         role: p.headline,
         location: p.location,
-        score: p.matchScore || 0,
-        status: p.availability?.status || 'New',
+        score: p.aiScore || 0,
+        status: p.aiScore ? 'Screened' : (p.availability?.status || 'New'),
         date: 'Recently',
         avatar: `${p.firstName[0]}${p.lastName[0]}`,
-        screened: !!p.matchScore,
+        screened: !!p.aiScore,
         jobStatus: (p as any).jobStatus || 'Open'
       }));
       setApplicants(mapped);
@@ -241,7 +241,7 @@ export default function ApplicantsPage() {
                           </Link>
                         )}
                         <Link href={`/applicants/${applicant.dbId || applicant.id}`}>
-                          <button className="cursor-pointer w-full inline-flex items-center justify-center gap-2 py-3 px-6 bg-cream text-dark hover:bg-white transition-all rounded-md font-black text-xs uppercase tracking-tighter">
+                          <button className="cursor-pointer w-full inline-flex items-center justify-center gap-2 py-3 px-6 bg-cream text-dark hover:bg-white transition-all rounded-md font-bold text-sm">
                             View Details
                           </button>
                         </Link>

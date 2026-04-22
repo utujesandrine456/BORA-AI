@@ -44,11 +44,11 @@ export default function JobTable() {
       toast.success('Applicants imported successfully!', { id });
       fetchJobs();
     } catch (error: unknown) {
-      const axiosError = error as any;
-      const serverMsg = axiosError?.response?.data?.message || axiosError?.response?.data?.error;
-      const msg = serverMsg || (error instanceof Error ? error.message : 'Import failed');
+      const msg = error instanceof Error ? error.message : 'Import failed';
       toast.error(`Upload failed: ${msg}`, { id });
-      console.error('CSV Upload Error:', axiosError?.response?.data || error);
+
+      console.warn('CSV Upload Extracted Error:', msg);
+      console.warn('Server Upload Raw Error:', error);
     } finally {
       setUploading(null);
       pendingJobIdRef.current = null;
@@ -58,7 +58,6 @@ export default function JobTable() {
 
   const triggerUpload = (jobId: string) => {
     pendingJobIdRef.current = jobId;
-    // Reset before clicking so change event fires even for same file
     if (fileInputRef.current) fileInputRef.current.value = '';
     fileInputRef.current?.click();
   };
@@ -75,21 +74,16 @@ export default function JobTable() {
 
       const rawArray: Job[] = Array.isArray(data) ? data : [];
 
-      // Calculate real applicant counts from profiles
-      const applicantCounts: Record<string, number> = {};
-      profilesRes.data.forEach((p: TalentProfile) => {
+
+      const applicantCounts: Record<string, number> = {}; profilesRes.data.forEach((p: TalentProfile) => {
         const jId = p.jobId;
         if (jId) {
           applicantCounts[jId] = (applicantCounts[jId] || 0) + 1;
         }
       });
 
-      console.log(`JobTable: Received ${rawArray.length} items from backend`);
-
-      // Fallback mapper for properties missing from base Job schema
       const mappedJobs = rawArray.map((job: Job) => {
         const jobId = job._id || job.id;
-        // Handle varied status strings: 'open' | 'active' | 'draft' | 'published'
         const rawStatus = job.status || 'open';
         let displayStatus = 'Open';
 
@@ -135,12 +129,27 @@ export default function JobTable() {
 
     setScreeningJob(jobId);
     const id = toast.loading('Initiating AI analysis for all candidates...');
+
+    // 50-second timeout guard to prevent infinite hanging
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Screening request timed out. The analysis may still be processing in the background.')), 50000)
+    );
+
     try {
-      await screeningApi.triggerScreening(jobId);
+      await Promise.race([
+        screeningApi.triggerScreening(jobId),
+        timeoutPromise
+      ]);
+
       toast.success('Analysis complete! Opening ranking dashboard...', { id });
-      router.push(`/screening/results?jobId=${jobId}`);
+
+      // Delay redirection slightly to allow DB state to stabilize
+      setTimeout(() => {
+        router.push(`/screening/results?jobId=${jobId}`);
+      }, 2000);
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Failed to start analysis';
+      console.error('JobTable: Screening failed:', msg);
       toast.error(msg, { id });
     } finally {
       setScreeningJob(null);
@@ -361,8 +370,8 @@ export default function JobTable() {
                             <div className="w-full h-full bg-cream/10"></div>
                           </div>
                         ))}
-                        <div className="w-9 h-9 rounded-md border border-cream bg-dark flex items-center justify-center text-[11px] font-black text-cream">
-                          +{(job.applicants || 0) > 3 ? (job.applicants as number) - 3 : 0}
+                        <div className="w-9 h-9 rounded-md border border-cream bg-dark flex items-center justify-center text-[12px] font-bold text-cream">
+                          +{(job.applicants || 0)}
                         </div>
                       </div>
                     </div>
