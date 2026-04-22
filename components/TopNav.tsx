@@ -9,18 +9,17 @@ export default function TopNav() {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
 
   useEffect(() => {
-    // 1. Initial load from localStorage for fast initial paint
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (_e) { /* ignore */ }
+      } catch (_e) { }
     }
 
     const fetchUser = async () => {
       try {
         const res = await authApi.getMe();
-        const freshUser = res.user || res; // Handle both wrapped and unwrapped response
+        const freshUser = res.user || res;
         if (freshUser) {
           setUser(freshUser);
           localStorage.setItem('user', JSON.stringify(freshUser));

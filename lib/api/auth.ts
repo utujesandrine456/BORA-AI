@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse } from './types';
+import { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, ForgotPasswordRequest, ResetPasswordRequest } from './types';
 
 export const authApi = {
   register: async (data: RegisterRequest): Promise<RegisterResponse> => {
@@ -50,6 +50,16 @@ export const authApi = {
 
   getMe: async (): Promise<any> => {
     const response = await apiClient.get('/v1/auth/me');
+    return response.data;
+  },
+
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>('/v1/auth/forgot-password', data);
+    return response.data;
+  },
+
+  resetPassword: async (data: ResetPasswordRequest): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>('/v1/auth/reset-password', data);
     return response.data;
   }
 };

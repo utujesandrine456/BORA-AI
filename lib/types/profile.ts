@@ -80,6 +80,9 @@ export interface TalentProfile {
     availability: Availability;
     socialLinks?: SocialLinks;
     // Optional fields returned by the API after screening
-    matchScore?: number;
+    aiScore?: number;
+    aiStrengths?: string[];
+    aiGaps?: string[];
+    aiRecommendation?: string;
     summary?: string;
 }

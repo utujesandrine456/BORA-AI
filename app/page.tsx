@@ -27,7 +27,7 @@ export default function LandingPage() {
     };
     fetchLiveStats();
   }, []);
-  const patternSvg = `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3Cpath d='M30 60L0 30' fill='none' stroke='%23DAC5A7' stroke-opacity='0.4' stroke-width='1'/%3E%3C/svg%3E`;
+  const patternSvg = `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='none' stroke='%23DAC5A7' stroke-opacity='0.15' stroke-width='1'/%3E%3Cpath d='M30 60L0 30' fill='none' stroke='%23DAC5A7' stroke-opacity='0.15' stroke-width='1'/%3E%3C/svg%3E`;
 
   return (
     <div className="min-h-screen bg-dark text-cream font-medium selection:bg-cream selection:text-dark overflow-x-hidden relative">
@@ -35,7 +35,7 @@ export default function LandingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 2 }}
-        className="fixed inset-0 z-0 pointer-events-none opacity-[0.25]"
+        className="fixed inset-0 z-0 pointer-events-none opacity-[0.06]"
         style={{ backgroundImage: `url("${patternSvg}")`, backgroundSize: '70px' }}
       />
 
@@ -339,7 +339,7 @@ export default function LandingPage() {
 
         {/* CTA SECTION */}
         <section className="py-32 px-6 bg-dark border-t border-cream/20 relative overflow-hidden">
-          <div className="absolute inset-0 z-0 opacity-5 pointer-events-none" style={{ backgroundImage: `url("${patternSvg}")`, backgroundSize: '40px' }}></div>
+          <div className="absolute inset-0 z-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: `url("${patternSvg}")`, backgroundSize: '40px' }}></div>
           <div className="max-w-4xl mx-auto text-center relative z-10">
             <h2 className="text-4xl md:text-7xl font-black text-cream mb-8 leading-none">
               Deploy intelligence.

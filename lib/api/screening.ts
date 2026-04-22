@@ -7,15 +7,14 @@ export const screeningApi = {
     return response.data;
   },
 
-  getResults: async (jobId: string): Promise<ScreeningResult[]> => {
-    type ResultsResponse = ScreeningResult[] | { data: ScreeningResult[] };
-    const response = await apiClient.get<ResultsResponse>(`/v1/results/${jobId}`);
-    // Handle both direct array and paginated { data: [] } response
-    return Array.isArray(response.data) ? response.data : (response.data?.data || []);
+  getResults: async (jobId: string, version?: number): Promise<any> => {
+    const query = version ? `?version=${version}` : '';
+    const response = await apiClient.get(`/v1/results/${jobId}${query}`);
+    return response.data;
   },
 
-  getResultVersions: async (jobId: string): Promise<{ version: number; createdAt: string }[]> => {
-    const response = await apiClient.get<{ version: number; createdAt: string }[]>(`/v1/results/${jobId}/versions`);
+  getResultVersions: async (jobId: string): Promise<any[]> => {
+    const response = await apiClient.get(`/v1/results/${jobId}/versions`);
     return response.data;
   }
 };

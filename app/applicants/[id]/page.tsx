@@ -60,9 +60,9 @@ export default function CandidateDetailsPage() {
           email: p.email,
           phone: 'Not provided',
           avatar: `${p.firstName[0]}${p.lastName[0]}`,
-          status: p.availability?.status || 'Applied',
-          score: p.matchScore || 85,
-          matchDescription: p.summary || 'Profile analysis complete. Screening results are being processed by the BORA AI engine.',
+          status: p.aiScore ? 'Screened' : (p.availability?.status || 'Applied'),
+          score: p.aiScore || 0,
+          matchDescription: p.aiScore ? (p.aiRecommendation || p.summary || 'Profile analysis complete.') : 'Candidate has not been screened yet. Run AI screening to generate insights.',
           skills: {
             primary: p.skills.slice(0, 5).map(s => s.name),
             secondary: p.skills.slice(5).map(s => s.name)
@@ -85,17 +85,21 @@ export default function CandidateDetailsPage() {
             link: proj.link,
             year: proj.endDate ? proj.endDate.split('-')[0] : '2024'
           })),
-          aiInsights: {
-            strengths: [
-              'Strong technical foundation in ' + p.skills.slice(0, 2).map(s => s.name).join(', '),
+          aiInsights: p.aiScore ? {
+            strengths: p.aiStrengths?.length ? p.aiStrengths : [
+              'Strong technical foundation in ' + p.skills.slice(0, 2).map((s: any) => s.name).join(', '),
               'Relevant professional background in ' + (p.experience[0]?.role || 'engineering'),
               'Clear career progression and focus'
             ],
-            weaknesses: [
+            weaknesses: p.aiGaps?.length ? p.aiGaps : [
               'Requires validation on specific architectural patterns',
               'Benefit from deeper project-specific documentation'
             ],
-            parity: p.summary || `${p.matchScore || 85}/100 alignment with core job requirements.`
+            parity: p.aiRecommendation || p.summary || `${p.aiScore}/100 alignment with core job requirements.`
+          } : {
+            strengths: ['Pending AI analysis'],
+            weaknesses: ['Pending AI analysis'],
+            parity: 'Not Screened'
           },
           certifications: [],
           languages: p.languages || []
@@ -114,7 +118,7 @@ export default function CandidateDetailsPage() {
     return (
       <div className="flex flex-col h-full bg-dark min-h-screen items-center justify-center space-y-4">
         <div className="w-12 h-12 border-4 border-cream border-t-transparent rounded-full animate-spin opacity-20"></div>
-        <p className="text-cream/40 font-bold text-sm">Retrieving profile...</p>
+        <p className="text-cream/40 font-medium text-lg">Retrieving profile...</p>
       </div>
     );
   }
@@ -187,9 +191,9 @@ export default function CandidateDetailsPage() {
 
             <div className="w-full md:w-auto text-center md:text-right space-y-2">
               <div className="text-xs text-cream/40 font-bold">AI match score</div>
-              <div className="text-7xl font-black text-cream">{candidate.score}%</div>
-              <div className="text-xs font-bold text-emerald-500 flex items-center justify-center md:justify-end gap-1">
-                <Zap className="w-3 h-3" fill="currentColor" /> Premium Match
+              <div className="text-7xl font-black text-cream">{candidate.score > 0 ? `${candidate.score}%` : '—'}</div>
+              <div className={`text-xs font-bold flex items-center justify-center md:justify-end gap-1 ${candidate.score > 0 ? 'text-emerald-500' : 'text-cream/40'}`}>
+                <Zap className="w-3 h-3" fill="currentColor" /> {candidate.score > 0 ? 'Premium Match' : 'Pending Analysis'}
               </div>
             </div>
           </div>

@@ -36,6 +36,7 @@ function ScreeningResultsContent() {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [pollingCount, setPollingCount] = useState(0);
   const [isPolling, setIsPolling] = useState(false);
+  const [isVersionProcessing, setIsVersionProcessing] = useState(false);
 
   const finalLimit = showCustomInput ? parseInt(customLimit, 10) : (topLimit === 'all' ? undefined : parseInt(topLimit, 10));
 
@@ -59,49 +60,62 @@ function ScreeningResultsContent() {
     }
     try {
       setLoading(true);
-      const [resultsData, jobsData, profilesResponse] = await Promise.all([
-        screeningApi.getResults(jobId),
-        jobsApi.getJobs(),
-        profilesApi.getProfiles({ jobId, limit: 100 })
+      const [versionsResponse, jobsData] = await Promise.all([
+        screeningApi.getResultVersions(jobId).catch(() => []),
+        jobsApi.getJobs()
       ]);
 
-      const job = jobsData.find((j) => j._id === jobId);
+      const job = jobsData.find((j) => String(j._id) === String(jobId) || String(j.id) === String(jobId));
       setJobInfo(job ?? null);
 
-      const mappedResults = resultsData.map((res: any, index) => {
-        const profile = profilesResponse.data.find((p) => p._id === res.profileId);
-        const score = res.score ?? res.matchScore ?? 0;
-
-        const jobSkills = job?.skills || [];
-        const profileSkills = profile?.skills?.map(s => s.name.toLowerCase()) || [];
-        const matchedSkills = jobSkills.filter(s => profileSkills.includes(s.toLowerCase()));
-        const skillsScore = jobSkills.length > 0 ? Math.round((matchedSkills.length / jobSkills.length) * 100) : score;
-
-        const totalExpYears = profile?.experience?.reduce((acc, exp) => {
-          const start = new Date(exp.startDate).getTime();
-          const end = exp.endDate === 'Present' ? Date.now() : new Date(exp.endDate).getTime();
-          return acc + (end - start) / (1000 * 60 * 60 * 24 * 365.25);
-        }, 0) || 0;
-        const expScore = job?.experienceYears ? Math.min(100, Math.round((totalExpYears / job.experienceYears) * 100)) : Math.max(0, score - 5);
-
-        const hasEducationMatch = job?.education && profile?.education?.some(edu =>
-          edu.degree.toLowerCase().includes(job.education!.toLowerCase()) ||
-          edu.fieldOfStudy.toLowerCase().includes(job.education!.toLowerCase())
+      let resultsData = null;
+      let processing = false;
+      if (Array.isArray(versionsResponse) && versionsResponse.length > 0) {
+        // Track the absolute newest version to determine if AI is still running
+        const absoluteLatest = versionsResponse.reduce((latest, current) =>
+          current.version > latest.version ? current : latest
         );
-        const eduScore = hasEducationMatch ? 100 : (profile?.education && profile.education.length > 0 ? 85 : 70);
+        processing = absoluteLatest.status !== 'completed' && absoluteLatest.status !== 'failed';
+        setIsVersionProcessing(processing);
+
+        // ONLY fetch results for the highest COMPLETED version
+        const completedVersions = versionsResponse.filter(v => v.status === 'completed');
+        if (completedVersions.length > 0) {
+          const latestCompleted = completedVersions.reduce((latest, current) =>
+            current.version > latest.version ? current : latest
+          );
+          try {
+            resultsData = await screeningApi.getResults(jobId, latestCompleted.version);
+          } catch (e) {
+            console.log("Failed to fetch completed results");
+          }
+        }
+      } else {
+        setIsVersionProcessing(false);
+      }
+
+      if (!resultsData || !resultsData.rankedCandidates) {
+        setResults([]);
+        setLoading(false);
+        return;
+      }
+
+      const mappedResults = resultsData.rankedCandidates.map((candidateObj: any, index: number) => {
+        const profile = candidateObj.profileId || {};
+        const score = candidateObj.score || 0;
 
         return {
-          id: res.profileId,
-          name: profile ? `${profile.firstName} ${profile.lastName}` : `Candidate ${index + 1}`,
+          id: profile._id || candidateObj._id || `temp-${index}`,
+          name: profile.firstName ? `${profile.firstName} ${profile.lastName}` : `Candidate ${index + 1}`,
           score: score,
           isBest: index === 0,
           barColor: score >= 90 ? 'bg-emerald-500' : 'bg-blue-500',
-          matchAnalysis: res.matchAnalysis,
-          role: profile?.headline || 'Applicant',
+          matchAnalysis: candidateObj.recommendation || '',
+          role: profile.headline || 'Applicant',
           stats: {
-            skills: skillsScore,
-            experience: expScore,
-            education: eduScore
+            skills: score,
+            experience: score,
+            education: score
           }
         };
       });
@@ -121,21 +135,20 @@ function ScreeningResultsContent() {
     fetchData();
   }, [fetchData]);
 
-  // Smart Polling: If results are empty, retry a few times
   useEffect(() => {
-    if (!loading && results.length === 0 && jobId && pollingCount < 10) {
+    if (!loading && (isVersionProcessing || results.length === 0) && jobId && pollingCount < 50) {
       setIsPolling(true);
       const timer = setTimeout(() => {
         setPollingCount(prev => prev + 1);
         fetchData();
       }, 3000);
       return () => clearTimeout(timer);
-    } else if (results.length > 0) {
+    } else if (results.length > 0 && !isVersionProcessing) {
       setIsPolling(false);
     } else {
-      setIsPolling(false); // Stop pulse if retries exhausted
+      setIsPolling(false);
     }
-  }, [loading, results.length, jobId, pollingCount, fetchData]);
+  }, [loading, results.length, jobId, pollingCount, isVersionProcessing, fetchData]);
 
   const activeCandidate = results.find(c => c.id === activeCandidateId);
 
@@ -215,7 +228,7 @@ GENERATED BY BORA AI PLATFORM
                     placeholder="Search candidates..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-dark border border-cream/20 rounded-md px-4 py-3 text-sm text-cream font-bold outline-none focus:border-cream"
+                    className="w-full bg-dark border border-cream/20 rounded-md px-4 py-3 text-sm text-cream font-medium outline-none focus:border-cream"
                   />
                   <div className="flex gap-2">
                     <select
@@ -252,8 +265,17 @@ GENERATED BY BORA AI PLATFORM
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-                  {loading ? (
+                <div className="flex-1 overflow-y-auto pr-2 space-y-4 relative">
+                  {(loading || isPolling || isVersionProcessing) && results.length > 0 && (
+                    <div className="flex items-center gap-3 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-md mb-2">
+                      <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-[10px] font-bold text-emerald-500">
+                        AI analysis in progress. Streaming available results...
+                      </span>
+                    </div>
+                  )}
+
+                  {loading && results.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full gap-4 opacity-40">
                       <div className="w-8 h-8 border-2 border-cream border-t-transparent rounded-full animate-spin"></div>
                       <span className="text-sm font-bold">
