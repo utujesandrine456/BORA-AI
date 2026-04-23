@@ -74,16 +74,33 @@ export default function JobTable() {
 
       const rawArray: Job[] = Array.isArray(data) ? data : [];
 
+      const findDataArray = (res: any): any[] => {
+        if (Array.isArray(res)) return res;
+        if (res && typeof res === 'object') {
+          const keys = ['data', 'profiles', 'items', 'results'];
+          for (const k of keys) if (Array.isArray(res[k])) return res[k];
+        }
+        return [];
+      };
 
-      const applicantCounts: Record<string, number> = {}; profilesRes.data.forEach((p: TalentProfile) => {
-        const jId = p.jobId;
+      const applicantCounts: Record<string, number> = {};
+      const allProfiles = findDataArray(profilesRes);
+
+      allProfiles.forEach((p: TalentProfile) => {
+        // Handle various jobId/job naming conventions and object/string ID formats
+        const rawJId = (p as any).jobId || (p as any).job;
+        const jId = typeof rawJId === 'string' ? rawJId : (rawJId && typeof rawJId === 'object' ? (rawJId._id || rawJId.id || rawJId._uuid) : null);
+
         if (jId) {
-          applicantCounts[jId] = (applicantCounts[jId] || 0) + 1;
+          const normId = String(jId).trim().toLowerCase();
+          applicantCounts[normId] = (applicantCounts[normId] || 0) + 1;
         }
       });
 
       const mappedJobs = rawArray.map((job: Job) => {
-        const jobId = job._id || job.id;
+        const jobId = String(job._id || job.id || '');
+        const idKey = jobId.trim().toLowerCase();
+
         const rawStatus = job.status || 'open';
         let displayStatus = 'Open';
 
@@ -98,7 +115,7 @@ export default function JobTable() {
           location: job.location || 'Remote',
           posted: job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Recently',
           createdAt: job.createdAt || new Date().toISOString(),
-          applicants: applicantCounts[jobId as string] || job.applicantsCount || 0,
+          applicants: applicantCounts[idKey] || (job as any).applicantsCount || (job as any).applicants || 0,
           status: displayStatus,
           company: job.company || 'BORA',
           description: job.description || ''
@@ -130,7 +147,6 @@ export default function JobTable() {
     setScreeningJob(jobId);
     const id = toast.loading('Initiating AI analysis for all candidates...');
 
-    // 50-second timeout guard to prevent infinite hanging
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Screening request timed out. The analysis may still be processing in the background.')), 50000)
     );
