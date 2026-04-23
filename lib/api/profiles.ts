@@ -27,7 +27,20 @@ export const profilesApi = {
   },
 
   getProfileById: async (id: string): Promise<TalentProfile> => {
-    const response = await apiClient.get<TalentProfile>(`/v1/profiles/${id}`);
-    return response.data;
+    try {
+      const response = await apiClient.get<TalentProfile>(`/v1/profiles/${id}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        console.warn(`Direct profile fetch failed for ${id}. Trying list fallback...`);
+        // Fallback: try filtering the list by ID (some backends allow this)
+        const response = await apiClient.get<PaginatedProfiles>('/v1/profiles', {
+          params: { id, limit: 1 }
+        });
+        const found = response.data.data.find(p => p._id === id || (p as any).id === id);
+        if (found) return found;
+      }
+      throw error;
+    }
   }
 };

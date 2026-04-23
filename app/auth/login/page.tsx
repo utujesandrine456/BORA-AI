@@ -67,7 +67,7 @@ export default function LoginPage() {
                             <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
                         </div>
                         <span className="text-3xl font-bold text-cream transition-all duration-700">
-                            Bora
+                            BORA
                         </span>
                     </Link>
                 </div>

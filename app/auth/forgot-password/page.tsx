@@ -56,7 +56,7 @@ export default function ForgotPasswordPage() {
                         <div className="w-12 h-12 border-2 border-cream/30 bg-dark rounded-full flex items-center justify-center transition-all group-hover:border-cream group-hover:rotate-12 duration-500 overflow-hidden shadow-2xl shadow-cream/20">
                             <img src="/logo.png" alt="BORA Logo" className="w-full h-full object-cover" />
                         </div>
-                        <span className="text-3xl font-bold text-cream">Bora</span>
+                        <span className="text-3xl font-bold text-cream">BORA</span>
                     </Link>
                 </div>
 

@@ -32,9 +32,6 @@ export default function TopNav() {
     fetchUser();
   }, []);
 
-  const initials = user?.name
-    ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
-    : '??';
 
   return (
     <>
@@ -51,7 +48,7 @@ export default function TopNav() {
         </div>
 
         <div className="flex items-center gap-8 relative z-10">
-          <Link href="/notifications" className="relative p-3 text-cream/40 hover:text-cream hover:bg-cream/5 rounded-md transition-all border cursor-pointer block border-cream/5">
+          <Link href="/notifications" className="ml-4 relative p-3 text-cream/40 hover:text-cream hover:bg-cream/5 rounded-full transition-all border cursor-pointer block border-cream/5">
             <Bell className="h-5 w-5" />
             <span className="absolute top-3 right-3 w-2 h-2 bg-emerald-500 rounded-full border-2 border-dark shadow-lg"></span>
           </Link>
@@ -60,13 +57,6 @@ export default function TopNav() {
             <div className="flex flex-col items-end">
               <span className="text-sm font-semibold text-cream ">{user?.name || (user ? 'Authenticating...' : 'Loading...')}</span>
               <span className="text-[12px] text-cream/40 font-medium">{user?.role || 'User'}</span>
-            </div>
-            <div className="flex items-center gap-2 cursor-pointer group">
-              <div className="w-12 h-12 bg-cream flex items-center justify-center rounded-md overflow-hidden border border-cream/20 shadow-2xl group-hover:scale-105 transition-transform">
-                <div className="w-full h-full bg-cream flex items-center justify-center text-dark font-black text-sm">
-                  {initials}
-                </div>
-              </div>
             </div>
           </div>
         </div>

@@ -36,9 +36,8 @@ export const authApi = {
 
   logout: async () => {
     try {
-      await apiClient.post('/v1/auth/logout');
-    } catch (error) {
-      console.error('Logout API call failed:', error);
+      await apiClient.post('/v1/auth/logout').catch(() => { });
+    } catch (_e) {
     } finally {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
