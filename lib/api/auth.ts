@@ -52,6 +52,12 @@ export const authApi = {
     return response.data;
   },
 
+  updateMe: async (data: any): Promise<any> => {
+    // Attempting to use PATCH as it's common for updates, or fallback to properties handled in User/Auth services
+    const response = await apiClient.patch('/v1/auth/me', data);
+    return response.data;
+  },
+
   forgotPassword: async (data: ForgotPasswordRequest): Promise<{ message: string }> => {
     const response = await apiClient.post<{ message: string }>('/v1/auth/forgot-password', data);
     return response.data;

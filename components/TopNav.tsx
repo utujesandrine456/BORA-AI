@@ -4,19 +4,22 @@ import { Search, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { authApi } from '@/lib/api/auth';
+import { notificationsApi } from '@/lib/api/notifications';
 
 export default function TopNav() {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (_e) { }
-    }
+    const loadData = async () => {
+      // 1. Load User
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (_e) { }
+      }
 
-    const fetchUser = async () => {
       try {
         const res = await authApi.getMe();
         const freshUser = res.user || res;
@@ -25,11 +28,23 @@ export default function TopNav() {
           localStorage.setItem('user', JSON.stringify(freshUser));
         }
       } catch (error) {
-        console.warn('TopNav: Failed to fetch fresh user data from /auth/me:', error);
+        console.warn('TopNav: Failed to fetch fresh user data:', error);
+      }
+
+      // 2. Load Notifications Count
+      try {
+        const notes = await notificationsApi.getNotifications();
+        setUnreadCount(notes.filter(n => !n.read).length);
+      } catch (error) {
+        console.error('TopNav: Failed to fetch notifications:', error);
       }
     };
 
-    fetchUser();
+    loadData();
+
+    // Check for updates every 30 seconds for a "live" feel
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
 
@@ -50,7 +65,9 @@ export default function TopNav() {
         <div className="flex items-center gap-8 relative z-10">
           <Link href="/notifications" className="ml-4 relative p-3 text-cream/40 hover:text-cream hover:bg-cream/5 rounded-full transition-all border cursor-pointer block border-cream/5">
             <Bell className="h-5 w-5" />
-            <span className="absolute top-3 right-3 w-2 h-2 bg-emerald-500 rounded-full border-2 border-dark shadow-lg"></span>
+            {unreadCount > 0 && (
+              <span className="absolute top-3 right-3 w-2 h-2 bg-emerald-500 rounded-full border-2 border-dark shadow-lg"></span>
+            )}
           </Link>
 
           <div className="flex items-center gap-6 pl-8 border-l border-cream/10">
