@@ -216,7 +216,6 @@ export default function JobTable() {
 
   return (
     <div className="bg-dark border border-cream/20 overflow-hidden rounded-md">
-      {/* Single shared hidden file input for all rows */}
       <input
         type="file"
         ref={fileInputRef}

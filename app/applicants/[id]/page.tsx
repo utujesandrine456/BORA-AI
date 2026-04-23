@@ -59,39 +59,39 @@ export default function CandidateDetailsPage() {
           location: p.location || 'Remote',
           email: p.email,
           phone: 'Not provided',
-          avatar: `${p.firstName[0]}${p.lastName[0]}`,
+          avatar: `${p.firstName?.[0] || '?'}${p.lastName?.[0] || ''}`,
           status: p.aiScore ? 'Screened' : (p.availability?.status || 'Applied'),
           score: p.aiScore || 0,
           matchDescription: p.aiScore ? (p.aiRecommendation || p.summary || 'Profile analysis complete.') : 'Candidate has not been screened yet. Run AI screening to generate insights.',
           skills: {
-            primary: p.skills.slice(0, 5).map(s => s.name),
-            secondary: p.skills.slice(5).map(s => s.name)
+            primary: (p.skills || []).slice(0, 5).map(s => s.name),
+            secondary: (p.skills || []).slice(5).map(s => s.name)
           },
-          experience: p.experience.map(exp => ({
-            role: exp.role,
-            company: exp.company,
-            period: `${exp.startDate} - ${exp.endDate || 'Present'}`,
-            description: exp.description
+          experience: (p.experience || []).map(exp => ({
+            role: exp.role || 'Role',
+            company: exp.company || 'Company',
+            period: `${exp.startDate || ''} - ${exp.endDate || 'Present'}`,
+            description: exp.description || ''
           })),
-          education: p.education.map(edu => ({
-            degree: edu.degree,
-            school: edu.institution,
-            year: String(edu.endYear)
+          education: (p.education || []).map(edu => ({
+            degree: edu.degree || 'Degree',
+            school: edu.institution || 'Institution',
+            year: String(edu.endYear || '')
           })),
-          projects: p.projects.map(proj => ({
-            name: proj.name,
-            description: proj.description,
-            technologies: proj.technologies,
+          projects: (p.projects || []).map(proj => ({
+            name: proj.name || 'Project',
+            description: proj.description || '',
+            technologies: proj.technologies || [],
             link: proj.link,
             year: proj.endDate ? proj.endDate.split('-')[0] : '2024'
           })),
           aiInsights: p.aiScore ? {
-            strengths: p.aiStrengths?.length ? p.aiStrengths : [
-              'Strong technical foundation in ' + p.skills.slice(0, 2).map((s: any) => s.name).join(', '),
-              'Relevant professional background in ' + (p.experience[0]?.role || 'engineering'),
+            strengths: (p.aiStrengths && p.aiStrengths.length) ? p.aiStrengths : [
+              'Strong technical foundation in ' + (p.skills || []).slice(0, 2).map((s: any) => s.name).join(', '),
+              'Relevant professional background in ' + (p.experience?.[0]?.role || 'engineering'),
               'Clear career progression and focus'
             ],
-            weaknesses: p.aiGaps?.length ? p.aiGaps : [
+            weaknesses: (p.aiGaps && p.aiGaps.length) ? p.aiGaps : [
               'Requires validation on specific architectural patterns',
               'Benefit from deeper project-specific documentation'
             ],
@@ -118,7 +118,7 @@ export default function CandidateDetailsPage() {
     return (
       <div className="flex flex-col h-full bg-dark min-h-screen items-center justify-center space-y-4">
         <div className="w-12 h-12 border-4 border-cream border-t-transparent rounded-full animate-spin opacity-20"></div>
-        <p className="text-cream/40 font-medium text-lg">Retrieving profile...</p>
+        <p className="text-cream/40 font-medium text-md">Retrieving profile...</p>
       </div>
     );
   }
@@ -128,7 +128,6 @@ export default function CandidateDetailsPage() {
       <TopNav />
 
       <div className="flex-1 p-8 max-w-7xl mx-auto w-full space-y-8">
-        {/* Navigation & Actions */}
         <div className="flex items-center justify-between">
           <Link href="/applicants" className="flex items-center gap-2 text-cream/40 hover:text-cream transition-colors group">
             <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />

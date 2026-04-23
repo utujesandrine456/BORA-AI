@@ -15,6 +15,7 @@ import Card from '@/components/ui/Card';
 import { useSearchParams } from 'next/navigation';
 import { screeningApi } from '@/lib/api/screening';
 import { jobsApi } from '@/lib/api/jobs';
+import { profilesApi } from '@/lib/api/profiles';
 import toast from 'react-hot-toast';
 
 
@@ -55,86 +56,88 @@ function ScreeningResultsContent() {
   }, [searchTerm, displayResults]);
 
   const fetchData = useCallback(async () => {
-    if (!jobId) {
-      setLoading(false);
-      return;
-    }
+    if (!jobId) return;
+
     try {
       setLoading(true);
-      const [versionsResponse, job] = await Promise.all([
+
+      // Step 1: Get Job Info, Versions, and actual Profiles count concurrently
+      const [job, versions, profilesRes] = await Promise.all([
+        jobsApi.getJobById(jobId).catch(() => null),
         screeningApi.getResultVersions(jobId).catch(() => []),
-        jobsApi.getJobById(jobId).catch(() => null)
+        profilesApi.getProfiles({ jobId, limit: 1 }).catch(() => null)
       ]);
 
-      setJobInfo(job ?? null);
+      setJobInfo(job);
+      const dbCount = profilesRes?.total || 0;
+      const jobCount = job?.applicantsCount || job?.applicants || 0;
+      const initialTotal = Math.max(dbCount, jobCount);
+      setTotalCandidates(initialTotal);
 
-      let resultsData = null;
-      let processing = false;
-      if (Array.isArray(versionsResponse) && versionsResponse.length > 0) {
-        // Track the absolute newest version to determine if AI is still running
-        const absoluteLatest = versionsResponse.reduce((latest, current) =>
-          current.version > latest.version ? current : latest
-        );
-        processing = absoluteLatest.status !== 'completed' && absoluteLatest.status !== 'failed';
-        setIsVersionProcessing(processing);
-
-        // Fetch results for the absolute latest version (to show partials)
-        try {
-          resultsData = await screeningApi.getResults(jobId, absoluteLatest.version);
-        } catch (e) {
-          console.warn("Partial result fetch failed for version:", absoluteLatest.version);
-          // Fallback to highest completed if partial fails
-          const completedVersions = versionsResponse.filter(v => v.status === 'completed');
-          if (completedVersions.length > 0) {
-            const latestCompleted = completedVersions.reduce((latest, current) =>
-              current.version > latest.version ? current : latest
-            );
-            resultsData = await screeningApi.getResults(jobId, latestCompleted.version);
-          }
-        }
-      } else {
+      if (!versions || versions.length === 0) {
         setIsVersionProcessing(false);
-      }
-
-      if (!resultsData || !resultsData.rankedCandidates) {
         setResults([]);
-        setTotalCandidates(0);
-        setLoading(false);
         return;
       }
 
-      setTotalCandidates(resultsData.totalCandidates || resultsData.rankedCandidates.length);
+      const latestVersion = versions.reduce((prev: any, curr: any) =>
+        (curr.version > prev.version) ? curr : prev
+      );
 
-      const mappedResults = resultsData.rankedCandidates.map((candidateObj: any, index: number) => {
-        const profile = candidateObj.profileId || {};
-        const score = candidateObj.score || 0;
+      const isProcessing = latestVersion.status === 'processing' || latestVersion.status === 'queued';
+      setIsVersionProcessing(isProcessing);
 
-        return {
-          id: profile._id || candidateObj._id || `temp-${index}`,
-          name: profile.firstName ? `${profile.firstName} ${profile.lastName}` : `Candidate ${index + 1}`,
-          score: score,
-          isBest: index === 0,
-          barColor: score >= 90 ? 'bg-emerald-500' : 'bg-blue-500',
-          matchAnalysis: candidateObj.recommendation || '',
-          role: profile.headline || 'Applicant',
-          stats: {
-            skills: score,
-            experience: score,
-            education: score
+      // Step 3: Fetch results for this specific version
+      try {
+        const resultsData = await screeningApi.getResults(jobId, latestVersion.version);
+
+        if (resultsData && resultsData.rankedCandidates) {
+          const apiTotal = resultsData.totalCandidates || resultsData.rankedCandidates.length || 0;
+          setTotalCandidates(prev => Math.max(prev, apiTotal));
+
+          const mappedResults = resultsData.rankedCandidates.map((candidateObj: any, index: number) => {
+            const profile = typeof candidateObj.profileId === 'object' ? candidateObj.profileId : {};
+            const profileId = typeof candidateObj.profileId === 'object' ? candidateObj.profileId._id : candidateObj.profileId;
+            const score = candidateObj.score || 0;
+
+            return {
+              id: profileId || candidateObj._id || `temp-${index}`,
+              name: profile.firstName ? `${profile.firstName} ${profile.lastName}` : (candidateObj.name || `Candidate ${index + 1}`),
+              score: score,
+              isBest: index === 0,
+              barColor: score >= 90 ? 'bg-emerald-500' : 'bg-blue-500',
+              matchAnalysis: candidateObj.recommendation || '',
+              role: profile.headline || 'Applicant',
+              stats: {
+                skills: score,
+                experience: score,
+                education: score
+              }
+            };
+          });
+
+          setResults(mappedResults);
+          if (mappedResults.length > 0 && !activeCandidateId) {
+            setActiveCandidateId(mappedResults[0].id);
           }
-        };
-      });
-
-      setResults(mappedResults);
-      if (mappedResults.length > 0) setActiveCandidateId(mappedResults[0].id);
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to load screening results';
-      console.error('ScreeningResultsPage: Failed to fetch results:', msg);
-      toast.error('Failed to load screening results');
+        }
+      } catch (err) {
+        console.warn(`Results fetch failed for version ${latestVersion.version}:`, err);
+        // If the newest version has NO results yet, we might want to check the previous version
+        if (versions.length > 1) {
+          const previousVersion = [...versions].sort((a: any, b: any) => b.version - a.version)[1];
+          const prevResults = await screeningApi.getResults(jobId, previousVersion.version).catch(() => null);
+          if (prevResults && prevResults.rankedCandidates) {
+            // ... show previous while new ones are still completely empty
+          }
+        }
+      }
+    } catch (error) {
+      console.error('ScreeningResults fetchData error:', error);
     } finally {
       setLoading(false);
     }
-  }, [jobId]);
+  }, [jobId, activeCandidateId]);
 
   useEffect(() => {
     fetchData();
