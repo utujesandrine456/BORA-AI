@@ -9,7 +9,6 @@ import {
   ArrowDownRight,
   Clock,
   ChevronRight,
-  MoreHorizontal,
   Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
@@ -33,24 +32,31 @@ export default function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const [jobs, profilesResponse] = await Promise.all([
-          jobsApi.getJobs(),
-          profilesApi.getProfiles({ limit: 1000 })
-        ]);
+        // Step 1: Get user's jobs
+        const jobs = await jobsApi.getJobs();
+        const jobIds = jobs.map((j: Job) => j._id || j.id).filter(Boolean) as string[];
 
-        // Calculate Stats
+        // Step 2: Fetch profiles for those jobs concurrently
+        const profilesResponses = await Promise.all(
+          jobIds.map(id => profilesApi.getProfiles({ jobId: id, limit: 10 }).catch(() => ({ data: [], total: 0 })))
+        );
+
+        const allProfiles = profilesResponses.flatMap(res => res.data).filter(p => p.jobId && jobIds.includes(p.jobId));
+        const totalApplicantsCount = profilesResponses.reduce((acc, res) => acc + res.total, 0);
+
         const activeJobs = jobs.filter((j: Job) => j.status !== 'closed' && j.status !== 'archived').length;
-        const totalApplicants = profilesResponse.total || 0;
 
-        // Calculate Screening Progress
-        const profilesWithScores = profilesResponse.data.filter((p: any) => p.aiScore && p.aiScore > 0).length;
-        const totalProfiles = profilesResponse.total || 0;
-        const screeningProgress = totalProfiles > 0 ? Math.round((profilesWithScores / totalProfiles) * 100) : 0;
+        // Calculate Screening Progress based on processed profiles
+        const processedProfilesCount = allProfiles.filter((p: any) =>
+          (p.aiScore !== undefined && p.aiScore >= 0) || p.summary || (p.aiStrengths && p.aiStrengths.length > 0)
+        ).length;
+        const totalProfilesCount = allProfiles.length;
+        const screeningProgress = totalProfilesCount > 0 ? Math.round((processedProfilesCount / totalProfilesCount) * 100) : 0;
 
         setStats([
           {
             label: 'Total Applicants',
-            value: totalApplicants.toLocaleString(),
+            value: totalApplicantsCount.toLocaleString(),
             change: '+5.2%',
             trend: 'up',
             icon: Users,
@@ -76,14 +82,21 @@ export default function Dashboard() {
 
 
 
-        const mappedApplicants = (profilesResponse.data || []).slice(0, 3).map((p: TalentProfile) => ({
-          id: p._id || '',
-          name: `${p.firstName} ${p.lastName}`,
-          role: p.headline || 'Applicant',
-          match: p.aiScore || 0,
-          status: p.aiScore && p.aiScore >= 90 ? 'High Match' : (p.aiScore && p.aiScore > 0 ? 'In Review' : 'Not Screened'),
-          avatar: `${p.firstName?.[0] || ''}${p.lastName?.[0] || ''}` || '?'
-        }));
+        const mappedApplicants = allProfiles
+          .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+          .slice(0, 3)
+          .map((p: TalentProfile) => ({
+            id: p._id || '',
+            name: `${p.firstName} ${p.lastName}`,
+            role: p.headline || 'Applicant',
+            match: p.aiScore || 0,
+            status: p.aiScore && p.aiScore >= 90
+              ? 'High Match'
+              : (p.aiScore && p.aiScore > 0
+                ? 'In Review'
+                : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0) ? 'Failed' : 'Not Screened')),
+            avatar: `${p.firstName?.[0] || ''}${p.lastName?.[0] || ''}` || '?'
+          }));
 
         setRecentApplicants(mappedApplicants);
       } catch (error) {
@@ -254,21 +267,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <Button variant="primary" className="w-full mt-8 py-4 bg-cream text-dark hover:bg-cream/60 hover:text-dark text-sm font-semibold transition-all">
-                Generate report
-              </Button>
             </Card>
 
-            <Card variant="glass" className="p-8 bg-cream/5 border-cream/10">
-              <div className="flex items-center gap-3 mb-4">
-                <MoreHorizontal className="w-4 h-4 text-cream/40" />
-                <span className="text-sm font-semibold text-cream/40">Quick actions</span>
-              </div>
-              <div className="space-y-2">
-                <button className="cursor-pointer w-full py-3 px-4 bg-cream border border-cream/5 rounded text-center text-[13px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Download Applicants CSV</button>
-                <button className="cursor-pointer w-full py-3 px-4 bg-cream border border-cream/5 rounded text-center text-[13px] font-bold text-dark hover:text-dark hover:border-cream/20 transition-all">Invite Team Members</button>
-              </div>
-            </Card>
           </div>
         </div>
       </div>

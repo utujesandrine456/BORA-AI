@@ -27,15 +27,19 @@ body {
     0% {
       transform: translateX(-100%);
     }
+
     100% {
       transform: translateX(100%);
     }
   }
 
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0px);
     }
+
     50% {
       transform: translateY(-20px);
     }
@@ -49,21 +53,179 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(218, 197, 167, 0.05); /* cream/5 */
+  background: rgba(218, 197, 167, 0.05);
+  /* cream/5 */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(218, 197, 167, 0.2); /* cream/20 */
+  background: rgba(218, 197, 167, 0.2);
+  /* cream/20 */
   border-radius: 10px;
   transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(218, 197, 167, 0.5); /* cream/50 */
+  background: rgba(218, 197, 167, 0.5);
+  /* cream/50 */
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(218, 197, 167, 0.2) transparent;
+}
+
+@media print {
+  @page {
+    size: auto;
+    margin: 25mm;
+  }
+
+  body {
+    background: #000000 !important;
+    color: #DAC5A7 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    text-align: center !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Hide navigation, buttons, avatars and other interactive elements */
+  nav,
+  button,
+  .no-print,
+  #avatar-badge,
+  .w-24.h-24.bg-cream.rounded-md,
+  header,
+  #top-nav,
+  [role="navigation"],
+  .flex.items-center.justify-between,
+  .gap-3.no-print,
+  .flex.items-center.gap-2.text-cream\/40,
+  a[href]::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  /* Main container adjustments */
+  .flex-1 {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #000000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .p-8 {
+    padding: 10mm 0 !important;
+  }
+
+  .max-w-7xl {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Force background colors for cards and badges */
+  .bg-dark {
+    background: #000000 !important;
+  }
+
+  .bg-cream\/5,
+  .bg-dark\/30,
+  .bg-dark\/40,
+  .border-cream\/10 {
+    background: transparent !important;
+    border: 1px solid rgba(218, 197, 167, 0.15) !important;
+    margin-bottom: 20px !important;
+    padding: 25px !important;
+  }
+
+  /* Specific styling for the report header card */
+  .bg-linear-to-r.from-cream\/5 {
+    background: linear-gradient(to bottom, rgba(218, 197, 167, 0.08), transparent) !important;
+    border: 1px solid rgba(218, 197, 167, 0.2) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .flex-col.md\:flex-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  /* Center all headings and text blocks */
+  h1,
+  h2,
+  h3,
+  p,
+  span,
+  div,
+  li {
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  .flex.items-center {
+    justify-content: center !important;
+  }
+
+  .flex.flex-wrap {
+    justify-content: center !important;
+    gap: 15px !important;
+  }
+
+  /* Preservation of score and accent highlights */
+  .text-emerald-500 {
+    color: #10b981 !important;
+  }
+
+  .bg-emerald-500\/5 {
+    background: rgba(16, 185, 129, 0.05) !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+    margin: 15px auto !important;
+  }
+
+  .text-amber-500 {
+    color: #f59e0b !important;
+  }
+
+  /* Section management */
+  section {
+    page-break-inside: avoid;
+    margin-bottom: 40pt !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  /* Grid layout adjustments for print - stack them centered */
+  .grid.lg\:grid-cols-3,
+  .grid.md\:grid-cols-2 {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 20px !important;
+  }
+
+  .lg\:col-span-2 {
+    width: 100% !important;
+  }
+
+  /* Remove all shadows for a cleaner PDF look */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Links */
+  a {
+    text-decoration: none !important;
+    color: #DAC5A7 !important;
+  }
 }

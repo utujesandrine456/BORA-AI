@@ -9,8 +9,7 @@ import {
   ChevronRight,
   Check,
   X,
-  Sparkles,
-  UploadCloud
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -18,7 +17,7 @@ import TopNav from '@/components/TopNav';
 import Badge from '@/components/ui/Badge';
 import Card from '@/components/ui/Card';
 import { profilesApi } from '@/lib/api/profiles';
-import { uploadsApi } from '@/lib/api/uploads';
+import { jobsApi } from '@/lib/api/jobs';
 import toast from 'react-hot-toast';
 import { TalentProfile } from '@/lib/types/profile';
 
@@ -30,29 +29,48 @@ export default function ApplicantsPage() {
   interface Applicant { id: number; dbId: string | undefined; jobId: string | undefined; name: string; role: string | undefined; location: string | undefined; score: number; status: string; date: string; avatar: string; screened: boolean; jobStatus: string; }
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
 
   const fetchApplicants = async () => {
     try {
       setLoading(true);
-      const response = await profilesApi.getProfiles({ limit: 1000 });
-      const mapped = response.data.map((p: TalentProfile, index: number) => ({
-        id: index + 1,
-        dbId: p._id,
-        jobId: p.jobId,
-        name: `${p.firstName} ${p.lastName}`,
-        role: p.headline,
-        location: p.location,
-        score: p.aiScore || 0,
-        status: p.aiScore ? 'Screened' : (p.availability?.status || 'New'),
-        date: 'Recently',
-        avatar: `${p.firstName[0]}${p.lastName[0]}`,
-        screened: !!p.aiScore,
-        jobStatus: (p as any).jobStatus || 'Open'
-      }));
+
+      const jobs = await jobsApi.getJobs();
+      const jobIds = jobs.map((j: any) => j._id || j.id).filter(Boolean) as string[];
+
+      if (jobIds.length === 0) {
+        setApplicants([]);
+        return;
+      }
+
+      const profilesResponses = await Promise.all(
+        jobIds.map(id => profilesApi.getProfiles({ jobId: id, limit: 100 }).catch(() => ({ data: [], total: 0 })))
+      );
+
+      const allProfiles = profilesResponses.flatMap(res => res.data);
+
+      // Step 3: Map and filter (just in case)
+      const mapped = allProfiles
+        .filter((p: TalentProfile) => p.jobId && jobIds.includes(p.jobId))
+        .map((p: TalentProfile, index: number) => ({
+          id: index + 1,
+          dbId: p._id,
+          jobId: p.jobId,
+          name: `${p.firstName} ${p.lastName}`,
+          role: p.headline,
+          location: p.location,
+          score: p.aiScore || 0,
+          status: p.aiScore
+            ? 'Screened'
+            : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0) ? 'Failed' : (p.availability?.status || 'New')),
+          date: 'Recently',
+          avatar: `${p.firstName?.[0] || ''}${p.lastName?.[0] || ''}`,
+          screened: !!p.aiScore || !!p.summary || !!(p.aiStrengths && p.aiStrengths.length > 0),
+          jobStatus: (p as any).jobStatus || 'Open'
+        }));
+
       setApplicants(mapped);
     } catch (error) {
-      console.error(error);
+      console.error('Applicants search error:', error);
       toast.error('Failed to fetch applicants');
     } finally {
       setLoading(false);
@@ -63,31 +81,16 @@ export default function ApplicantsPage() {
     fetchApplicants();
   }, []);
 
-  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    setUploading(true);
-    const id = toast.loading('Uploading and analyzing resume...');
-    try {
-      await uploadsApi.uploadResume(file);
-      toast.success('Resume analyzed and profile created!', { id });
-      fetchApplicants(); // Refresh list
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Upload failed';
-      toast.error(message, { id });
-    } finally {
-      setUploading(false);
-    }
-  };  const handleViewResults = async (applicant: Applicant) => {
+
+  const handleViewResults = async (applicant: Applicant) => {
     if (!applicant.dbId) return;
 
     const toastId = toast.loading('Fetching screening data...');
     try {
-      // Call the API as requested by the user
       const profile = await profilesApi.getProfileById(applicant.dbId);
       const targetJobId = profile.jobId || applicant.jobId || 'all';
-      
+
       router.push(`/screening/results?jobId=${targetJobId}&candidateId=${profile._id}`);
       toast.dismiss(toastId);
     } catch (error) {
@@ -121,24 +124,6 @@ export default function ApplicantsPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <input
-                type="file"
-                id="resume-upload"
-                className="hidden"
-                accept=".pdf,.doc,.docx"
-                onChange={handleResumeUpload}
-                disabled={uploading}
-              />
-              <button
-                className="cursor-pointer inline-flex items-center justify-center gap-3 py-4 px-8 bg-cream hover:bg-white text-dark transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-md font-black text-sm"
-                onClick={() => document.getElementById('resume-upload')?.click()}
-                disabled={uploading}
-              >
-                <UploadCloud className={`w-5 h-5 ${uploading ? 'animate-bounce' : ''}`} />
-                <span>{uploading ? 'Processing...' : 'Scan Single Resume'}</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -247,7 +232,7 @@ export default function ApplicantsPage() {
 
                       <div className="flex flex-col gap-3 ml-auto shrink-0">
                         {applicant.screened && (
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleViewResults(applicant);

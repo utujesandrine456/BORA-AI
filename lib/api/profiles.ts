@@ -40,5 +40,11 @@ export const profilesApi = {
       }
       throw error;
     }
+  },
+
+  updateProfile: async (id: string, data: Partial<ProfileInput>): Promise<TalentProfile> => {
+    // Switching to PUT as the jobs API uses it for updates and PATCH returned 404
+    const response = await apiClient.put<TalentProfile>(`/v1/profiles/${id}`, data);
+    return response.data;
   }
 };

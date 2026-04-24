@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Bell,
     Check,
@@ -14,27 +14,50 @@ import TopNav from '@/components/TopNav';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 
-const INITIAL_NOTIFICATIONS = [
-    { id: 1, type: 'application', title: 'New Application Received', message: 'Alexander Chen applied for Senior Backend Engineer.', time: '10 mins ago', read: false, icon: UserPlus, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { id: 2, type: 'message', title: 'Message from Candidate', message: 'Sarah Thompson replied to your interview request.', time: '1 hour ago', read: false, icon: MessageSquare, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { id: 3, type: 'system', title: 'System Update', message: 'Platform maintenance scheduled for this weekend.', time: '3 hours ago', read: true, icon: AlertCircle, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-    { id: 4, type: 'job', title: 'Job Posting Expiring', message: 'Your posting for "Product Designer" expires in 2 days.', time: '1 day ago', read: true, icon: Briefcase, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { id: 5, type: 'application', title: 'Candidate Shortlisted', message: 'Michael Laurent has been moved to Shortlisted by the hiring team.', time: '2 days ago', read: true, icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-];
+import { notificationsApi, Notification } from '@/lib/api/notifications';
+
+const ICON_MAP: Record<string, any> = {
+    UserPlus,
+    MessageSquare,
+    AlertCircle,
+    Briefcase,
+    CheckCircle2
+};
 
 export default function NotificationsPage() {
-    const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+    const [notifications, setNotifications] = React.useState<Notification[]>([]);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        const loadNotifications = async () => {
+            try {
+                setLoading(true);
+                const data = await notificationsApi.getNotifications();
+                setNotifications(data);
+            } catch (error) {
+                console.error('Failed to load notifications:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadNotifications();
+    }, []);
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
-    const markAllAsRead = () => {
-        setNotifications(notifications.map(n => ({ ...n, read: true })));
+    const markAllAsRead = async () => {
+        await notificationsApi.markAllAsRead();
+        const data = await notificationsApi.getNotifications();
+        setNotifications(data);
     };
 
-    const toggleReadStatus = (id: number) => {
-        setNotifications(notifications.map(n =>
+    const toggleReadStatus = async (id: string) => {
+        const notifications = await notificationsApi.getNotifications();
+        const updated = notifications.map(n =>
             n.id === id ? { ...n, read: !n.read } : n
-        ));
+        );
+        notificationsApi.saveNotifications(updated);
+        setNotifications(updated);
     };
 
     return (
@@ -64,8 +87,12 @@ export default function NotificationsPage() {
 
                 {/* Notifications List */}
                 <div className="space-y-4">
-                    {notifications.map((notification) => {
-                        const Icon = notification.icon;
+                    {loading ? (
+                        [1, 2, 3].map(i => (
+                            <div key={i} className="h-24 w-full bg-cream/5 border border-cream/10 rounded-md animate-pulse" />
+                        ))
+                    ) : notifications.map((notification) => {
+                        const Icon = ICON_MAP[notification.icon as string] || Bell;
                         return (
                             <Card
                                 key={notification.id}

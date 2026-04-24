@@ -16,15 +16,14 @@ import {
   Zap,
   CheckCircle2,
   AlertCircle,
-  Download,
   Code2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import TopNav from '@/components/TopNav';
+import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
 import { profilesApi } from '@/lib/api/profiles';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -35,7 +34,8 @@ export default function CandidateDetailsPage() {
   const id = params.id as string;
   interface CandidateDetail {
     id: string | undefined; name: string; role: string; location: string; email: string; phone: string; avatar: string;
-    status: string; score: number; matchDescription: string;
+    status: string; score: number; matchDescription: string; jobId: string | undefined;
+    socialLinks: { linkedin?: string; github?: string; portfolio?: string };
     skills: { primary: string[]; secondary: string[] };
     experience: { role: string; company: string; period: string; description: string }[];
     education: { degree: string; school: string; year: string }[];
@@ -58,11 +58,23 @@ export default function CandidateDetailsPage() {
           role: p.headline || 'Applicant',
           location: p.location || 'Remote',
           email: p.email,
-          phone: 'Not provided',
+          phone: (p as any).phone || 'Not provided',
           avatar: `${p.firstName?.[0] || '?'}${p.lastName?.[0] || ''}`,
-          status: p.aiScore ? 'Screened' : (p.availability?.status || 'Applied'),
+          socialLinks: {
+            linkedin: p.socialLinks?.linkedin || (p.socialLinks as any)?.linkedIn,
+            github: p.socialLinks?.github,
+            portfolio: p.socialLinks?.portfolio
+          },
+          status: p.aiScore
+            ? 'Screened'
+            : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0) ? 'Failed' : (p.availability?.status || 'New')),
           score: p.aiScore || 0,
-          matchDescription: p.aiScore ? (p.aiRecommendation || p.summary || 'Profile analysis complete.') : 'Candidate has not been screened yet. Run AI screening to generate insights.',
+          jobId: p.jobId,
+          matchDescription: p.aiScore
+            ? (p.aiRecommendation || p.summary || 'Profile analysis complete.')
+            : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0)
+              ? 'Candidate processed but did not meet minimum criteria for scoring.'
+              : 'Candidate has not been screened yet. Run AI screening to generate insights.'),
           skills: {
             primary: (p.skills || []).slice(0, 5).map(s => s.name),
             secondary: (p.skills || []).slice(5).map(s => s.name)
@@ -96,11 +108,15 @@ export default function CandidateDetailsPage() {
               'Benefit from deeper project-specific documentation'
             ],
             parity: p.aiRecommendation || p.summary || `${p.aiScore}/100 alignment with core job requirements.`
+          } : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0) ? {
+            strengths: p.aiStrengths || [],
+            weaknesses: p.aiGaps || [],
+            parity: 'Failed - Did not meet score threshold.'
           } : {
             strengths: ['Pending AI analysis'],
             weaknesses: ['Pending AI analysis'],
             parity: 'Not Screened'
-          },
+          }),
           certifications: [],
           languages: p.languages || []
         });
@@ -113,6 +129,7 @@ export default function CandidateDetailsPage() {
     };
     fetchCandidate();
   }, [id]);
+
 
   if (loading || !candidate) {
     return (
@@ -128,25 +145,17 @@ export default function CandidateDetailsPage() {
       <TopNav />
 
       <div className="flex-1 p-8 max-w-7xl mx-auto w-full space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between no-print">
           <Link href="/applicants" className="flex items-center gap-2 text-cream/40 hover:text-cream transition-colors group">
             <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span className="font-bold">Back</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <Button variant="secondary" className="gap-2">
-              <Download className="w-4 h-4" /> Save PDF
-            </Button>
-            <Button variant="primary" className="gap-2">
-              <Mail className="w-4 h-4" /> Contact Candidate
-            </Button>
-          </div>
         </div>
 
         {/* Profile Header */}
         <Card className="p-8 bg-linear-to-r from-cream/5 to-transparent border-cream/20">
           <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="w-24 h-24 bg-cream rounded-md flex items-center justify-center text-dark text-3xl font-black shrink-0">
+            <div id="avatar-badge" className="no-print w-24 h-24 bg-cream rounded-md flex items-center justify-center text-dark text-3xl font-black shrink-0">
               {candidate.avatar}
             </div>
             <div className="flex-1 space-y-4">
@@ -176,15 +185,21 @@ export default function CandidateDetailsPage() {
               </div>
 
               <div className="flex gap-4 pt-2">
-                <a href="#" className="p-2 border border-cream/20 rounded-md hover:bg-cream/10 transition-colors">
-                  <Linkedin className="w-4 h-4 text-cream/60" />
-                </a>
-                <a href="#" className="p-2 border border-cream/20 rounded-md hover:bg-cream/10 transition-colors">
-                  <Github className="w-4 h-4 text-cream/60" />
-                </a>
-                <a href="#" className="p-2 border border-cream/20 rounded-md hover:bg-cream/10 transition-colors">
-                  <ExternalLink className="w-4 h-4 text-cream/60" />
-                </a>
+                {candidate.socialLinks.linkedin && (
+                  <a href={candidate.socialLinks.linkedin.startsWith('http') ? candidate.socialLinks.linkedin : `https://${candidate.socialLinks.linkedin}`} target="_blank" rel="noopener noreferrer" className="p-2 border border-cream/20 rounded-md hover:bg-cream/10 transition-colors">
+                    <Linkedin className="w-4 h-4 text-cream/60" />
+                  </a>
+                )}
+                {candidate.socialLinks.github && (
+                  <a href={candidate.socialLinks.github.startsWith('http') ? candidate.socialLinks.github : `https://${candidate.socialLinks.github}`} target="_blank" rel="noopener noreferrer" className="p-2 border border-cream/20 rounded-md hover:bg-cream/10 transition-colors">
+                    <Github className="w-4 h-4 text-cream/60" />
+                  </a>
+                )}
+                {candidate.socialLinks.portfolio && (
+                  <a href={candidate.socialLinks.portfolio.startsWith('http') ? candidate.socialLinks.portfolio : `https://${candidate.socialLinks.portfolio}`} target="_blank" rel="noopener noreferrer" className="p-2 border border-cream/20 rounded-md hover:bg-cream/10 transition-colors">
+                    <ExternalLink className="w-4 h-4 text-cream/60" />
+                  </a>
+                )}
               </div>
             </div>
 
@@ -357,7 +372,6 @@ export default function CandidateDetailsPage() {
               </Card>
             </section>
 
-            {/* Certifications & Languages */}
             <section className="space-y-4">
               <h2 className="text-xl font-bold text-cream flex items-center gap-2 px-1">
                 <Award className="w-5 h-5 text-cream/40" />
@@ -400,7 +414,7 @@ export default function CandidateDetailsPage() {
             </section>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

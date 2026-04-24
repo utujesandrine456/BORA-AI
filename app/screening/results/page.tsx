@@ -21,8 +21,9 @@ import toast from 'react-hot-toast';
 
 function ScreeningResultsContent() {
   const searchParams = useSearchParams();
-  const jobId = searchParams.get('jobId');
+  const jobIdFromQuery = searchParams.get('jobId');
   const candidateIdFromQuery = searchParams.get('candidateId');
+  const [jobId, setJobId] = useState<string | null>(jobIdFromQuery);
   const [activeCandidateId, setActiveCandidateId] = useState<string | number>(candidateIdFromQuery || '');
 
   interface MappedResult {
@@ -55,6 +56,23 @@ function ScreeningResultsContent() {
       }
     }
   }, [searchTerm, displayResults]);
+
+  // If only candidateId is present (no jobId), resolve jobId from the profile
+  useEffect(() => {
+    const resolveJobId = async () => {
+      if (!jobIdFromQuery && candidateIdFromQuery) {
+        try {
+          const profile = await profilesApi.getProfileById(candidateIdFromQuery);
+          if (profile?.jobId) {
+            setJobId(profile.jobId);
+          }
+        } catch (err) {
+          console.error('Could not resolve jobId from candidateId:', err);
+        }
+      }
+    };
+    resolveJobId();
+  }, [jobIdFromQuery, candidateIdFromQuery]);
 
   const fetchData = useCallback(async () => {
     if (!jobId) return;

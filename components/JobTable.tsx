@@ -13,7 +13,7 @@ import { TalentProfile } from '@/lib/types/profile';
 import { Job } from '@/lib/api/types';
 import toast from 'react-hot-toast';
 import { Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function JobTable() {
   const router = useRouter();
@@ -136,6 +136,8 @@ export default function JobTable() {
       setLoading(false);
     }
   };
+
+
 
   useEffect(() => {
     fetchJobs();
@@ -417,6 +419,9 @@ export default function JobTable() {
                         <Zap className={`h-3.5 w-3.5 ${screeningJob === (job.id as string) ? 'animate-pulse text-emerald-400' : ''}`} />
                         {screeningJob === (job.id as string) ? 'Screening...' : 'Screen Candidates'}
                       </Button>
+
+
+
                       <div className="relative">
                         <button
                           onClick={(e) => {

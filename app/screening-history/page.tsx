@@ -23,6 +23,8 @@ import Button from '@/components/ui/Button';
 import Link from 'next/link';
 import { jobsApi } from '@/lib/api/jobs';
 import { analyticsApi } from '@/lib/api/analytics';
+import { screeningApi } from '@/lib/api/screening';
+import { profilesApi } from '@/lib/api/profiles';
 import toast from 'react-hot-toast';
 
 
@@ -35,7 +37,7 @@ export default function ScreeningHistoryPage() {
         totalAssessments: 0,
         avgMatchQuality: 0,
         avgCandidates: 0,
-        efficiency: 94
+        efficiency: 0
     });
 
     useEffect(() => {
@@ -51,26 +53,62 @@ export default function ScreeningHistoryPage() {
 
                 // Fetch details for each job using the analytics API
                 const extendedHistory = await Promise.all(jobs.map(async (job) => {
+                    const jobId = job._id || job.id || '';
                     try {
-                        const analytics = await analyticsApi.getJobAnalytics(job._id || job.id || '');
+                        const analytics = await analyticsApi.getJobAnalytics(jobId);
+
+                        let topMatchName = 'No Match';
+                        if (analytics.topCandidate && (analytics.topCandidate.firstName || analytics.topCandidate.lastName)) {
+                            topMatchName = `${analytics.topCandidate.firstName || ''} ${analytics.topCandidate.lastName || ''}`.trim() || 'Top Candidate';
+                        } else {
+                            // Fallback 1: Try screening results
+                            try {
+                                const resultsData = await screeningApi.getResults(jobId);
+                                const candidates = resultsData?.rankedCandidates || resultsData?.data || [];
+                                if (candidates.length > 0) {
+                                    const top = candidates[0];
+                                    const profile = typeof top.profileId === 'object' ? top.profileId : top;
+                                    topMatchName = (profile.firstName || profile.lastName)
+                                        ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
+                                        : (top.name || 'Top Candidate');
+                                }
+                            } catch (e) {
+                                console.warn(`Fallback screening fetch failed for ${jobId}:`, e);
+                            }
+
+                            // Fallback 2: Final resort - Fetch directly from profiles API
+                            if (topMatchName === 'No Match') {
+                                try {
+                                    const profilesRes = await profilesApi.getProfiles({ jobId, limit: 10 });
+                                    if (profilesRes?.data?.length > 0) {
+                                        // Sort by aiScore descending just in case the API doesn't default to it
+                                        const sorted = [...profilesRes.data].sort((a, b) => (b.aiScore || 0) - (a.aiScore || 0));
+                                        const top = sorted[0];
+                                        topMatchName = `${top.firstName || ''} ${top.lastName || ''}`.trim() || 'Top Candidate';
+                                    }
+                                } catch (e) {
+                                    console.warn(`Final resort profile fetch failed for ${jobId}:`, e);
+                                }
+                            }
+                        }
 
                         return {
-                            id: job._id || job.id,
+                            id: jobId,
                             role: job.title,
                             date: job.updatedAt || job.createdAt,
-                            candidates: analytics.totalCandidates || 0,
+                            candidates: analytics.totalCandidates || job.applicantsCount || job.applicants || 0,
                             avgScore: Math.round(analytics.averageScore || 0),
-                            topMatch: analytics.topCandidate ? `${analytics.topCandidate.firstName} ${analytics.topCandidate.lastName}` : 'No Match',
+                            topMatch: topMatchName,
                             status: job.status === 'closed' ? 'Archived' : 'Completed',
                             matchQuality: (analytics.averageScore || 0) >= 80 ? 'High' : (analytics.averageScore || 0) >= 60 ? 'Medium' : 'Low'
                         };
                     } catch (error) {
-                        console.warn(`Analytics failed for job ${job._id}:`, error);
+                        console.warn(`Analytics failed for job ${jobId}:`, error);
                         return {
-                            id: job._id || job.id,
+                            id: jobId,
                             role: job.title,
                             date: job.updatedAt || job.createdAt,
-                            candidates: 0,
+                            candidates: job.applicantsCount || job.applicants || 0,
                             avgScore: 0,
                             topMatch: 'No Data',
                             status: job.status === 'closed' ? 'Archived' : 'Completed',
@@ -83,12 +121,14 @@ export default function ScreeningHistoryPage() {
 
                 const totalCands = extendedHistory.reduce((acc, curr) => acc + curr.candidates, 0);
                 const totalAvgScore = extendedHistory.reduce((acc, curr) => acc + curr.avgScore, 0);
+                const screenedJobs = extendedHistory.filter(h => h.candidates > 0).length;
+                const efficiencyRate = jobs.length > 0 ? Math.round((screenedJobs / jobs.length) * 100) : 0;
 
                 setStats({
                     totalAssessments: jobs.length,
                     avgMatchQuality: jobs.length > 0 ? Math.round(totalAvgScore / jobs.length) : 0,
                     avgCandidates: jobs.length > 0 ? Number((totalCands / jobs.length).toFixed(1)) : 0,
-                    efficiency: 94
+                    efficiency: efficiencyRate
                 });
 
             } catch (error: unknown) {
