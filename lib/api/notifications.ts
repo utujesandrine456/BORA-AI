@@ -1,72 +1,46 @@
-import { UserPlus, MessageSquare, AlertCircle, Briefcase, CheckCircle2 } from 'lucide-react';
+import { apiClient } from './client';
 
 export interface Notification {
-    id: string;
-    type: 'application' | 'message' | 'system' | 'job';
+    id?: string;
+    _id?: string;
+    type: 'application' | 'message' | 'system' | 'job' | string;
     title: string;
     message: string;
-    time: string;
     read: boolean;
-    icon: any;
-    color: string;
-    bg: string;
-    createdAt: string;
+    createdAt?: string;
+
+    // Optional frontend fields
+    icon?: string;
+    color?: string;
+    bg?: string;
+    time?: string;
 }
-
-const STORAGE_KEY = 'bora_notifications';
-
-const INITIAL_NOTIFICATIONS: Notification[] = [];
 
 export const notificationsApi = {
     getNotifications: async (): Promise<Notification[]> => {
-        if (typeof window === 'undefined') return [];
-
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_NOTIFICATIONS));
-            return INITIAL_NOTIFICATIONS;
-        }
-
-        let notifications: Notification[] = JSON.parse(stored);
-
-        // Robust cleanup: Filter out any legacy mock IDs (1 through 5)
-        const mockIds = ['1', '2', '3', '4', '5'];
-        const cleanNotifications = notifications.filter(n => !mockIds.includes(n.id));
-
-        if (cleanNotifications.length !== notifications.length) {
-            notificationsApi.saveNotifications(cleanNotifications);
-            return cleanNotifications;
-        }
-
-        return notifications;
+        const response = await apiClient.get<{ data: Notification[] } | Notification[]>('/v1/notifications');
+        const data = ('data' in response.data) ? response.data.data : response.data;
+        return Array.isArray(data) ? data : [];
     },
 
-    saveNotifications: (notifications: Notification[]) => {
-        if (typeof window !== 'undefined') {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
-        }
+    getUnreadCount: async (): Promise<number> => {
+        const response = await apiClient.get<{ count: number }>('/v1/notifications/unread-count');
+        return response.data.count || 0;
     },
 
     markAsRead: async (id: string): Promise<void> => {
-        const notifications = await notificationsApi.getNotifications();
-        const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
-        notificationsApi.saveNotifications(updated);
+        await apiClient.patch(`/v1/notifications/${id}/read`);
     },
 
     markAllAsRead: async (): Promise<void> => {
-        const notifications = await notificationsApi.getNotifications();
-        const updated = notifications.map(n => ({ ...n, read: true }));
-        notificationsApi.saveNotifications(updated);
+        await apiClient.patch('/v1/notifications/mark-all-read');
     },
 
-    addNotification: async (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>): Promise<void> => {
-        const notifications = await notificationsApi.getNotifications();
-        const newNotification: Notification = {
-            ...notification,
-            id: Math.random().toString(36).substr(2, 9),
-            read: false,
-            createdAt: new Date().toISOString()
-        };
-        notificationsApi.saveNotifications([newNotification, ...notifications]);
+    deleteNotification: async (id: string): Promise<void> => {
+        await apiClient.delete(`/v1/notifications/${id}`);
+    },
+
+    deleteAll: async (): Promise<void> => {
+        await apiClient.delete('/v1/notifications');
     }
 };
