@@ -65,10 +65,16 @@ export default function CandidateDetailsPage() {
             github: p.socialLinks?.github,
             portfolio: p.socialLinks?.portfolio
           },
-          status: p.aiScore ? 'Screened' : (p.availability?.status || 'New'),
+          status: p.aiScore
+            ? 'Screened'
+            : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0) ? 'Failed' : (p.availability?.status || 'New')),
           score: p.aiScore || 0,
           jobId: p.jobId,
-          matchDescription: p.aiScore ? (p.aiRecommendation || p.summary || 'Profile analysis complete.') : 'Candidate has not been screened yet. Run AI screening to generate insights.',
+          matchDescription: p.aiScore
+            ? (p.aiRecommendation || p.summary || 'Profile analysis complete.')
+            : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0)
+              ? 'Candidate processed but did not meet minimum criteria for scoring.'
+              : 'Candidate has not been screened yet. Run AI screening to generate insights.'),
           skills: {
             primary: (p.skills || []).slice(0, 5).map(s => s.name),
             secondary: (p.skills || []).slice(5).map(s => s.name)
@@ -102,11 +108,15 @@ export default function CandidateDetailsPage() {
               'Benefit from deeper project-specific documentation'
             ],
             parity: p.aiRecommendation || p.summary || `${p.aiScore}/100 alignment with core job requirements.`
+          } : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0) ? {
+            strengths: p.aiStrengths || [],
+            weaknesses: p.aiGaps || [],
+            parity: 'Failed - Did not meet score threshold.'
           } : {
             strengths: ['Pending AI analysis'],
             weaknesses: ['Pending AI analysis'],
             parity: 'Not Screened'
-          },
+          }),
           certifications: [],
           languages: p.languages || []
         });

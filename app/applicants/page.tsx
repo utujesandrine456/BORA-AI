@@ -59,10 +59,12 @@ export default function ApplicantsPage() {
           role: p.headline,
           location: p.location,
           score: p.aiScore || 0,
-          status: p.aiScore ? 'Screened' : (p.availability?.status || 'New'),
+          status: p.aiScore
+            ? 'Screened'
+            : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0) ? 'Failed' : (p.availability?.status || 'New')),
           date: 'Recently',
           avatar: `${p.firstName?.[0] || ''}${p.lastName?.[0] || ''}`,
-          screened: !!p.aiScore,
+          screened: !!p.aiScore || !!p.summary || !!(p.aiStrengths && p.aiStrengths.length > 0),
           jobStatus: (p as any).jobStatus || 'Open'
         }));
 

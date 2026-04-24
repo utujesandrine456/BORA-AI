@@ -46,10 +46,12 @@ export default function Dashboard() {
 
         const activeJobs = jobs.filter((j: Job) => j.status !== 'closed' && j.status !== 'archived').length;
 
-        // Calculate Screening Progress based on these profiles
-        const profilesWithScores = allProfiles.filter((p: any) => p.aiScore && p.aiScore > 0).length;
+        // Calculate Screening Progress based on processed profiles
+        const processedProfilesCount = allProfiles.filter((p: any) =>
+          (p.aiScore !== undefined && p.aiScore >= 0) || p.summary || (p.aiStrengths && p.aiStrengths.length > 0)
+        ).length;
         const totalProfilesCount = allProfiles.length;
-        const screeningProgress = totalProfilesCount > 0 ? Math.round((profilesWithScores / totalProfilesCount) * 100) : 0;
+        const screeningProgress = totalProfilesCount > 0 ? Math.round((processedProfilesCount / totalProfilesCount) * 100) : 0;
 
         setStats([
           {
@@ -88,7 +90,11 @@ export default function Dashboard() {
             name: `${p.firstName} ${p.lastName}`,
             role: p.headline || 'Applicant',
             match: p.aiScore || 0,
-            status: p.aiScore && p.aiScore >= 90 ? 'High Match' : (p.aiScore && p.aiScore > 0 ? 'In Review' : 'Not Screened'),
+            status: p.aiScore && p.aiScore >= 90
+              ? 'High Match'
+              : (p.aiScore && p.aiScore > 0
+                ? 'In Review'
+                : (p.summary || (p.aiStrengths && p.aiStrengths.length > 0) ? 'Failed' : 'Not Screened')),
             avatar: `${p.firstName?.[0] || ''}${p.lastName?.[0] || ''}` || '?'
           }));
 
