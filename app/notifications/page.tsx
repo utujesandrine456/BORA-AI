@@ -29,35 +29,79 @@ export default function NotificationsPage() {
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
-        const loadNotifications = async () => {
-            try {
-                setLoading(true);
-                const data = await notificationsApi.getNotifications();
-                setNotifications(data);
-            } catch (error) {
-                console.error('Failed to load notifications:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
         loadNotifications();
     }, []);
+
+    const loadNotifications = async () => {
+        try {
+            setLoading(true);
+            const data = await notificationsApi.getNotifications();
+
+            // Map backend data to UI format
+            const mappedData = data.map(n => {
+                let iconStr = 'Bell';
+                let colorStr = 'text-cream';
+                let bgStr = 'bg-cream/10';
+
+                if (n.type === 'application') { iconStr = 'UserPlus'; colorStr = 'text-emerald-500'; bgStr = 'bg-emerald-500/10'; }
+                else if (n.type === 'message') { iconStr = 'MessageSquare'; colorStr = 'text-amber-500'; bgStr = 'bg-amber-500/10'; }
+                else if (n.type === 'system') { iconStr = 'AlertCircle'; colorStr = 'text-red-500'; bgStr = 'bg-red-500/10'; }
+                else if (n.type === 'job') { iconStr = 'Briefcase'; colorStr = 'text-[#38bdf8]'; bgStr = 'bg-[#38bdf8]/10'; }
+                else if (n.type === 'success') { iconStr = 'CheckCircle2'; colorStr = 'text-emerald-500'; bgStr = 'bg-emerald-500/10'; }
+
+                // Format relative time if necessary or use createdAt
+                const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleDateString() : 'Recently';
+
+                return {
+                    ...n,
+                    id: n.id || n._id,
+                    icon: n.icon || iconStr,
+                    color: n.color || colorStr,
+                    bg: n.bg || bgStr,
+                    time: n.time || timeStr
+                };
+            });
+
+            setNotifications(mappedData);
+        } catch (error) {
+            console.error('Failed to load notifications:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
     const markAllAsRead = async () => {
-        await notificationsApi.markAllAsRead();
-        const data = await notificationsApi.getNotifications();
-        setNotifications(data);
+        try {
+            await notificationsApi.markAllAsRead();
+            await loadNotifications();
+        } catch (e) {
+            console.error('Failed to mark all as read:', e);
+        }
     };
 
-    const toggleReadStatus = async (id: string) => {
-        const notifications = await notificationsApi.getNotifications();
-        const updated = notifications.map(n =>
-            n.id === id ? { ...n, read: !n.read } : n
-        );
-        notificationsApi.saveNotifications(updated);
-        setNotifications(updated);
+    const toggleReadStatus = async (id: string | undefined, currentlyRead: boolean) => {
+        if (!id) return;
+        try {
+            if (!currentlyRead) {
+                await notificationsApi.markAsRead(id);
+            }
+            // If the user wants to unread, backend doesn't have an endpoint for it as per screenshot, so we might just refetch
+            await loadNotifications();
+        } catch (e) {
+            console.error('Failed to update notification:', e);
+        }
+    };
+
+    const deleteNotification = async (id: string | undefined) => {
+        if (!id) return;
+        try {
+            await notificationsApi.deleteNotification(id);
+            await loadNotifications();
+        } catch (e) {
+            console.error('Failed to delete notification:', e);
+        }
     };
 
     return (
@@ -125,14 +169,16 @@ export default function NotificationsPage() {
                                         </span>
                                     </div>
 
-                                    <div className="shrink-0 flex items-center gap-2 opactiy-0 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={() => toggleReadStatus(notification.id)}
-                                            className="p-2 hover:bg-cream/10 rounded-md text-cream/50 hover:text-cream transition-colors"
-                                            title={notification.read ? "Mark as unread" : "Mark as read"}
-                                        >
-                                            {notification.read ? <Bell className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
-                                        </button>
+                                    <div className="shrink-0 flex items-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {!notification.read && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); toggleReadStatus(notification.id, notification.read); }}
+                                                className="p-2 hover:bg-cream/10 rounded-md text-emerald-500 hover:text-emerald-400 transition-colors"
+                                                title="Mark as read"
+                                            >
+                                                <CheckCircle2 className="w-4 h-4" />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
