@@ -231,7 +231,7 @@ export default function ApplicantsPage() {
                       </div>
 
                       <div className="flex flex-col gap-3 ml-auto shrink-0">
-                        {applicant.screened && (
+                        {applicant.screened && applicant.status !== 'Failed' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

@@ -24,8 +24,15 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState('');
   const [type, setType] = useState('full-time');
+  const [company, setCompany] = useState('');
+  const [experienceLevel, setExperienceLevel] = useState('mid');
+  const [education, setEducation] = useState('bachelor');
+  const [experienceYears, setExperienceYears] = useState(0);
+  const [status, setStatus] = useState('open');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -37,6 +44,11 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
         setLocation(data.location || '');
         setSkills(data.skills || []);
         setType(data.type || 'full-time');
+        setCompany(data.company || '');
+        setExperienceLevel(data.experienceLevel || 'mid');
+        setEducation(data.education || 'bachelor');
+        setExperienceYears(data.experienceYears || 0);
+        setStatus(data.status || 'open');
       } catch (_error) {
         toast.error('Failed to load job data');
       } finally {
@@ -65,12 +77,17 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
         description,
         location,
         skills,
-        type,
+        company,
+        experienceYears,
+        status
       });
       toast.success('Job updated successfully!');
       router.push('/jobs');
-    } catch (_error) {
-      toast.error('Failed to update job');
+    } catch (error: any) {
+      console.error('Update job error:', error.response?.data || error);
+      const backendMessage = error.response?.data?.message;
+      const errorMsg = Array.isArray(backendMessage) ? backendMessage.join(', ') : (backendMessage || 'Failed to update job');
+      toast.error(`Failed to update: ${errorMsg}`);
     } finally {
       setSaving(false);
     }
@@ -117,6 +134,12 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                     value={title}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
                     placeholder="e.g. Senior Frontend Developer"
+                  />
+                  <Input
+                    label="Company Name"
+                    value={company}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCompany(e.target.value)}
+                    placeholder="e.g. BORA Tech"
                   />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -189,6 +212,8 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                 <div className="space-y-8">
                   <Select
                     label="Experience Level"
+                    value={experienceLevel}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setExperienceLevel(e.target.value)}
                     options={[
                       { value: 'entry', label: 'Entry Level (0-2 years)' },
                       { value: 'junior', label: 'Junior (2-4 years)' },
@@ -199,6 +224,8 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                   />
                   <Select
                     label="Education"
+                    value={education}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEducation(e.target.value)}
                     options={[
                       { value: 'high_school', label: 'High School' },
                       { value: 'associate', label: 'Associate Degree' },
@@ -206,6 +233,13 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
                       { value: 'master', label: "Master's Degree" },
                       { value: 'phd', label: 'PhD' }
                     ]}
+                  />
+                  <Input
+                    label="Years of Experience"
+                    type="number"
+                    value={experienceYears.toString()}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setExperienceYears(Number(e.target.value) || 0)}
+                    placeholder="e.g. 3"
                   />
                 </div>
               </Card>

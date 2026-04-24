@@ -205,9 +205,9 @@ export default function CandidateDetailsPage() {
 
             <div className="w-full md:w-auto text-center md:text-right space-y-2">
               <div className="text-xs text-cream/40 font-bold">AI match score</div>
-              <div className="text-7xl font-black text-cream">{candidate.score > 0 ? `${candidate.score}%` : '—'}</div>
+              <div className="text-7xl font-black text-cream">{candidate.score > 0 || candidate.status === 'Failed' ? `${candidate.score}%` : '—'}</div>
               <div className={`text-xs font-bold flex items-center justify-center md:justify-end gap-1 ${candidate.score > 0 ? 'text-emerald-500' : 'text-cream/40'}`}>
-                <Zap className="w-3 h-3" fill="currentColor" /> {candidate.score > 0 ? 'Premium Match' : 'Pending Analysis'}
+                <Zap className="w-3 h-3" fill="currentColor" /> {candidate.score > 0 ? 'Premium Match' : (candidate.status === 'Failed' ? 'Failed' : 'Pending Analysis')}
               </div>
             </div>
           </div>

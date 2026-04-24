@@ -71,8 +71,8 @@ export default function Dashboard() {
             color: 'text-emerald-500'
           },
           {
-            label: 'Screening Progress',
-            value: `${screeningProgress}%`,
+            label: 'Total Assessments Made',
+            value: processedProfilesCount.toLocaleString(),
             change: '+12%',
             trend: 'up',
             icon: ClipboardCheck,

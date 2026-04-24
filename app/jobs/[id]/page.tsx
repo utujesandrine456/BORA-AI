@@ -27,7 +27,7 @@ interface EnrichedJob extends Omit<ApiJob, 'requirements' | 'applicants'> {
   applicantsCount: number;
   requirements: { experience: string; education: string; location: string };
   summary: { total: number; screened: number; shortlisted: number };
-  applicants: { name: string; skills: string; experience: string; match: number }[];
+  applicants: { name: string; skills: string; experience: string; match: number; failed: boolean }[];
 }
 
 export default function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -51,7 +51,8 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
           name: `${p.firstName} ${p.lastName}`,
           skills: p.headline || 'Candidate',
           experience: p.experience?.[0]?.role || 'Professional',
-          match: p.aiScore || 0
+          match: p.aiScore || 0,
+          failed: (!p.aiScore && (!!p.summary || !!(p.aiStrengths && p.aiStrengths.length > 0)))
         }));
 
         const screened = applicants.filter(a => a.match > 0).length;
@@ -228,8 +229,8 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                         </div>
                         <div className="text-right">
                           <div className="flex flex-col items-end">
-                            <span className="text-4xl font-black text-cream leading-none">{applicant.match > 0 ? `${applicant.match}%` : '—'}</span>
-                            <span className="text-cream/60 font-black text-[10px] mt-2">{applicant.match > 0 ? 'Score match' : 'Not screened'}</span>
+                            <span className="text-4xl font-black text-cream leading-none">{applicant.match > 0 || applicant.failed ? `${applicant.match}%` : '—'}</span>
+                            <span className="text-cream/60 font-black text-[10px] mt-2">{applicant.match > 0 ? 'Score match' : (applicant.failed ? 'Failed' : 'Not screened')}</span>
                           </div>
                         </div>
                       </div>

@@ -9,20 +9,13 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authApi } from '@/lib/api/auth';
 
-type Category = 'workspace' | 'ai' | 'security';
+type Category = 'ai' | 'security';
 
 
 export default function AdminSettings() {
-    const [activeCategory, setActiveCategory] = React.useState<Category>('workspace');
+    const [activeCategory, setActiveCategory] = React.useState<Category>('ai');
     const [loading, setLoading] = React.useState(false);
     const [fetching, setFetching] = React.useState(true);
-
-    const [workspaceData, setWorkspaceData] = React.useState({
-        companyName: '',
-        website: '',
-        industry: 'Tech',
-        description: ''
-    });
 
     const [recruiterData, setRecruiterData] = React.useState({
         name: '',
@@ -50,13 +43,6 @@ export default function AdminSettings() {
                         email: user.email || '',
                         role: user.role || 'Recruiter'
                     });
-
-                    setWorkspaceData({
-                        companyName: user.company || '',
-                        website: (user as any).website || '',
-                        industry: (user as any).industry || 'Tech',
-                        description: (user as any).description || ''
-                    });
                 }
             } catch (error) {
                 console.error('Failed to load profile:', error);
@@ -72,15 +58,7 @@ export default function AdminSettings() {
         setLoading(true);
         const id = toast.loading(`Saving ${activeCategory} configuration...`);
         try {
-            if (activeCategory === 'workspace') {
-                await authApi.updateMe({
-                    name: recruiterData.name,
-                    company: workspaceData.companyName,
-                    industry: workspaceData.industry,
-                    description: workspaceData.description,
-                    website: workspaceData.website
-                });
-            } else if (activeCategory === 'ai') {
+            if (activeCategory === 'ai') {
                 // Simulate AI config save as backend endpoint for AI weights might be specialized
                 await new Promise(resolve => setTimeout(resolve, 800));
             }
@@ -95,7 +73,6 @@ export default function AdminSettings() {
     };
 
     const categories: { id: Category; label: string; icon: any; color: string }[] = [
-        { id: 'workspace', label: 'Workspace Profile', icon: User, color: 'text-cream' },
         { id: 'ai', label: 'AI Preferences', icon: Laptop, color: 'text-emerald-500' },
         { id: 'security', label: 'Account Details', icon: Shield, color: 'text-amber-500' },
     ];
@@ -149,42 +126,6 @@ export default function AdminSettings() {
                             transition={{ duration: 0.3 }}
                             className="relative z-10"
                         >
-                            {activeCategory === 'workspace' && (
-                                <div className="space-y-8 max-w-2xl">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <Input
-                                            label="Company Name"
-                                            value={workspaceData.companyName}
-                                            onChange={(e) => setWorkspaceData({ ...workspaceData, companyName: e.target.value })}
-                                            placeholder="Enter company name"
-                                        />
-                                        <Input
-                                            label="Website URL"
-                                            value={workspaceData.website}
-                                            onChange={(e) => setWorkspaceData({ ...workspaceData, website: e.target.value })}
-                                            placeholder="https://example.com"
-                                        />
-                                    </div>
-                                    <Select
-                                        label="Industry Category"
-                                        options={[
-                                            { value: 'Tech', label: 'Technology' },
-                                            { value: 'Finance', label: 'Finance' },
-                                            { value: 'Healthcare', label: 'Healthcare' }
-                                        ]}
-                                        value={workspaceData.industry}
-                                        onChange={(e) => setWorkspaceData({ ...workspaceData, industry: e.target.value })}
-                                    />
-                                    <Textarea
-                                        label="Company Description"
-                                        rows={4}
-                                        value={workspaceData.description}
-                                        onChange={(e) => setWorkspaceData({ ...workspaceData, description: e.target.value })}
-                                        placeholder="Briefly describe your workspace..."
-                                    />
-                                </div>
-                            )}
-
                             {activeCategory === 'ai' && (
                                 <div className="space-y-8 max-w-2xl">
                                     <Select
