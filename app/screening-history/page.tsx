@@ -240,14 +240,14 @@ export default function ScreeningHistoryPage() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-cream/5 border-b border-cream/10">
-                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40">Reference</th>
-                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40">Role Name</th>
-                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40 text-center">Date</th>
-                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40 text-center">Batch Size</th>
-                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40 text-center">Avg. Score</th>
-                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40">Top Candidate</th>
-                                    <th className="px-6 py-5 text-[10px] font-black text-cream/40">Status</th>
-                                    <th className="px-6 py-5"></th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-cream/40">Reference</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-cream/40">Role Name</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-cream/40 text-center">Date</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-cream/40 text-center">Batch Size</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-cream/40 text-center">Avg. Score</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-cream/40">Top Candidate</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-cream/40">Status</th>
+                                    <th className="px-6 py-4"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-cream/5">
@@ -327,7 +327,17 @@ export default function ScreeningHistoryPage() {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        No screening history found.
+                                        <td colSpan={8} className="px-6 py-20 text-center">
+                                            <div className="flex flex-col items-center justify-center space-y-4">
+                                                <div className="w-16 h-16 rounded-full bg-cream/5 border border-cream/10 flex items-center justify-center mb-2">
+                                                    <History className="w-8 h-8 text-cream/20" />
+                                                </div>
+                                                <span className="text-xl font-bold text-cream/60">No screening history found</span>
+                                                <span className="text-sm font-medium text-cream/40 max-w-sm mx-auto">
+                                                    There are no assessment records matching your current filter criteria.
+                                                </span>
+                                            </div>
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>
