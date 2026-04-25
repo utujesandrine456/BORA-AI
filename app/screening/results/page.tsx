@@ -403,13 +403,13 @@ function ScreeningResultsContent() {
                         View Details
                       </Button>
                     </Link>
-                    <button
+                    {/* <button
                       onClick={handleDownloadReport}
                       title="Download Analysis Report"
                       className="p-3 border border-cream/20 rounded-md cursor-pointer hover:bg-cream/10 transition-colors text-cream hidden sm:block"
                     >
                       <Download className="w-5 h-5" />
-                    </button>
+                    </button> */}
                   </div>
                 </div>
 

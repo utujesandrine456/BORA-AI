@@ -25,6 +25,11 @@ export default function LoginPage() {
             return toast.error('Please enter your email and password');
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            return toast.error('Please enter a valid email address');
+        }
+
         setLoading(true);
         try {
             console.log('Attempting login for:', formData.email);

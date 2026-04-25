@@ -9,11 +9,10 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authApi } from '@/lib/api/auth';
 
-type Category = 'ai' | 'security';
-
+type Category = 'security' | 'profile';
 
 export default function AdminSettings() {
-    const [activeCategory, setActiveCategory] = React.useState<Category>('ai');
+    const [activeCategory, setActiveCategory] = React.useState<Category>('security');
     const [loading, setLoading] = React.useState(false);
     const [fetching, setFetching] = React.useState(true);
 
@@ -23,11 +22,10 @@ export default function AdminSettings() {
         role: ''
     });
 
-    const [aiData, setAiData] = React.useState({
-        model: 'advanced',
-        experienceWeight: 40,
-        educationWeight: 30,
-        skillsWeight: 30
+    const [passwordData, setPasswordData] = React.useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
     });
 
     React.useEffect(() => {
@@ -35,6 +33,7 @@ export default function AdminSettings() {
             try {
                 setFetching(true);
                 const res = await authApi.getMe();
+                // backend might return { user: {...} } or just the user
                 const user = res.user || res;
 
                 if (user) {
@@ -55,26 +54,63 @@ export default function AdminSettings() {
     }, []);
 
     const handleSave = async () => {
-        setLoading(true);
-        const id = toast.loading(`Saving ${activeCategory} configuration...`);
-        try {
-            if (activeCategory === 'ai') {
-                // Simulate AI config save as backend endpoint for AI weights might be specialized
-                await new Promise(resolve => setTimeout(resolve, 800));
+        if (activeCategory === 'security') {
+            if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+                toast.error('Please fill in all password fields');
+                return;
             }
+            if (passwordData.newPassword !== passwordData.confirmPassword) {
+                toast.error('New passwords do not match');
+                return;
+            }
+            if (passwordData.newPassword.length < 6) {
+                toast.error('New password must be at least 6 characters');
+                return;
+            }
+        }
 
-            toast.success('Configuration saved successfully!', { id });
+        setLoading(true);
+        const id = toast.loading(`Saving ${activeCategory === 'security' ? 'security updates' : 'account details'}...`);
+        try {
+            if (activeCategory === 'profile') {
+                const updated = await authApi.updateMe({ name: recruiterData.name });
+                setRecruiterData({
+                    name: updated.name || recruiterData.name,
+                    email: updated.email || recruiterData.email,
+                    role: updated.role || recruiterData.role,
+                });
+
+                if (typeof window !== 'undefined') {
+                    const stored = localStorage.getItem('user');
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        localStorage.setItem('user', JSON.stringify({ ...parsed, name: updated.name }));
+                    }
+                }
+                toast.success('Profile updated successfully!', { id });
+            } else {
+                await authApi.changePassword({
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword
+                });
+                setPasswordData({
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                });
+                toast.success('Password changed successfully!', { id });
+            }
         } catch (error: any) {
             console.error('Save failed:', error);
-            toast.error(error.message || 'Failed to save configuration', { id });
+            toast.error(error?.response?.data?.message || error.message || 'Failed to save configuration', { id });
         } finally {
             setLoading(false);
         }
     };
 
     const categories: { id: Category; label: string; icon: any; color: string }[] = [
-        { id: 'ai', label: 'AI Preferences', icon: Laptop, color: 'text-emerald-500' },
-        { id: 'security', label: 'Account Details', icon: Shield, color: 'text-amber-500' },
+        { id: 'security', label: 'Account Security', icon: Shield, color: 'text-amber-500' },
+        { id: 'profile', label: 'Account Details', icon: User, color: 'text-emerald-500' },
     ];
 
     if (fetching) {
@@ -94,7 +130,7 @@ export default function AdminSettings() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-4 border-b border-cream/10 pb-12">
                     <div>
                         <h1 className="text-5xl font-black text-cream leading-none mb-4">Platform Settings</h1>
-                        <p className="text-cream/40 font-medium text-md">Configure your recruitment environment and AI parameters</p>
+                        <p className="text-cream/40 font-medium text-md">Manage your account security and profile information</p>
                     </div>
 
                     <div className="flex items-center gap-4 bg-cream/5 p-1.5 rounded-md border border-cream/10">
@@ -126,46 +162,47 @@ export default function AdminSettings() {
                             transition={{ duration: 0.3 }}
                             className="relative z-10"
                         >
-                            {activeCategory === 'ai' && (
-                                <div className="space-y-8 max-w-2xl">
-                                    <Select
-                                        label="Model Engine"
-                                        options={[
-                                            { value: 'standard', label: 'Standard (Fast)' },
-                                            { value: 'advanced', label: 'Advanced (Precise)' },
-                                            { value: 'experimental', label: 'Experimental (Cutting Edge)' }
-                                        ]}
-                                        value={aiData.model}
-                                        onChange={(e) => setAiData({ ...aiData, model: e.target.value })}
-                                    />
-
+                            {activeCategory === 'security' && (
+                                <div className="space-y-8 max-w-xl">
+                                    <h3 className="text-xl font-bold text-cream">Change Password</h3>
                                     <div className="space-y-6">
-                                        <h4 className="text-sm font-bold text-cream">Screening Weight Distribution</h4>
-                                        <div className="space-y-4">
-                                            {[
-                                                { label: 'Work Experience', key: 'experienceWeight' },
-                                                { label: 'Education & Certs', key: 'educationWeight' },
-                                                { label: 'Skill Proficiency', key: 'skillsWeight' }
-                                            ].map((weight) => (
-                                                <div key={weight.key} className="space-y-2">
-                                                    <div className="flex justify-between text-xs font-bold text-cream/60">
-                                                        <span>{weight.label}</span>
-                                                        <span>{aiData[weight.key as keyof typeof aiData]}%</span>
-                                                    </div>
-                                                    <input
-                                                        type="range"
-                                                        className="w-full accent-cream"
-                                                        value={aiData[weight.key as keyof typeof aiData]}
-                                                        onChange={(e) => setAiData({ ...aiData, [weight.key]: parseInt(e.target.value) })}
-                                                    />
-                                                </div>
-                                            ))}
+                                        <Input
+                                            label="Current Password"
+                                            type="password"
+                                            value={passwordData.currentPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                            placeholder="••••••••"
+                                        />
+                                        <Input
+                                            label="New Password"
+                                            type="password"
+                                            value={passwordData.newPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                            placeholder="••••••••"
+                                        />
+                                        <Input
+                                            label="Confirm New Password"
+                                            type="password"
+                                            value={passwordData.confirmPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
+                                    <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                                        <div className="flex gap-3">
+                                            <Shield className="w-5 h-5 text-amber-500 shrink-0" />
+                                            <div>
+                                                <p className="text-xs font-bold text-amber-500 uppercase tracking-wider mb-1">Security Recommendation</p>
+                                                <p className="text-xs text-cream/60 leading-relaxed">
+                                                    Use at least 8 characters with a mix of letters, numbers, and symbols for maximum security.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             )}
 
-                            {activeCategory === 'security' && (
+                            {activeCategory === 'profile' && (
                                 <div className="space-y-8 max-w-2xl">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <Input
@@ -177,6 +214,7 @@ export default function AdminSettings() {
                                         <Input
                                             label="Email Address"
                                             value={recruiterData.email}
+                                            readOnly
                                             disabled
                                             placeholder="your@email.com"
                                         />
@@ -208,10 +246,10 @@ export default function AdminSettings() {
                         ) : (
                             <Save className="w-5 h-5" />
                         )}
-                        Save Configuration
+                        {activeCategory === 'security' ? 'Update Password' : 'Save Details'}
                     </Button>
                     {loading && (
-                        <p className="text-cream/40 font-bold text-sm animate-pulse">Syncing changes with neural engine...</p>
+                        <p className="text-cream/40 font-bold text-sm animate-pulse">Syncing changes with secure vaults...</p>
                     )}
                 </div>
             </div>
