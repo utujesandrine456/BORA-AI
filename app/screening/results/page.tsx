@@ -29,7 +29,8 @@ function ScreeningResultsContent() {
 
   interface MappedResult {
     id: string; screeningId: string; name: string; score: number; isBest: boolean; barColor: string; matchAnalysis: string; role: string;
-    stats: { skills: number; experience: number; education: number };
+    strengths: string[];
+    weaknesses: string[];
   }
   const [results, setResults] = useState<MappedResult[]>([]);
   const [jobInfo, setJobInfo] = useState<{ title?: string; company?: string } | null>(null);
@@ -128,13 +129,10 @@ function ScreeningResultsContent() {
               score: score,
               isBest: index === 0,
               barColor: score >= 90 ? 'bg-emerald-500' : 'bg-blue-500',
-              matchAnalysis: candidateObj.recommendation || candidateObj.matchAnalysis || '',
+              matchAnalysis: candidateObj.recommendation || candidateObj.matchAnalysis || profile.aiRecommendation || '',
               role: profile.headline || 'Applicant',
-              stats: {
-                skills: score,
-                experience: score,
-                education: score
-              }
+              strengths: candidateObj.aiStrengths || profile.aiStrengths || candidateObj.strengths || [],
+              weaknesses: candidateObj.aiGaps || candidateObj.aiWeaknesses || profile.aiGaps || profile.aiWeaknesses || candidateObj.weaknesses || []
             };
           });
 
@@ -440,18 +438,44 @@ function ScreeningResultsContent() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-                  {[
-                    { label: 'Skills', value: `${activeCandidate?.stats?.skills ?? 0}%` },
-                    { label: 'Experience', value: `${activeCandidate?.stats?.experience ?? 0}%` },
-                    { label: 'Education', value: `${activeCandidate?.stats?.education ?? 0}%` },
-                    { label: 'Relevance', value: `${activeCandidate?.score ?? 0}%` }
-                  ].map((stat, i) => (
-                    <div key={i} className="bg-cream/5 border border-cream/10 rounded-md p-6 text-center hover:bg-cream/10 transition-colors">
-                      <div className="text-3xl font-black text-cream mb-1">{stat.value}</div>
-                      <div className="text-xs text-cream/60 font-bold">{stat.label}</div>
-                    </div>
-                  ))}
+                <div className="grid md:grid-cols-2 gap-6 mb-12">
+                  <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-md p-6">
+                    <h4 className="text-emerald-500 font-bold mb-4 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5" />
+                      Key Strengths
+                    </h4>
+                    {activeCandidate?.strengths && activeCandidate.strengths.length > 0 ? (
+                      <ul className="space-y-3">
+                        {activeCandidate.strengths.map((strength, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-cream/80">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50 mt-1.5 shrink-0" />
+                            <span className="leading-relaxed font-medium">{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-emerald-500/50 italic font-medium">No specific strengths listed.</p>
+                    )}
+                  </div>
+
+                  <div className="bg-amber-500/5 border border-amber-500/20 rounded-md p-6">
+                    <h4 className="text-amber-500 font-bold mb-4 flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5" />
+                      Potential Gaps
+                    </h4>
+                    {activeCandidate?.weaknesses && activeCandidate.weaknesses.length > 0 ? (
+                      <ul className="space-y-3">
+                        {activeCandidate.weaknesses.map((weakness, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-cream/80">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500/50 mt-1.5 shrink-0" />
+                            <span className="leading-relaxed font-medium">{weakness}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-amber-500/50 italic font-medium">No particular gaps identified.</p>
+                    )}
+                  </div>
                 </div>
 
               </Card>
