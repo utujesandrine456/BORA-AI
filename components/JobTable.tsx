@@ -504,7 +504,7 @@ export default function JobTable() {
                             className="bg-dark border-cream/20 font-bold transition-all hover:bg-amber-500/20 hover:text-amber-500 hover:border-amber-500/40"
                             onClick={() => triggerUpload(job.id as string)}
                           >
-                            {uploading === job.id ? 'Importing...' : 'Import CSV / Excel'}
+                            {uploading === job.id ? 'Importing...' : 'Import CSV / PDF'}
                           </Button>
                           <Button
                             variant="primary"
