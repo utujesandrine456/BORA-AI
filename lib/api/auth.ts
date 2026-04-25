@@ -42,7 +42,7 @@ export const authApi = {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/';
+        window.location.href = '/auth/login';
       }
     }
   },

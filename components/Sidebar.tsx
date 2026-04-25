@@ -59,7 +59,6 @@ export default function Sidebar() {
   const handleLogout = () => {
     authApi.logout();
     toast.success('Signed out successfully');
-    window.location.href = '/';
   };
 
   const appRoutes = [
