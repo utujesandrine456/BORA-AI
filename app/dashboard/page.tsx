@@ -172,11 +172,9 @@ export default function Dashboard() {
         </div>
 
         {/* Tables/Lists Section */}
-        <div className="grid lg:grid-cols-3 gap-12 pt-4">
+        <div className="pt-4">
           {/* Main Activity */}
-          <div
-            className="lg:col-span-2 space-y-8"
-          >
+          <div className="space-y-8">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-black text-cream">Recent applicants</h2>
               <Link href="/applicants" className="text-[10px] font-black text-cream/40 hover:text-cream underline underline-offset-4 transition-colors text-right">View All Candidates</Link>
@@ -225,50 +223,6 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Side Panel: System Insights */}
-          <div
-            className="space-y-8"
-          >
-            <h2 className="text-2xl font-black text-cream">Live insights</h2>
-
-            <Card variant="glass" className="p-8 border-emerald-500/20 relative group">
-              <div className="absolute top-0 right-0 p-4">
-                <Sparkles className="w-12 h-12 text-emerald-500/10 group-hover:rotate-12 transition-transform duration-700" />
-              </div>
-
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
-                  <Clock className="w-6 h-6 text-emerald-500" />
-                </div>
-                <div>
-                  <div className="text-xs font-black text-cream/40">Average TTH</div>
-                  <div className="text-lg font-black text-cream">4.2 Days</div>
-                </div>
-              </div>
-
-              <p className="text-sm text-cream/60 leading-relaxed font-medium mb-8">
-                Your current screening process is performing <span className="text-emerald-500 font-black">15% faster</span> than the previous month. AI shortlisting is saving an average of <span className="text-cream font-black italic">22 hours</span> per role.
-              </p>
-
-              <div className="space-y-6">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[12px] font-semibold text-cream/40">Matching accuracy</span>
-                    <span className="text-xs font-black text-cream">94.8%</span>
-                  </div>
-                  <div className="h-2 w-full bg-cream/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-cream blur-[0.5px]"
-                      style={{ width: '94.8%' }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-            </Card>
-
           </div>
         </div>
       </div>
