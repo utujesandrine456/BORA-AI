@@ -42,7 +42,6 @@ export default function TopNav() {
 
     loadData();
 
-    // Check for updates every 30 seconds for a "live" feel
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
   }, []);
