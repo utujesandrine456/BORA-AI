@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
-const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://bora-1.onrender.com/api';
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL,
